@@ -2118,23 +2118,49 @@ function toContents(input){
   const turns = typeof input === "string" ? [{role:"user", content:input}] : input;
   return turns.map(t => ({ role: t.role === "assistant" ? "model" : "user", parts: [{text: String(t.content)}] }));
 }
+/* Order of models to try. A busy or rate-limited model falls through to the next one.
+   Free-tier limits are per model, so another model often still works. */
+function modelChain(){
+  const all = (G.models && G.models.length) ? G.models.slice() : [G.model || "gemini-flash-latest"];
+  if (G.pinned && G.pinned !== "auto"){ return [G.pinned].concat(all.filter(m => m !== G.pinned)); }
+  return all;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let fallbackNoted = false;
+const busyUntil = {};
 async function gFetch(path, body, signal){
-  let r;
-  try {
-    r = await fetch(`${GBASE}/models/${encodeURIComponent(G.model || "gemini-flash-latest")}:${path}`, {
-      method: "POST", signal,
-      headers: {"Content-Type": "application/json", "x-goog-api-key": G.key},
-      body: JSON.stringify(body)
-    });
-  } catch(e) { throw gErr("network", "No connection to Gemini. Check your internet."); }
-  if (!r.ok){
-    let msg = ""; try { msg = (await r.json()).error.message || ""; } catch(e) {}
-    if (r.status === 429) throw gErr("rate_limited", "The free Gemini limit is used up for now. Wait a minute, or try again tomorrow.");
-    if (r.status === 400 && /api key/i.test(msg) || r.status === 401 || r.status === 403) throw gErr("not_granted", "Gemini did not accept the key. Check it in Settings.");
-    if (r.status === 404) throw gErr("model", "This Gemini model is not available to your key. Open Settings and tap Test key.");
-    throw gErr("upstream_error", msg || ("Gemini error " + r.status));
+  const chain = modelChain().slice(0, 4);
+  let last = null;
+  for (let mi = 0; mi < chain.length; mi++){
+    const model = chain[mi];
+    if ((busyUntil[model] || 0) > Date.now() && mi < chain.length - 1) continue;   // busy a moment ago: skip it for now
+    for (let attempt = 0; attempt < 2; attempt++){
+      let r;
+      try {
+        r = await fetch(`${GBASE}/models/${encodeURIComponent(model)}:${path}`, {
+          method: "POST", signal,
+          headers: {"Content-Type": "application/json", "x-goog-api-key": G.key},
+          body: JSON.stringify(body)
+        });
+      } catch(e) {
+        if (e && e.name === "AbortError") throw gErr("cancelled", "Stopped.");
+        throw gErr("network", "No connection to Gemini. Check your internet.");
+      }
+      if (r.ok){
+        if (G.lastUsed !== model){ G.lastUsed = model; saveG(); }
+        if (mi > 0 && !fallbackNoted){ fallbackNoted = true; toast("Main model busy", "This answer came from " + model + "."); }
+        return r;
+      }
+      let msg = ""; try { msg = (await r.json()).error.message || ""; } catch(e) {}
+      if ((r.status === 400 && /api key/i.test(msg)) || r.status === 401 || r.status === 403) throw gErr("not_granted", "Gemini did not accept the key. Check it in Settings.");
+      const busy = r.status === 503 || r.status === 500 || r.status === 502 || r.status === 504 || /overload|high demand|unavailable/i.test(msg);
+      if (r.status === 429){ busyUntil[model] = Date.now() + 60000; last = gErr("rate_limited", "The free Gemini limit is used up on every model for now. Wait a minute, or try again tomorrow."); break; }   // try the next model
+      if (r.status === 404){ last = gErr("model", "This Gemini model is not available to your key. Open Settings and tap Save and test key."); break; }
+      if (busy){ last = gErr("busy", "Gemini is very busy right now on every model. Try again in a few minutes."); if (attempt === 0){ await sleep(1500); continue; } busyUntil[model] = Date.now() + 120000; break; }
+      throw gErr("upstream_error", msg || ("Gemini error " + r.status));
+    }
   }
-  return r;
+  throw last || gErr("upstream_error", "Gemini did not answer. Try again.");
 }
 const textOf = j => ((((j || {}).candidates || [])[0] || {}).content || {}).parts?.map(p => p.text || "").join("") || "";
 
@@ -2168,21 +2194,22 @@ gemini.json = async (input, opts = {}) => {
   try { return JSON.parse(t); } catch(e) { const m = t.match(/[{[][\s\S]*[}\]]/); if (m) return JSON.parse(m[0]); throw gErr("upstream_error", "Gemini returned an unreadable answer."); }
 };
 
-/* Pick the newest stable Flash model this key can use */
-async function pickModel(){
+/* List the text models this key can use, best first:
+   stable Flash (newest first), then stable Flash-Lite, then everything else as a last resort */
+async function listModels(){
   let r;
   try { r = await fetch(`${GBASE}/models?pageSize=200`, { headers: {"x-goog-api-key": G.key} }); }
   catch(e) { throw gErr("network", "No connection to Gemini. Check your internet."); }
   if (!r.ok) throw gErr("not_granted", "Gemini did not accept the key. Check that you copied all of it.");
-  const list = ((await r.json()).models || [])
+  const names = ((await r.json()).models || [])
     .filter(m => (m.supportedGenerationMethods || []).includes("generateContent"))
     .map(m => m.name.replace(/^models\//, ""))
-    .filter(n => /flash/.test(n) && !/(preview|exp|image|tts|live|audio|thinking|lite|8b)/.test(n));
+    .filter(n => /^gemini-/.test(n) && !/(image|tts|live|audio|embedding|vision|learnlm|robotics|computer-use)/.test(n));
   const ver = n => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
-  list.sort((a, b) => ver(b) - ver(a) || a.length - b.length);
-  return list[0] || "gemini-flash-latest";
+  const rank = n => /preview|exp/.test(n) ? 3 : /flash-lite/.test(n) ? 1 : /flash/.test(n) ? 0 : 2;
+  names.sort((a, b) => rank(a) - rank(b) || ver(b) - ver(a) || a.length - b.length);
+  return names.length ? names : ["gemini-flash-latest"];
 }
-
 /* ---------- settings ---------- */
 function openSettings(){
   const host = $("sheetHost");
@@ -2195,7 +2222,12 @@ function openSettings(){
       <label class="note" for="gKey">Gemini API key</label>
       <input type="password" id="gKey" autocomplete="off" spellcheck="false" placeholder="Paste the key from aistudio.google.com" value="${esc(G.key || "")}">
       <div class="row"><button class="btn primary" id="gTest">Save and test key</button><button class="btn" id="gClear"${G.key ? "" : " hidden"}>Remove key</button></div>
-      <p class="note" id="gStatus">${G.key ? "Model: " + esc(G.model || "not tested yet") : "Get a free key at aistudio.google.com → Get API key."}</p>
+      <p class="note" id="gStatus">${G.key ? (G.lastUsed ? "Last answer from: " + esc(G.lastUsed) : "Key saved. Tap Save and test key to check it.") : "Get a free key at aistudio.google.com → Get API key."}</p>
+      <label class="note" for="gModel"${G.models && G.models.length ? "" : " hidden"}>Model</label>
+      <select id="gModel"${G.models && G.models.length ? "" : " hidden"}>
+        <option value="auto">Automatic: best available, switches when one is busy</option>
+        ${(G.models || []).slice(0, 12).map(m => `<option value="${esc(m)}"${G.pinned === m ? " selected" : ""}>${esc(m)}</option>`).join("")}
+      </select>
     </div>
     <div class="set">
       <div class="eyebrow">Backup</div>
@@ -2213,14 +2245,16 @@ function openSettings(){
     const k = $("gKey").value.trim(); if (!k){ $("gStatus").textContent = "Paste your key first."; return; }
     G.key = k; saveG(); $("gStatus").textContent = "Testing…"; $("gTest").disabled = true;
     try {
-      G.model = await pickModel(); saveG();
+      G.models = await listModels(); G.model = G.models[0]; saveG();
       const r = await gemini("Reply with exactly: ready");
       sample = gemini; wireClaude();
-      $("gStatus").textContent = "Working. Model: " + G.model + ". Reply: " + r.text.trim().slice(0, 40);
+      openSettings();
+      $("gStatus").textContent = "Working. Answer from: " + G.lastUsed + ". Reply: " + r.text.trim().slice(0, 40);
       toast("Gemini connected", "The tutor and mock interviews are on.");
     } catch(e) { $("gStatus").textContent = e.message; }
     $("gTest").disabled = false;
   };
+  const sel = $("gModel"); if (sel) sel.onchange = () => { G.pinned = sel.value; saveG(); fallbackNoted = false; toast("Model saved", sel.value === "auto" ? "The site picks the best free model and switches when one is busy." : sel.value + " first. Others take over if it is busy."); };
   ACT.bkSave = () => {
     const blob = new Blob([JSON.stringify({app: "prem-100", version: 1, savedAt: new Date().toISOString(), data: S}, null, 1)], {type: "application/json"});
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "prem-100-backup-" + todayKey() + ".json";
