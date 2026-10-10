@@ -20,7 +20,7 @@
   --bg:#FAF7F0; --surface:#FFFDF8; --surface-2:#F1ECE2; --ink:#2B2A28; --muted:#6B665E; --line:#E6DFD2;
   --accent:#B5553A; --accent-ink:#FFFDF8; --parta:#2F5D8A; --partb:#7A4A86; --good:#3D7A4F; --bad:#A8323E; --gold:#C9972E;
   --hl-yellow:#F6E7A8; --hl-green:#CFE6CF; --hl-blue:#D3E2F2; --hl-pink:#F2D4DC; --sticky:#F8EBA6;
-  --p1:#2F5D8A; --p2:#7A4A86; --p3:#3D7A4F; --p4:#9A6B1F; --p5:#B5553A; --p6:#3E6E6A;
+  --p1:#2F5D8A; --p2:#7A4A86; --p3:#3D7A4F; --p4:#9A6B1F; --p5:#B5553A; --p6:#3E6E6A; --p7:#5A5F8C;
   --rule:rgba(47,93,138,.13); --margin:rgba(181,85,58,.55);
   --shadow:0 1px 2px rgba(60,45,30,.05),0 4px 14px -8px rgba(60,45,30,.14);
   --read:"Literata", Georgia, "Times New Roman", serif;
@@ -33,7 +33,7 @@
   --bg:#1A1917; --surface:#22201D; --surface-2:#2C2926; --ink:#D9D3C7; --muted:#9A948A; --line:#38342F;
   --accent:#E08A6D; --accent-ink:#1A1917; --parta:#8FB4DB; --partb:#C39BD0; --good:#8CC49A; --bad:#E88A92; --gold:#D9B060;
   --hl-yellow:rgba(246,231,168,.28); --hl-green:rgba(207,230,207,.26); --hl-blue:rgba(211,226,242,.28); --hl-pink:rgba(242,212,220,.28); --sticky:#3A3622;
-  --p1:#8FB4DB; --p2:#C39BD0; --p3:#8CC49A; --p4:#D9B060; --p5:#E08A6D; --p6:#86BDB6;
+  --p1:#8FB4DB; --p2:#C39BD0; --p3:#8CC49A; --p4:#D9B060; --p5:#E08A6D; --p6:#86BDB6; --p7:#A9AEDC;
   --rule:rgba(143,180,219,.10); --margin:rgba(224,138,109,.45);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 16px -10px rgba(0,0,0,.5); color-scheme:dark;
 }
@@ -452,7 +452,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   <div class="wrap" style="padding:0">
     <div class="card">
       <h2>The 100 days</h2>
-      <p class="muted">One hour a day. Tap any day to open it. A filled square is a finished day. The square with a terracotta outline is today.</p>
+      <p class="muted">One hour a day. Tap any day to open it. A filled square is a finished day. The square with a terracotta outline is today. The last row is the optional bonus module on AI agent evals. You can open it at any time.</p>
       <div class="grid" id="grid"></div>
     </div>
     <div class="card"><div class="eyebrow">Phases</div><div class="legend" id="legend"></div></div>
@@ -477,6 +477,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
         <option value="design">System design for an AI solution</option>
         <option value="behavioural">Behavioural and 'tell me about yourself'</option>
         <option value="full">Full mixed interview</option>
+        <option value="evals">AI agent evals (bonus module)</option>
       </select>
       <div class="row"><button class="btn primary" id="mockStart">Start the round</button><button class="btn" id="mockEnd" hidden>End and get feedback</button></div>
       <p class="note" id="mockNote"></p>
@@ -527,7 +528,9 @@ const PHASES = [
   {id:5, name:"AI Consulting and Product", short:"Consulting", from:71, to:86, color:"--p5",
    why:"You learn how to find, sell, measure and govern AI work for a client."},
   {id:6, name:"Interview Sprint", short:"Interviews", from:87, to:100, color:"--p6",
-   why:"You practise answers, cases and system design until they feel natural."}
+   why:"You practise answers, cases and system design until they feel natural."},
+  {id:7, name:"Bonus: AI Agent Evals", short:"Evals", from:101, to:110, color:"--p7", bonus:true,
+   why:"Optional. You learn how teams test AI coding agents. This topic helps consultant interviews and is the base for research roles."}
 ];
 
 const PROJECTS = [
@@ -542,7 +545,9 @@ const PROJECTS = [
   {day:86, name:"AI business case", goal:"Write a business case for one AI use case in a BPM operation.",
    steps:["Describe the current process, volume and cost","Describe the AI solution and the human-in-the-loop step","Calculate cost, savings and payback period","List the top 5 risks and one control for each"]},
   {day:100, name:"Portfolio and story", goal:"Package your work so an interviewer can see it in 2 minutes.",
-   steps:["Put the 5 projects on one page with a short summary each","Write your 90-second 'tell me about yourself' answer","Update your LinkedIn headline and About section","Record yourself answering 3 questions and fix one weak point"]}
+   steps:["Put the 5 projects on one page with a short summary each","Write your 90-second 'tell me about yourself' answer","Update your LinkedIn headline and About section","Record yourself answering 3 questions and fix one weak point"]},
+  {day:110, name:"Bonus: mini coding-agent eval", goal:"Build a 10-task eval and compare two coding-agent setups.",
+   steps:["Ask Claude Code to make a tiny Python project with 10 small bugs","Write one task description and one unit test per bug; check each test fails before and passes after the fix","Run an agent 3 times per task in setup A, then change one thing for setup B","Record pass rate, cost and steps, and sort the failed traces into categories","Write a one-page report and push the project to GitHub"]}
 ];
 
 const DAYS = [
@@ -1286,7 +1291,84 @@ const DAYS = [
  x:"Finish Project 6 and send 3 applications or messages to contacts.",
  q:"What shows expertise best in an AI consultant interview?", o:["Real projects with numbers and lessons","A list of buzzwords","Certificates only","Long answers"], a:0,
  iq:"What did you learn in the last 100 days?",
- ia:"I covered ML and LLM fundamentals, built a RAG assistant, wrote an architecture document and a business case. The biggest lesson: AI value comes from the right problem, good data and adoption, not only from the model."}
+ ia:"I covered ML and LLM fundamentals, built a RAG assistant, wrote an architecture document and a business case. The biggest lesson: AI value comes from the right problem, good data and adoption, not only from the model."},
+
+// ---------- Bonus Phase 7: AI Agent Evals ----------
+{t:"What an eval is, and why it decides quality",
+ n:"An eval is a repeatable test for an AI system. An eval has three parts: a task set, a grader and a metric. The task set lists the inputs. The grader decides if each output is correct. The metric turns all grades into one number, for example pass rate. Without evals, a team cannot prove that a new model or prompt is better.",
+ k:["Eval","Grader","Pass rate"],
+ g:"  task set (inputs)\n        |\n        v\n  +-------------+\n  | AI system   |  model + prompt + tools\n  +-------------+\n        |\n        v\n     outputs\n        |\n        v\n  +-------------+\n  | grader      |  correct or not?\n  +-------------+\n        |\n        v\n  metric: pass rate = passed / total",
+ x:"Pick one AI tool you use at work. Write 5 test inputs and what a correct output looks like for each.",
+ q:"Which three parts make an eval?", o:["Task set, grader, metric","Model, GPU, prompt","Data, dashboard, logo","Training, inference, cost"], a:0,
+ iq:"A client asks, 'How do we know our AI assistant is good enough to launch?' What do you say?",
+ ia:"I propose an eval before launch. We agree a task set from real cases, a grader with clear pass rules, and a target pass rate. We run the eval on every change, so the launch decision uses evidence, not opinion."},
+{t:"Coding benchmarks: HumanEval and SWE-bench",
+ n:"A benchmark is a public eval that many teams use to compare models. HumanEval gives the model a short function description, and unit tests grade the code. SWE-bench is harder: the agent gets a real GitHub issue and a full repository, and must write a fix that passes the project's tests. Pass@k is the chance that at least one of k attempts passes.",
+ k:["Benchmark","SWE-bench","Pass@k"],
+ g:"HumanEval                 SWE-bench\n---------                 ---------\none function              whole repository\n  |                         |\nwrite code                read issue -> find files\n  |                         |\nunit tests grade          edit code -> run tests\n                            |\n                          project tests grade",
+ x:"Open the SWE-bench website. Read one task and write, in 3 sentences, what the agent must do.",
+ q:"What does SWE-bench give the agent?", o:["A real GitHub issue and the full repository","Only a multiple-choice question","An image to label","A spreadsheet to sum"], a:0,
+ iq:"Why is SWE-bench a better test of a coding agent than HumanEval?",
+ ia:"HumanEval tests one small function. SWE-bench tests real work: the agent must read a large codebase, find the right files, change them and pass the project's tests. That is closer to what a developer does every day."},
+{t:"How a coding agent works: the harness",
+ n:"A coding agent is a model inside a harness. The harness is the software around the model. It gives the model tools: read a file, search, edit a file, run a command. The agent runs in a loop: plan, act, observe the result, and repeat. A sandbox is an isolated computer where the agent can run code safely. The harness changes results as much as the model does.",
+ k:["Harness","Sandbox","Agent loop"],
+ g:"        +---------+\n   +--> |  model  | -- decides next action\n   |    +---------+\n   |         |\n   |         v\n   |   tool call: read / edit / run tests\n   |         |\n   |         v\n   |   +-----------+\n   +-- |  sandbox  |  returns the result\n       +-----------+",
+ x:"Use Claude Code on a small task. Write down every tool call it makes, in order.",
+ q:"What is a sandbox in an agent eval?", o:["An isolated computer where the agent runs code safely","A type of model","A pricing plan","A chat window"], a:0,
+ iq:"Two teams use the same model but get very different benchmark scores. Why?",
+ ia:"The harness is different. Tools, prompts, the number of steps allowed and how errors return to the model all change the result. So I always ask which harness produced a score before I compare numbers."},
+{t:"Graders: tests, rules, LLM judges and humans",
+ n:"A grader decides if an output is correct. Unit tests are the strongest grader for code: the code passes or fails. Rule checks test format or forbidden actions. An LLM judge is a model that grades another model's output against a rubric. Human review is the most trusted but the most expensive. Teams check LLM judges against human grades before they trust them.",
+ k:["Unit test","LLM judge","Rubric"],
+ x:"For a meeting-summary bot, write a 4-point rubric that an LLM judge can use.",
+ q:"Which grader is most objective for code?", o:["Unit tests","A random vote","The model grading itself with no rubric","Word count"], a:0,
+ iq:"When do you use an LLM as a judge, and what is the risk?",
+ ia:"I use an LLM judge when no exact test exists, for example for summaries or explanations. The risk is that the judge is biased or inconsistent. I give it a clear rubric and compare a sample of its grades with human grades first."},
+{t:"Why benchmarks fail",
+ n:"Benchmarks can mislead. Contamination means the test tasks were in the model's training data, so the model remembers answers. Saturation means all top models score near 100%, so the benchmark stops showing differences. Weak tests let wrong code pass. Teams build private, fresh and well-tested task sets to avoid these problems.",
+ k:["Contamination","Saturation","Weak tests"],
+ x:"Write 3 ways a model could score high on a benchmark but still fail in a real company.",
+ q:"A model saw the test answers during training. This is called:", o:["Contamination","Saturation","Regularisation","Inference"], a:0,
+ iq:"A vendor shows a 90% benchmark score. How do you judge if it matters for our client?",
+ ia:"I ask if the benchmark is public and possibly contaminated, and if its tasks look like the client's work. Then I run a small private eval on the client's own tasks. That number matters more than the public score."},
+{t:"Reading agent traces",
+ n:"A trace is the full record of one agent run: every thought, tool call and result. Pass rate shows how often the agent fails. Traces show why. Teams read failed traces and sort them into categories, for example wrong file, broken edit, gave up early or tests not run. This list is a failure taxonomy. It shows what to fix first.",
+ k:["Trace","Failure taxonomy","Root cause"],
+ g:"failed runs\n    |\n    v\nread each trace\n    |\n    v\n+------------------------------+\n| wrong file        |  ####    |\n| broken edit       |  ######  |\n| gave up early     |  ##      |\n| tests not run     |  ###     |\n+------------------------------+\n    |\n    v\nfix the biggest category first",
+ x:"Ask Claude Code to do a task that fails. Read the log and write the root cause in one sentence.",
+ q:"What does a failure taxonomy show?", o:["Which types of failure happen most often","The model's price","The number of users","The server location"], a:0,
+ iq:"Your agent's pass rate dropped after an update. How do you find the cause?",
+ ia:"I compare traces from before and after the update. I sort the new failures into categories and look for the biggest change. Then I test one fix at a time and rerun the eval."},
+{t:"Metrics beyond pass rate",
+ n:"Pass rate is not enough. Teams also measure cost per task, time per task, number of steps and tool errors. Safety metrics check for harmful actions, for example deleting files. Agents are random, so one run can mislead. Teams run each task several times and report the average and the spread.",
+ k:["Cost per task","Variance","Safety metric"],
+ x:"Design a scorecard with 5 metrics for a coding agent your client wants to buy.",
+ q:"Why do teams run each task several times?", o:["Agent results vary from run to run","To use more electricity","Because tests are slow","To hide failures"], a:0,
+ iq:"Agent A passes 70% of tasks at Rs 20 each. Agent B passes 75% at Rs 90 each. Which do you recommend?",
+ ia:"It depends on the value of a solved task and the cost of a failure. I calculate cost per solved task: about Rs 29 for A and Rs 120 for B. For most routine work I pick A, and I route hard tasks to B."},
+{t:"Build day: your own task set",
+ n:"Today you build a small eval. Ask Claude Code to create a tiny Python project with 10 small bugs. For each bug, write a task description and a unit test that fails before the fix and passes after it. Check every test yourself. A wrong test makes the whole eval wrong.",
+ k:["Task set","Unit test","Ground truth"],
+ x:"Start Project 7 in the Projects tab: build the 10 tasks and their tests.",
+ q:"What must each task's test do before the fix?", o:["Fail","Pass","Be skipped","Be deleted"], a:0,
+ iq:"How did you make sure your eval tasks were correct?",
+ ia:"Each test fails on the buggy code and passes on a correct fix. I checked both cases for every task. I also read each task description to make sure a human could solve it with no hidden information."},
+{t:"Build day: run, compare, report",
+ n:"Run a coding agent on your 10 tasks. Run each task 3 times. Record pass or fail, cost and number of steps. Then change one thing, for example the prompt or the model, and run again. Compare the two setups. Read the failed traces and write a one-page report.",
+ k:["Experiment","Baseline","Report"],
+ g:"setup A (baseline)        setup B (one change)\n      |                          |\n10 tasks x 3 runs          10 tasks x 3 runs\n      |                          |\n      +-----------+--------------+\n                  |\n                  v\n   compare: pass rate, cost, steps\n                  |\n                  v\n   read failed traces -> one-page report",
+ x:"Finish Project 7: run both setups and write the report.",
+ q:"Why change only one thing between two runs?", o:["So you know what caused the difference","To save time","Because tools allow only one","It does not matter"], a:0,
+ iq:"Walk me through an eval you designed.",
+ ia:"I built 10 bug-fix tasks with unit tests. I ran an agent 3 times per task in two setups that differed in one prompt change. I compared pass rate, cost and steps, read the failed traces, and wrote what to fix next."},
+{t:"Bonus review: evals in interviews and consulting",
+ n:"Evals connect research and business. Research teams, such as the new Google DeepMind Polaris team, design evals for coding agents. Consulting clients need evals to choose vendors and approve launches. Research engineer roles also need strong Python and ML depth. Consultant roles need you to explain evals and turn results into decisions.",
+ k:["Eval strategy","Vendor selection","Launch gate"],
+ x:"Add Project 7 to your portfolio page. Write a 3-sentence summary with your numbers.",
+ q:"How do evals help a consulting client?", o:["They give evidence to choose vendors and approve launches","They replace all testing","They remove the need for data","They set the price of GPUs"], a:0,
+ iq:"How would you set up evaluation for a client's AI coding assistant rollout?",
+ ia:"I build a private task set from the client's own repositories. I grade with their tests and a small human review. I track pass rate, cost and safety per release, and I set a target that the assistant must meet before each wider rollout."}
 ];
 
 // Visual lesson scripts. One per day: [kind, items, captions, extra]
@@ -1492,7 +1574,27 @@ const VIS = [
 /*99*/ ["bars",[["Mock 1 score",0.6],["*Mock 2 score",0.8]],
  ["Yesterday you found your weak points.","Today you practise again. Each mock moves the score up."]],
 /*100*/ ["chain",["Day 1","Foundations","Building","Consulting","*Your new role"],
- ["You started on day 1 with the basics.","You learned how models work.","You built real AI systems.","You learned how clients buy AI.","Now you walk into the interview prepared and calm."]]
+ ["You started on day 1 with the basics.","You learned how models work.","You built real AI systems.","You learned how clients buy AI.","Now you walk into the interview prepared and calm."]],
+/*101*/ ["chain",["Task set","AI system","Grader","*Metric"],
+ ["An eval starts with a task set: the test inputs.","The AI system answers each task.","The grader marks each answer correct or not.","The metric turns all grades into one number, for example pass rate."]],
+/*102*/ ["compare",[["HumanEval","SWE-bench"],["One function","A whole repository"],["Short description","A real GitHub issue"],["*Unit tests grade","*Project tests grade"]],
+ ["Two well-known coding benchmarks.","HumanEval tests one small function. SWE-bench tests a full codebase.","HumanEval gives a short description. SWE-bench gives a real issue.","Both use tests as the grader."]],
+/*103*/ ["loop",["Plan","Call a tool","Sandbox runs it","*Observe result"],
+ ["The agent loop starts with a plan.","The model calls a tool: read, edit or run tests.","The sandbox runs the tool safely and returns the result.","The model reads the result and plans the next step."]],
+/*104*/ ["pyramid",["*Human review","LLM judge","Rule checks","Unit tests"],
+ ["Human review is the most trusted grader, and the most expensive.","An LLM judge grades with a rubric. Check it against humans.","Rule checks test format and forbidden actions.","Unit tests are the cheap, objective base for code."]],
+/*105*/ ["hub",["*Misleading score","Contamination","Saturation","Weak tests"],
+ ["Three problems can make a benchmark score mislead.","Contamination: the model saw the test answers in training.","Saturation: every top model scores near 100%.","Weak tests: wrong code still passes."],"in"],
+/*106*/ ["bars",[["Wrong file",0.35],["*Broken edit",0.5],["Gave up early",0.15],["Tests not run",0.25]],
+ ["Sort failed traces into categories. Wrong file is one category.","Broken edits are the biggest category here. Fix this first.","Some runs give up too early.","Some runs never run the tests."]],
+/*107*/ ["hub",["*Agent scorecard","Pass rate","Cost per task","Steps and time","Safety"],
+ ["A good agent scorecard has more than one number.","Pass rate: how many tasks it solves.","Cost per task: what each attempt costs.","Steps and time: how efficient it is.","Safety: no harmful actions, for example deleted files."]],
+/*108*/ ["chain",["10 small bugs","Task description","Test fails before","*Test passes after"],
+ ["Ask Claude Code to make a tiny project with 10 small bugs.","Write a clear task description for each bug.","Check that each test fails on the buggy code.","Check that each test passes after a correct fix."]],
+/*109*/ ["chain",["Setup A","Setup B","Compare","Read failures","*Report"],
+ ["Run the baseline setup: 10 tasks, 3 runs each.","Change one thing and run setup B.","Compare pass rate, cost and steps.","Read the failed traces.","Write a one-page report with what to fix next."]],
+/*110*/ ["split",["*Evals","Research: measure agents","Clients: choose vendors","Clients: approve launches"],
+ ["Evals connect research and business.","Research teams use evals to measure and improve agents.","Clients use evals to choose between vendors.","Clients use evals as a gate before each launch."]]
 ];
 
 /* ---------- visual lesson engine ---------- */
@@ -1765,13 +1867,16 @@ function applyPref(){
   const tb=$("themeBtn"); if(tb){ tb.setAttribute("aria-label", PREF.dark?"Switch to paper mode":"Switch to night mode");
     tb.innerHTML = PREF.dark ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>'; }
 }
-const current = () => { for (let d=1; d<=100; d++) if (!S.done[d]) return d; return 100; };
+const CORE = 100, LAST = DAYS.length;
+const coreDone = () => Object.keys(S.done).filter(d => +d <= CORE).length;
+const current = () => { for (let d=1; d<=LAST; d++) if (!S.done[d]) return d; return LAST; };
+const dayLabel = d => d <= CORE ? "Day " + d : "Bonus day " + (d - CORE);
 let viewDay = null, backTo = null;
 
 /* ---------- header ---------- */
 function renderTop(){
   const c = current();
-  $("countTop").textContent = "Day " + c + " of 100";
+  $("countTop").textContent = c <= CORE ? "Day " + c + " of 100" : "Bonus day " + (c - CORE) + " of " + (LAST - CORE);
 }
 
 /* ---------- morning ---------- */
@@ -1800,7 +1905,7 @@ function renderMorning(){
     $("upBtn").textContent = rc ? "Continue" : "Start";
     ACT.upBtn = () => { const id = !m.breath?"st-breath":!m.visual?"st-visual":!m.self?"st-self":"st-log"; $(id).scrollIntoView({behavior:"smooth",block:"start"}); };
   } else if (!S.done[c]){
-    $("upEyebrow").textContent = "Up next · Day " + c + " · " + p.name;
+    $("upEyebrow").textContent = "Up next · " + dayLabel(c) + " · " + p.name;
     $("upTitle").textContent = x.t;
     $("upWhy").textContent = c===p.from ? p.why : "One focused hour: read, watch, learn with the tutor, then practise.";
     $("upBtn").textContent = "Start today's hour";
@@ -1808,7 +1913,7 @@ function renderMorning(){
   } else {
     $("upEyebrow").textContent = "Up next";
     $("upTitle").textContent = "Rest. Today's work is done.";
-    $("upWhy").textContent = "Tomorrow: Day " + (c===100?100:c) + ", " + x.t + ". A short mock interview is a good extra if you have energy.";
+    $("upWhy").textContent = "Tomorrow: " + dayLabel(c) + ", " + x.t + ". A short mock interview is a good extra if you have energy.";
     $("upBtn").textContent = "Open a mock interview";
     ACT.upBtn = () => show("mock");
   }
@@ -1830,7 +1935,7 @@ function renderMorning(){
   // countdown + pace
   const days = Math.max(0, Math.ceil((GOAL_DATE - new Date().setHours(0,0,0,0))/864e5));
   $("goalDays").textContent = days;
-  const n = Object.keys(S.done).length;
+  const n = coreDone();
   const start = new Date((S.start||tk)+"T00:00");
   const expected = Math.min(100, Math.floor((new Date().setHours(0,0,0,0) - start)/864e5) + 1);
   $("paceNum").textContent = n + " of 100";
@@ -1880,7 +1985,7 @@ let tutorTurns = [];
 function renderLearn(){
   const d = viewDay || current(), x = DAYS[d-1], p = PH(d);
   const chip=$("lPhase"); chip.querySelector("i").style.background=`var(${p.color})`;
-  chip.querySelector("span").textContent = "Day " + d + " · " + p.name;
+  chip.querySelector("span").textContent = dayLabel(d) + " · " + p.name;
   $("lTitle").textContent = x.t;
   let note = esc(x.n); x.k.forEach(k=>{ const re = new RegExp("\\b("+k.replace(/[.*+?^${}()|[\]\\\/]/g,"\\$&")+")\\b","i"); note = note.replace(re,'<mark class="hl">$1</mark>'); });
   $("lNote").innerHTML = "<p>"+note+"</p>";
@@ -1903,7 +2008,7 @@ function renderLearn(){
   $("doneBtn").textContent = S.done[d] ? "Day complete · undo" : "Mark this day complete";
   $("doneBtn").className = S.done[d] ? "btn" : "btn primary";
   $("doneNote").textContent = "";
-  $("prevDay").disabled = d<=1; $("nextDay").disabled = d>=100;
+  $("prevDay").disabled = d<=1; $("nextDay").disabled = d>=LAST;
 }
 
 /* ---------- markdown ---------- */
@@ -1943,7 +2048,7 @@ function wireClaude(){
   $("scriptAI").hidden = false;
   ACT.teachBtn = async () => {
     const d = viewDay||current(), x = DAYS[d-1];
-    const prompt = `${STYLE}\n\nTeach Day ${d} of a 100-day track: "${x.t}". Phase: ${PH(d).name}.\nCore note: ${x.n}\nKey terms: ${x.k.join(", ")}.\n\nWrite a 10-minute lesson, about 450 words:\n#### The idea in one line\n#### How it works (with an everyday analogy)\n#### A BPM or consulting example\n#### What interviewers want to hear\n#### Check yourself (3 short questions, answers hidden at the end under 'Answers')`;
+    const prompt = `${STYLE}\n\nTeach ${d<=CORE ? "Day "+d+" of a 100-day track" : "bonus day "+(d-CORE)+" of a 10-day module on AI agent evals"}: "${x.t}". Phase: ${PH(d).name}.\nCore note: ${x.n}\nKey terms: ${x.k.join(", ")}.\n\nWrite a 10-minute lesson, about 450 words:\n#### The idea in one line\n#### How it works (with an everyday analogy)\n#### A BPM or consulting example\n#### What interviewers want to hear\n#### Check yourself (3 short questions, answers hidden at the end under 'Answers')`;
     tutorTurns = [{role:"user",content:prompt}];
     const t = await ask(prompt, $("tutorOut"), {cache:true});
     if (t){ tutorTurns.push({role:"assistant",content:t}); $("askRow").hidden=false; }
@@ -1990,7 +2095,8 @@ const MODES = {
   case:"A consulting case about using AI in a real business (BPM, insurance, retail, energy). Ask clarifying-style prompts step by step",
   design:"A system design round: design an AI solution. Guide him through requirements, estimates, design, deep dive and trade-offs",
   behavioural:"Behavioural round with STAR stories, starting with 'tell me about yourself'",
-  full:"A full mixed interview: story, concepts, a short case and a short design"
+  full:"A full mixed interview: story, concepts, a short case and a short design",
+  evals:"An AI agent evals round: how to design evals for coding agents, benchmarks such as SWE-bench, graders, contamination, trace analysis and metrics beyond pass rate. Mix concept questions with one short design task"
 };
 function bubble(role, html){ const b=document.createElement("div"); b.className="msg "+(role==="user"?"me":"them ruled")+" md"; b.innerHTML=html; $("chat").appendChild(b); return b; }
 async function mockTurn(){
@@ -2002,7 +2108,7 @@ async function startMock(){
   const mode=$("mockMode").value, c=current();
   const studied = DAYS.slice(0, Math.max(c-1,3)).map((d,i)=>(i+1)+". "+d.t).join("; ");
   $("chat").innerHTML=""; $("mockInRow").hidden=false; $("mockEnd").hidden=false;
-  mock=[{role:"user",content:`${STYLE}\n\nYou are a friendly but rigorous interviewer for an AI Consultant role at a consulting or IT services firm. Round: ${MODES[mode]}.\nPrem is on day ${c} of 100. Topics studied: ${studied}.\nRules: ask ONE question at a time. After each answer, give: a score out of 10, one thing that worked, one thing to improve, then the next question. Keep each reply under 120 words. He has anxiety at times: be encouraging and specific, never harsh. Start now with a one-line welcome and the first question.`}];
+  mock=[{role:"user",content:`${STYLE}\n\nYou are a friendly but rigorous interviewer for an AI Consultant role at a consulting or IT services firm. Round: ${MODES[mode]}.\nPrem is on ${c<=CORE ? "day "+c+" of 100" : "bonus day "+(c-CORE)+" (agent evals)"}. Topics studied: ${studied}.\nRules: ask ONE question at a time. After each answer, give: a score out of 10, one thing that worked, one thing to improve, then the next question. Keep each reply under 120 words. He has anxiety at times: be encouraging and specific, never harsh. Start now with a one-line welcome and the first question.`}];
   await mockTurn();
 }
 async function sendMock(){
@@ -2022,7 +2128,7 @@ function renderPlan(){
   $("legend").innerHTML = PHASES.map(p=>{const n=Object.keys(S.done).filter(d=>d>=p.from&&d<=p.to).length;return `<div><i style="background:var(${p.color})"></i><span><strong>${p.name}</strong><br><span class="muted">${p.why}</span></span><span class="note">${n}/${p.to-p.from+1}</span></div>`;}).join("");
 }
 function renderProjects(){
-  $("projList").innerHTML = `<div class="card"><h2>Portfolio projects</h2><p class="muted">Six projects give you real stories for interviews. Each one ends a phase.</p></div>` +
+  $("projList").innerHTML = `<div class="card"><h2>Portfolio projects</h2><p class="muted">Seven projects give you real stories for interviews. Each one ends a phase. Project 7 is a bonus.</p></div>` +
    PROJECTS.map((p,pi)=>{const st=S.proj[p.day]||[];const n=st.filter(Boolean).length;
     return `<div class="card proj"><div class="eyebrow">Day ${p.day} · ${n}/${p.steps.length} steps</div><h3>${esc(p.name)}</h3><p class="muted">${esc(p.goal)}</p>${p.steps.map((s,i)=>`<label class="check"><input type="checkbox" id="pj-${p.day}-${i}" data-pj="${p.day}" data-i="${i}" ${st[i]?"checked":""}><span>${esc(s)}</span></label>`).join("")}</div>`;}).join("");
 }
@@ -2069,16 +2175,17 @@ ACT.sizeBtn =()=>{ const i=SIZES.indexOf(PREF.fs||17); PREF.fs=SIZES[(i+1)%SIZES
 ACT.sosBtn =()=>{$("sos").hidden=!$("sos").hidden;};
 ACT.sosBreath =()=>{$("st-breath").scrollIntoView({behavior:"smooth",block:"center"}); if(!breathTimer) startBreath();};
 ACT.prevDay =()=>{viewDay=Math.max(1,(viewDay||current())-1);renderLearn();};
-ACT.nextDay =()=>{viewDay=Math.min(100,(viewDay||current())+1);renderLearn();};
+ACT.nextDay =()=>{viewDay=Math.min(LAST,(viewDay||current())+1);renderLearn();};
 ACT.todayDay =()=>{viewDay=null;renderLearn();};
 ACT.modelBtn =()=>{$("modelAns").hidden=!$("modelAns").hidden;};
 INP.iqAns=(()=>{const d=viewDay||current(); (S.ans ||= {})[d]=$("iqAns").value; save();});
 ACT.doneBtn =()=>{const d=viewDay||current();
   if(S.done[d]){ sheet("Mark Day "+d+" as not done?","Your quiz and interview answers stay saved.","Mark as not done",()=>{ delete S.done[d]; save(); renderTop(); renderLearn(); }); return; }
   S.done[d]=todayKey(); save(); renderTop(); renderLearn();
-  $("doneNote").textContent = d<100 ? "Day "+d+" done. Add it to tomorrow's success log." : "You finished all 100 days.";
+  $("doneNote").textContent = d===CORE ? "You finished all 100 days." : d===LAST ? "You finished the bonus module." : dayLabel(d)+" done. Add it to tomorrow's success log.";
   const ph = PHASES.find(p=>p.to===d);
-  if (d===100) toast("Day 100","You finished the whole track. Your portfolio is ready.");
+  if (d===CORE) toast("Day 100","You finished the whole track. The bonus evals module is next.");
+  else if (d===LAST) toast("Bonus complete","You can now design and explain an agent eval.");
   else if (ph) toast("Phase complete", ph.name+" is done. Next: "+PH(d+1).name+".");
   else if ([7,21,30,60,90].includes(Object.keys(S.done).length)) toast(Object.keys(S.done).length+" lessons", "A steady habit. Keep the same calm pace.");
 };

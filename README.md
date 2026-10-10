@@ -4,7 +4,8 @@ A calm morning routine and a 100-day study track for an AI Consultant role.
 
 - **Today**: breathing, a Psycho-Cybernetics visualisation, a sticky-note self-image, and a success log.
 - **Learn**: 100 daily lessons in 6 phases, each with a note, a diagram, an animated visual lesson and narration.
-- **Plan**, **Mock** and **Projects**: progress grid, mock interviews and 6 portfolio projects.
+- **Bonus module**: 10 optional lessons on AI agent evals (benchmarks, graders, traces, metrics), with a project and a mock interview round.
+- **Plan**, **Mock** and **Projects**: progress grid, mock interviews and 7 portfolio projects.
 
 ## How it works
 
