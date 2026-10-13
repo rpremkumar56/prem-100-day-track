@@ -91,7 +91,7 @@ pre{font:13px/1.45 var(--mono);background:var(--surface-2);border-radius:10px;pa
 
 /* tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
-nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:640px;width:100%}
+nav.tabs .in{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:640px;width:100%}
 nav.tabs button{border:0;background:none;border-radius:12px;min-height:52px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 .74rem var(--ui);color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--surface-2)}
@@ -245,6 +245,30 @@ svg .hd text{font:700 12.5px var(--read)}
 .sheet{max-height:88vh;overflow-y:auto}
 input[type=password]{width:100%;font-size:1rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;font-family:var(--mono)}
 body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+/* think */
+.skill{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font:700 .82rem var(--ui)}
+.tq{font-size:1.12rem;line-height:1.45}
+.skilltip{border-top:1px dashed var(--line);padding-top:8px}
+.claim{font:italic 1.08rem/1.55 var(--read);border-left:3px solid var(--partb);padding-left:12px}
+.frame{background:var(--surface-2);border-radius:12px;padding:10px 14px}
+.frame ol{margin:4px 0 0;padding-left:20px;font:.95rem/1.5 var(--ui)}
+.thinkhead{display:flex;flex-direction:column;gap:8px}
+.tchks{display:flex;gap:12px;flex-wrap:wrap}
+.tchk{display:inline-flex;align-items:center;gap:6px;font:700 .85rem var(--ui);color:var(--muted)}
+.tchk i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line)}
+.tchk.on{color:var(--ink)} .tchk.on i{background:var(--good);border-color:var(--good)}
+.secthead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.board{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
+.board svg{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
+.board .hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.board .body{stroke:#D9B07A;stroke-width:6;stroke-linecap:round}
+.board .head{fill:var(--accent)}
+.board .stk.lift .body{stroke:var(--gold);filter:drop-shadow(0 0 3px var(--gold))}
+.board .ghost{stroke:var(--line);stroke-width:5;stroke-linecap:round;stroke-dasharray:2 5}
+.board .slot.edge .ghost{opacity:.35}
+.board .slot.open .ghost{stroke:var(--parta);opacity:.8}
+.board .eqs{stroke:var(--ink);stroke-width:5;stroke-linecap:round}
+:root[data-theme="dark"] .board .body{stroke:#C9A06A}
 </style>
 </head>
 <body>
@@ -296,6 +320,12 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
         <div><span class="eyebrow">Role goal</span><b id="goalDays">92</b><span class="note">days to 9 Jan 2027</span></div>
         <div><span class="eyebrow">Pace</span><b id="paceNum">0 of 100</b><span class="note" id="paceNote">lessons done</span></div>
       </div>
+    </div>
+
+    <div class="card" id="thinkCard">
+      <div class="secthead"><div class="eyebrow">Think</div><span class="note" id="thinkCardNote">0 of 3 done today</span></div>
+      <div class="tchks" id="thinkToday"></div>
+      <div class="row"><button class="btn" id="thinkGo">Open today's puzzles</button></div>
     </div>
 
     <div class="principle">
@@ -487,6 +517,30 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   </div>
 </section>
 
+<!-- THINK -->
+<section class="view" id="v-think" hidden>
+  <div class="wrap" style="padding:0">
+    <div class="thinkhead">
+      <h2>Think</h2>
+      <p class="muted">Three short exercises a day. Try first, then check. The point is how you think, so read the explanation even when you are right.</p>
+      <div class="tchks" id="thinkTodayTab"></div>
+      <p class="note" id="thinkTotals"></p>
+    </div>
+    <div class="card">
+      <div class="secthead"><div class="eyebrow">1 · Brain teaser</div><button class="linkbtn" id="tNext">Another one ›</button></div>
+      <div id="teaserBody" class="plain" style="padding:0"></div>
+    </div>
+    <div class="card">
+      <div class="secthead"><div class="eyebrow">2 · Smart answers · Spot the flaw</div><button class="linkbtn" id="fNext">Another one ›</button></div>
+      <div id="flawBody" class="plain" style="padding:0"></div>
+    </div>
+    <div class="card">
+      <div class="secthead"><div class="eyebrow">3 · Smart answers · Answer drill</div><button class="linkbtn" id="dNext">Another one ›</button></div>
+      <div id="drillBody" class="plain" style="padding:0"></div>
+    </div>
+  </div>
+</section>
+
 <!-- PROJECTS -->
 <section class="view" id="v-projects" hidden>
   <div class="wrap" style="padding:0" id="projList"></div>
@@ -497,6 +551,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
 <nav class="tabs" aria-label="Sections"><div class="in">
   <button data-v="morning" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v3M4.9 8.9l2 2M19.1 8.9l-2 2"/></svg>Today</button>
   <button data-v="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>Learn</button>
+  <button data-v="think"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Think</button>
   <button data-v="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Plan</button>
   <button data-v="mock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/></svg>Mock</button>
   <button data-v="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8M20 12v7H4V5h11"/></svg>Projects</button>
@@ -1789,6 +1844,413 @@ const VL = (() => {
 })();
 
 
+
+/* ===== Think tab ===== */
+/* ---------- stick puzzles: seven-segment digits and +/- operators ---------- */
+/* A board is a list of cells. Digit cell: segments a..g. Operator cell: h (horizontal), v (vertical). "=" is fixed. */
+const STK = (() => {
+  const DIGITS = { "abcdef":"0", "bc":"1", "ef":"1", "abdeg":"2", "abcdg":"3", "bcfg":"4", "acdfg":"5", "acdefg":"6",
+    "abc":"7", "abcf":"7", "abcdefg":"8", "abcdfg":"9", "abcfg":"9" };
+  const SEGS = "abcdefg".split("");
+  const OPSEGS = ["h","v"];
+  const ENC = { "0":"abcdef","1":"bc","2":"abdeg","3":"abcdg","4":"bcfg","5":"acdfg","6":"acdefg","7":"abc","8":"abcdefg","9":"abcdfg" };
+  const key = set => [...set].sort().join("");
+
+  // build a board from text such as "946" (number puzzle) or "5+7=2" (equation)
+  function build(text, kind){
+    const cells = [];
+    if (kind === "num") cells.push({t:"d", s:new Set(), edge:true});
+    for (const ch of text){
+      if (/\d/.test(ch)) cells.push({t:"d", s:new Set(ENC[ch])});
+      else if (ch === "+") cells.push({t:"o", s:new Set(["h","v"])});
+      else if (ch === "-") cells.push({t:"o", s:new Set(["h"])});
+      else if (ch === "=") cells.push({t:"eq"});
+    }
+    if (kind === "num") cells.push({t:"d", s:new Set(), edge:true});
+    return cells;
+  }
+  const clone = cells => cells.map(c => ({...c, s: c.s ? new Set(c.s) : undefined}));
+
+  // read the board back as text, or null if any cell is not a valid symbol
+  function read(cells, kind){
+    let out = "";
+    for (let i = 0; i < cells.length; i++){
+      const c = cells[i];
+      if (c.t === "eq"){ out += "="; continue; }
+      if (c.t === "o"){ const k = key(c.s); if (k === "hv") out += "+"; else if (k === "h") out += "-"; else return null; continue; }
+      const k = key(c.s);
+      if (k === ""){ if (c.edge){ out += " "; continue; } return null; }
+      if (k === "g"){ if (kind === "num" && i === 0) { out += "-"; continue; } return null; }
+      if (!(k in DIGITS)) return null;
+      out += DIGITS[k];
+    }
+    return out.trim();
+  }
+  function value(text, kind){
+    if (text == null) return null;
+    if (kind === "num"){
+      if (!/^-?\d+$/.test(text) || /\s/.test(text)) return null;
+      if (/^-?0\d/.test(text)) return null;            // no leading zeros
+      return parseInt(text, 10);
+    }
+    const m = text.match(/^(\d+)([+-])(\d+)=(\d+)$/) || text.match(/^(\d+)=(\d+)([+-])(\d+)$/);
+    if (!m) return null;
+    if (/(^|[^\d])0\d/.test(text)) return null;
+    if (text.indexOf("=") > text.search(/[+-]/)){ const [_, a, op, b, c] = m; return (op === "+" ? +a + +b : +a - +b) === +c; }
+    const [_, c, a, op, b] = m; return (op === "+" ? +a + +b : +a - +b) === +c;
+  }
+  const slots = c => c.t === "d" ? SEGS : c.t === "o" ? OPSEGS : [];
+
+  // every board reachable with n moves (move = lift one stick, put it in an empty slot)
+  function moves(cells){
+    const out = [];
+    cells.forEach((c, i) => { if (!c.s) return; for (const sg of c.s){
+      cells.forEach((d, j) => { if (!d.s) return; for (const tg of slots(d)){
+        if (d.s.has(tg) || (i === j && sg === tg)) continue;
+        const nb = clone(cells); nb[i].s.delete(sg); nb[j].s.add(tg); out.push({board:nb, from:[i,sg], to:[j,tg]});
+      } }); } });
+    return out;
+  }
+  function solve(text, kind, n, goal, target){
+    let frontier = [{board: build(text, kind), path: []}], seen = new Set();
+    for (let k = 0; k < n; k++){
+      const next = [];
+      for (const f of frontier) for (const m of moves(f.board)){
+        const sig = m.board.map(c => c.s ? key(c.s) : "=").join("|"); if (seen.has(sig)) continue; seen.add(sig);
+        next.push({board: m.board, path: f.path.concat([[m.from, m.to]])});
+      }
+      frontier = next;
+    }
+    const ok = [];
+    for (const f of frontier){
+      const t = read(f.board, kind), v = value(t, kind);
+      if (v === null || v === false) continue;
+      if (kind === "eq"){ if (t !== text) ok.push({text: t, path: f.path}); continue; }
+      if (goal === "max" || (goal === "gt" && v > target)) ok.push({text: t, v, path: f.path});
+      if (goal === "min" || (goal === "lt" && v < target)) ok.push({text: t, v, path: f.path});
+    }
+    if (kind === "num") ok.sort((a, b) => goal === "max" || goal === "gt" ? b.v - a.v : a.v - b.v);
+    const uniq = []; const st = new Set(); for (const o of ok){ if (!st.has(o.text)){ st.add(o.text); uniq.push(o); } }
+    return uniq;
+  }
+  // a puzzle result is accepted when it meets the goal
+  function check(cells, p){
+    const t = read(cells, p.kind), v = value(t, p.kind);
+    if (v === null) return {ok:false, text:t, why:"Some sticks do not form a number or sign yet."};
+    if (p.kind === "eq") return v ? {ok: t !== p.start, text:t} : {ok:false, text:t, why:"The equation is still not true."};
+    if (p.goal === "gt" || p.goal === "max") return v > p.target ? {ok:true, text:t, v} : {ok:false, text:t, why: t + " is not larger than " + p.target + "."};
+    return v < p.target ? {ok:true, text:t, v} : {ok:false, text:t, why: t + " is not smaller than " + p.target + "."};
+  }
+  return { build, clone, read, value, solve, check, key };
+})();
+
+/* ---------- Think: brain teasers, spot the flaw, answer drills ---------- */
+/* Teaser fields: q question, a accepted answers (any match passes), o options (multiple choice, c = correct index),
+   h hint, x explanation, s the thinking skill it trains */
+const SKILLS = {
+  read:   ["Read the question exactly", "Slow down and read every word. Many puzzles hide the answer in the wording."],
+  assume: ["Question your assumptions", "List what you assumed without being told. Then drop one assumption at a time."],
+  check:  ["Check the fast answer", "Your first answer comes from instinct. Test it with numbers before you say it."],
+  back:   ["Work backwards", "Start from the end state, then step back one move at a time."],
+  pattern:["Find the pattern", "Look at the differences, the positions, and the names of things, not only the values."],
+  steps:  ["Break it into steps", "Split the problem into small parts. Solve each part and write it down."],
+  info:   ["Get information from every move", "Design each step so that every possible result tells you something new."],
+  extreme:["Try an extreme case", "Push the numbers to the smallest or largest case. The answer often becomes obvious."]
+};
+const TEASERS = [
+ {q:"A bat and a ball cost ₹110 in total. The bat costs ₹100 more than the ball. How much does the ball cost?", a:["5","₹5","rs 5","five"], h:"If the ball cost ₹10, what would the bat cost? Add them up.", x:"Ball = x, bat = x + 100. So 2x + 100 = 110, and x = 5. The fast answer ₹10 gives a total of ₹120.", s:"check"},
+ {q:"A patch of lilies on a lake doubles in size every day. It covers the whole lake on day 48. On which day does it cover half the lake?", a:["47","day 47","forty seven"], h:"Work back one day from the full lake.", x:"The patch doubles each day, so one day before full it was half. Day 47.", s:"back"},
+ {q:"5 machines make 5 widgets in 5 minutes. How long do 100 machines take to make 100 widgets?", a:["5","5 minutes","five"], h:"How long does one machine take to make one widget?", x:"Each machine makes one widget in 5 minutes. 100 machines make 100 widgets in the same 5 minutes.", s:"check"},
+ {q:"Three boxes are labelled Apples, Oranges and Mixed. Every label is wrong. You may take out one fruit from one box without looking inside. Which box do you choose to fix all three labels?", o:["The box labelled Apples","The box labelled Oranges","The box labelled Mixed","You cannot do it with one fruit"], c:2, h:"Which box is certain to contain only one kind of fruit?", x:"The 'Mixed' box is wrong, so it holds only one kind. If you take an apple, it is the Apples box. The box labelled Oranges cannot be Oranges or Apples, so it is Mixed. The last box is Oranges.", s:"info"},
+ {q:"You have 8 balls. One ball is slightly heavier. With a two-pan balance, what is the smallest number of weighings that always finds the heavy ball?", a:["2","two"], h:"Do not split into two groups. Split into three.", x:"Weigh 3 against 3. If they balance, the heavy ball is in the last 2: weigh those. If not, take the heavy 3 and weigh 1 against 1. Two weighings in every case.", s:"info"},
+ {q:"On an island, knights always tell the truth and knaves always lie. A says: \"We are both knaves.\" What are A and B?", o:["Both knights","Both knaves","A is a knight, B is a knave","A is a knave, B is a knight"], c:3, h:"Can a knight ever say 'I am a knave'?", x:"A knight cannot say the sentence, so A is a knave. A lies, so 'both knaves' is false. B is a knight.", s:"assume"},
+ {q:"What is the next number? 2, 6, 12, 20, 30, …", a:["42"], h:"Look at the differences between the numbers.", x:"The differences grow by 2: 4, 6, 8, 10, 12. Each term is n × (n + 1). The next is 6 × 7 = 42.", s:"pattern"},
+ {q:"What is the next letter? O, T, T, F, F, S, S, E, …", a:["n","nine"], h:"Say the numbers 1 to 8 out loud.", x:"They are the first letters of One, Two, Three … Eight. Next is Nine: N.", s:"pattern"},
+ {q:"A clock shows 3:15. What is the angle between the hour hand and the minute hand?", a:["7.5","7.5 degrees","7.5°"], h:"The hour hand does not stay on the 3. Where is it after 15 minutes?", x:"The minute hand is at 90°. The hour hand moves 0.5° each minute, so it is at 90° + 7.5°. The gap is 7.5°.", s:"check"},
+ {q:"A father is 4 times as old as his son. In 20 years, he will be twice as old as his son. How old is the son now?", a:["10","ten"], h:"Write the son's age as x and make one equation.", x:"4x + 20 = 2(x + 20). So 2x = 20, and x = 10. The father is 40.", s:"steps"},
+ {q:"A snail is at the bottom of a 10 m well. Each day it climbs 3 m. Each night it slides back 2 m. On which day does it get out?", a:["8","day 8","eighth","8th"], h:"What happens on the last day? Does it slide back?", x:"After 7 days and nights it is at 7 m. On day 8 it climbs 3 m, reaches 10 m and is out before night.", s:"extreme"},
+ {q:"10 people meet. Each person shakes hands with every other person once. How many handshakes happen?", a:["45","forty five"], h:"Each person shakes 9 hands, but each handshake has two people.", x:"10 × 9 ÷ 2 = 45.", s:"steps"},
+ {q:"A game show has 3 doors. One hides a car. You pick door 1. The host, who knows where the car is, opens door 3 to show a goat. Should you switch to door 2?", o:["Stay: the odds are now 50:50","Switch: it wins 2 times in 3","It makes no difference","Switch only if you feel lucky"], c:1, h:"Imagine 100 doors. You pick one, and the host opens 98 empty ones.", x:"Your first pick wins 1 time in 3. The host's choice gives you information, so the other door holds the remaining 2 in 3.", s:"extreme"},
+ {q:"How many people must be in a room for a better than 50% chance that two share a birthday?", a:["23","twenty three"], h:"Count pairs of people, not people.", x:"23 people make 253 pairs. With 365 days, that is enough for a 50.7% chance of a match.", s:"check"},
+ {q:"Three switches outside a closed room control one bulb inside. You can enter the room only once. How do you find the right switch?", a:["warm","heat","hot","temperature"], h:"A bulb gives more than light.", x:"Turn on switch 1 for 5 minutes, then off. Turn on switch 2 and enter. Bulb on: switch 2. Off but warm: switch 1. Off and cold: switch 3.", s:"info"},
+ {q:"Which is heavier: a kilo of feathers or a kilo of iron?", a:["same","equal","neither","both","they weigh the same"], h:"Read the question again.", x:"Both weigh one kilo.", s:"read"},
+ {q:"You have a 3-litre jug and a 5-litre jug, and plenty of water. How do you measure exactly 4 litres?", a:["fill the 5","fill 5"], h:"Fill the 5-litre jug first and pour into the 3-litre jug.", x:"Fill 5, pour into 3 (2 left in the 5). Empty the 3, pour the 2 into it. Fill 5 again and top up the 3 (needs 1). The 5-litre jug now holds 4.", s:"steps"},
+ {q:"A plane crashes exactly on the border of India and Nepal. Where do they bury the survivors?", a:["nowhere","don't","do not","not","survivors are alive","alive"], h:"Who are survivors?", x:"Survivors are alive. Nobody buries them.", s:"read"},
+ {q:"In a race, you overtake the person in second place. What position are you in now?", a:["2","second","2nd"], h:"Whose place do you take?", x:"You take their place: second. The fast answer 'first' is wrong.", s:"check"},
+ {q:"A farmer has 17 sheep. All but 9 run away. How many are left?", a:["9","nine"], h:"Read 'all but 9' slowly.", x:"All but 9 ran away, so 9 are left.", s:"read"},
+ {q:"How many months have 28 days?", a:["12","all","twelve"], h:"Does February have the only 28th day?", x:"Every month has at least 28 days, so all 12.", s:"read"},
+ {q:"Two trains start 100 km apart and move towards each other at 50 km/h each. A bird flies at 75 km/h between them, back and forth, until they meet. How far does the bird fly?", a:["75","75 km"], h:"Do not follow the bird. How long until the trains meet?", x:"The gap closes at 100 km/h, so the trains meet in 1 hour. The bird flies 75 km/h for 1 hour: 75 km.", s:"steps"},
+ {q:"Prem stands in a row. He is 7th from the left and 12th from the right. How many people are in the row?", a:["18","eighteen"], h:"Do not count Prem twice.", x:"6 people on his left + Prem + 11 on his right = 18.", s:"check"},
+ {q:"Today is Tuesday. Which day is it 100 days from now?", a:["thursday"], h:"How many full weeks are in 100 days, and what is left over?", x:"100 = 14 weeks + 2 days. Tuesday + 2 days = Thursday.", s:"steps"},
+ {q:"Three friends pay ₹30 for a room, ₹10 each. The clerk returns ₹5. The bellboy keeps ₹2 and gives ₹1 back to each friend. Each friend paid ₹9: 3 × 9 = 27, plus the bellboy's 2 = 29. Where is the missing rupee?", o:["The hotel kept it","There is no missing rupee: the ₹27 already includes the bellboy's ₹2","The clerk made an error","The bellboy kept ₹3"], c:1, h:"Follow where the ₹27 went.", x:"The friends paid ₹27: ₹25 to the hotel and ₹2 to the bellboy. Adding the ₹2 again is the trick. 27 + 3 returned = 30.", s:"assume"},
+ {q:"A surgeon looks at a boy and says: \"I cannot operate on him. He is my son.\" The surgeon is not the boy's father. How?", a:["mother","mom","mum","amma"], h:"What did you assume about the surgeon?", x:"The surgeon is the boy's mother. The puzzle tests a hidden assumption.", s:"assume"},
+ {q:"A man pushes his car to a hotel and tells the owner he is bankrupt. Why?", a:["monopoly","board game"], h:"Not every car or hotel is full size.", x:"He is playing Monopoly.", s:"assume"},
+ {q:"Two children are born to the same mother, on the same day, in the same year, but they are not twins. How?", a:["triplet","triplets","quadruplet"], h:"Twins are not the only option.", x:"They are two of a set of triplets.", s:"assume"},
+ {q:"What 5-letter word becomes shorter when you add two letters to it?", a:["short"], h:"Read the question as words, not meaning.", x:"Short + er = shorter.", s:"read"},
+ {q:"Rearrange the letters of LISTEN to make a word that means 'quiet'.", a:["silent"], h:"It starts with S.", x:"LISTEN → SILENT.", s:"pattern"},
+ {q:"You have two coins that make ₹15. One of them is not a ₹10 coin. What are the coins?", a:["10 and 5","5 and 10","₹10 and ₹5","ten and five"], h:"Which one is not the ₹10 coin?", x:"A ₹10 coin and a ₹5 coin. The ₹5 coin is the one that is not ₹10.", s:"read"},
+ {q:"A family has two children. At least one is a boy. What is the chance that both are boys?", a:["1/3","one third","33%","33"], h:"List every possible family: BB, BG, GB, GG. Which are still possible?", x:"BB, BG and GB remain. Only one of the three is BB: 1/3.", s:"steps"},
+ {q:"You buy a share for ₹100. It falls 50%, then rises 50%. What is it worth now?", a:["75","₹75"], h:"50% of what?", x:"After the fall it is ₹50. A 50% rise on ₹50 is ₹25, so ₹75.", s:"check"},
+ {q:"A team's revenue grew 10% each year for 7 years. Roughly how much bigger is it now?", o:["About 1.7 times","About 2 times","About 3 times","About 7 times"], c:1, h:"Use the rule of 72: years to double ≈ 72 ÷ growth rate.", x:"72 ÷ 10 ≈ 7 years to double. 1.1^7 = 1.95.", s:"steps"},
+ {q:"A test for a rare disease is 99% accurate. 1 in 1,000 people has the disease. You test positive. Roughly what is the chance you have it?", o:["About 99%","About 50%","About 9%","About 1%"], c:2, h:"Imagine 100,000 people. How many true and how many false positives?", x:"100 sick people give 99 true positives. 99,900 healthy people give about 999 false positives. 99 ÷ 1,098 ≈ 9%.", s:"steps"},
+ {q:"What has keys but cannot open a lock?", a:["piano","keyboard"], h:"Think of music or typing.", x:"A piano or a keyboard.", s:"assume"},
+ {q:"The more you take, the more you leave behind. What are they?", a:["footsteps","steps","footprints"], h:"You leave them when you walk.", x:"Footsteps.", s:"assume"},
+ {q:"What gets wetter the more it dries?", a:["towel"], h:"You use it after a bath.", x:"A towel.", s:"assume"},
+ {q:"Before Mount Everest was discovered, what was the highest mountain on Earth?", a:["everest"], h:"Discovery does not change height.", x:"Mount Everest. It was the highest before anyone measured it.", s:"read"},
+ {q:"You can hold it in your right hand, but never in your left hand. What is it?", a:["left hand","left elbow"], h:"Think about your own body.", x:"Your left hand (or left elbow).", s:"assume"},
+ {q:"Two ropes each take exactly 60 minutes to burn, but they burn unevenly. How do you measure 45 minutes?", a:["both ends"], h:"A rope lit at both ends burns in half the time, even if uneven.", x:"Light rope A at both ends and rope B at one end. A burns out at 30 minutes. Then light B's other end: it burns out 15 minutes later.", s:"steps"},
+ {q:"A book costs ₹100 plus half of its own price. How much does the book cost?", a:["200","₹200"], h:"Call the price x and write x = 100 + x/2.", x:"x = 100 + x/2, so x/2 = 100 and x = 200. The fast answer ₹150 is wrong.", s:"check"}
+];
+
+/* Spot the flaw: one short argument, four thinking errors to choose from */
+const FLAWS = [
+ {q:"\"We studied our 20 most successful AI pilots. All of them used Vendor X. So Vendor X makes pilots succeed.\"", o:["Survivorship bias","Anchoring","Sunk cost fallacy","Straw man"], c:0, x:"They only looked at successes. Failed pilots may also have used Vendor X."},
+ {q:"\"Teams that use the AI assistant close 20% more tickets. So the assistant makes people faster.\"", o:["Gambler's fallacy","Correlation is not causation","Appeal to authority","Slippery slope"], c:1, x:"Faster teams may simply adopt new tools first. A controlled test is needed."},
+ {q:"\"We have spent ₹2 crore on this platform. We must keep going, or that money is wasted.\"", o:["Base rate neglect","Sunk cost fallacy","Hasty generalisation","Availability bias"], c:1, x:"Past spend is gone either way. Decide on future costs and benefits only."},
+ {q:"\"Our first client said the chatbot is great. Clients love it.\"", o:["Small sample: hasty generalisation","False dichotomy","Regression to the mean","Goodhart's law"], c:0, x:"One opinion is not evidence about all clients."},
+ {q:"\"Either we build our own LLM, or we fall behind our competitors.\"", o:["False dichotomy","Survivorship bias","Confirmation bias","Ad hominem"], c:0, x:"There are more options: buy, partner, use APIs, wait."},
+ {q:"\"The vendor first quoted ₹80 lakh. Now they offer ₹50 lakh. That is a great deal.\"", o:["Anchoring","Sunk cost fallacy","Selection bias","Straw man"], c:0, x:"The first number set the reference. Judge ₹50 lakh against value and other quotes."},
+ {q:"\"After the worst month of the year, we hired a coach. Next month was much better. The coach works.\"", o:["Regression to the mean","Bandwagon effect","Appeal to authority","Straw man"], c:0, x:"After an extreme month, the next month usually moves back towards normal anyway."},
+ {q:"\"We rewarded agents for short call times. Now calls are short, but customers call back twice.\"", o:["Goodhart's law: the measure became the target","Gambler's fallacy","Survivorship bias","Hasty generalisation"], c:0, x:"When a measure becomes a target, people optimise the measure, not the goal."},
+ {q:"\"I only read reports that show AI saves money, and they all say it does.\"", o:["Confirmation bias","Anchoring","Regression to the mean","False dichotomy"], c:0, x:"He looks only for evidence that agrees with his belief."},
+ {q:"\"Three AI projects failed in the news this week. AI projects mostly fail.\"", o:["Availability bias","Sunk cost fallacy","Simpson's paradox","Straw man"], c:0, x:"Recent, vivid stories feel common. Look at the real rate across many projects."},
+ {q:"\"The model is 95% accurate, so it is ready for fraud detection.\"", o:["Base rate neglect: fraud is rare, so accuracy hides misses","Bandwagon effect","Ad hominem","Slippery slope"], c:0, x:"If 1% of cases are fraud, a model that always says 'no fraud' is 99% accurate and useless."},
+ {q:"\"The CTO says we do not need data governance. He is very senior, so it must be true.\"", o:["Appeal to authority","Survivorship bias","Anchoring","Regression to the mean"], c:0, x:"Seniority is not evidence. Ask for the reasoning."},
+ {q:"\"If we allow one team to use ChatGPT, soon everyone will paste client secrets into it.\"", o:["Slippery slope","Correlation is not causation","Sunk cost fallacy","Base rate neglect"], c:0, x:"It assumes a chain of events without evidence. Controls can stop the slide."},
+ {q:"\"Everyone in our industry is launching an AI agent, so we should too.\"", o:["Bandwagon effect","Anchoring","Survivorship bias","False precision"], c:0, x:"Popularity is not a business case."},
+ {q:"\"The roulette wheel landed on red 6 times. Black is due now.\"", o:["Gambler's fallacy","Hasty generalisation","Confirmation bias","Straw man"], c:0, x:"Each spin is independent. Past spins do not change the odds."},
+ {q:"\"The analyst disagrees with my forecast, but she is new, so ignore her.\"", o:["Ad hominem","Anchoring","Base rate neglect","Goodhart's law"], c:0, x:"It attacks the person, not the argument."},
+ {q:"\"My rival wants some AI regulation. So he wants to ban all innovation.\"", o:["Straw man","Survivorship bias","Sunk cost fallacy","Regression to the mean"], c:0, x:"It replaces his real position with a weaker one that is easy to attack."},
+ {q:"\"We surveyed users of our app about whether people like our app. 90% said yes.\"", o:["Selection bias","Gambler's fallacy","Anchoring","False dichotomy"], c:0, x:"Unhappy people have already left the app, so they were not surveyed."},
+ {q:"\"The project will take 3 months. Our last five projects took 6, but this one is different.\"", o:["Planning fallacy","Bandwagon effect","Appeal to authority","Straw man"], c:0, x:"Use the base rate of past projects, not hope."},
+ {q:"\"Bot A resolves more tickets than Bot B in both the billing and the tech queues. Yet Bot B has the higher overall rate.\" Someone says: \"The data is wrong.\"", o:["Simpson's paradox: the mix of queues differs","Gambler's fallacy","Ad hominem","Slippery slope"], c:0, x:"If Bot B handles more of the easy queue, its overall rate can be higher. The data can be right."},
+ {q:"\"Our model's accuracy is 87.3462%.\"", o:["False precision","Survivorship bias","Sunk cost fallacy","Bandwagon effect"], c:0, x:"With a small test set, the extra decimals suggest certainty that does not exist."},
+ {q:"\"We showed only the three best months in the board deck. Growth looks great.\"", o:["Cherry picking","Regression to the mean","Straw man","Anchoring"], c:0, x:"Chosen data hides the true trend."},
+ {q:"\"Cities with more AI startups have more Starbucks. Starbucks attracts AI startups.\"", o:["A hidden third factor (confounding)","Gambler's fallacy","Sunk cost fallacy","Ad hominem"], c:0, x:"Large, rich cities have more of both."},
+ {q:"\"I'm 95% sure the go-live will be on time. I have never been wrong.\"", o:["Overconfidence","Selection bias","Simpson's paradox","Straw man"], c:0, x:"People are usually less accurate than their confidence."},
+ {q:"\"The pilot saved 30% in one week with 5 hand-picked users. So it will save 30% for all 2,000 users.\"", o:["Small, non-random sample","Bandwagon effect","Ad hominem","Gambler's fallacy"], c:0, x:"Hand-picked early users differ from everyone else. Test at scale."}
+];
+
+/* Answer drills: answer out loud or type. The frame is the method; the model answer is one good version */
+const DRILLS = [
+ {k:"Estimate", q:"How many cups of tea are sold in Bangalore each day?", f:["Clarify: sold outside the home, one day","Split: people × share who buy × cups each","State each assumption with a round number","Calculate, then sanity-check"], m:"Bangalore has about 1.3 crore people. Assume 40% buy tea outside the home on a normal day: about 52 lakh people. Assume 2 cups each: about 1 crore cups. Sanity check: with about 50,000 tea stalls and shops, that is 200 cups per stall a day. That feels right. So roughly 1 crore cups a day."},
+ {k:"Estimate", q:"How many Ola and Uber rides happen in Bangalore each day?", f:["Clarify the scope: cars and autos, one day","Supply side: drivers × trips per driver","Check with the demand side","Give a range, not one number"], m:"Assume about 1.5 lakh active drivers across cars and autos, each doing about 8 trips a day: 12 lakh trips. Demand check: 1.3 crore people, about 8% take one ride a day: about 10 lakh. So about 10–12 lakh rides a day."},
+ {k:"Estimate", q:"What is the yearly market for AI note-taking tools for doctors in India?", f:["Who pays: clinics or doctors","Count the users","Price per user per month","Adoption rate, then the market size"], m:"India has about 13 lakh registered doctors. Assume 40% work in private practice that could pay: about 5 lakh. Price ₹2,000 a month = ₹24,000 a year. Full market: about ₹1,200 crore a year. With 10% adoption in 3 years: about ₹120 crore."},
+ {k:"Estimate", q:"How much would it cost each month to run a GenAI assistant for 5,000 employees?", f:["Questions per user per day","Tokens per question","Price per million tokens","Add retrieval, hosting and a buffer"], m:"Assume 5,000 users × 8 questions × 22 working days = 8.8 lakh questions a month. At about 4,000 tokens each, that is 3.5 billion tokens. At a blended $1 per million tokens: about $3,500. Add 30% for search, hosting and retries: about $4,500 a month, roughly ₹3.8 lakh. About ₹75 per user."},
+ {k:"Estimate", q:"How many dentists are there in Bangalore?", f:["Top-down from population and ratio","Bottom-up from clinics","Compare the two","Give a range"], m:"Top-down: India has about 3 lakh dentists for 140 crore people, about 1 per 4,700. Cities have more, maybe 1 per 2,000. 1.3 crore ÷ 2,000 = about 6,500. Bottom-up: about 3,000 clinics × 2 dentists = 6,000. So about 6,000–7,000."},
+ {k:"Estimate", q:"How many invoices does a mid-size BPM finance team process in a year?", f:["Clients served","Invoices per client per month","Months","Sanity-check with team size"], m:"Assume 20 clients, each with about 4,000 invoices a month: 80,000 a month, about 10 lakh a year. Check: at 60 invoices per person per day for 250 days, that needs about 65 people. That fits a mid-size team."},
+ {k:"Case", q:"A client's customer-service chatbot satisfaction (CSAT) fell 10 points last month. What do you do?", f:["Clarify: which channel, which customers, since when","Hypotheses in groups: the bot, the customers, the process, the measurement","Data to test each one","Prioritise and propose a first step"], m:"First I clarify when the drop started and if it is in all segments. Then I check four groups of causes. The bot: a new model or prompt change. The customers: new kinds of questions, for example after a product launch. The process: slower human handover. The measurement: a survey change. I would compare transcripts before and after the drop, then fix the biggest cause first and track CSAT weekly."},
+ {k:"Case", q:"A BPM client asks: 'Where should we use GenAI first?' How do you answer?", f:["Understand goals and pain points","List candidate processes with volume and cost","Score value × feasibility × risk","Recommend 1–2 quick wins and a pilot plan"], m:"I start with their goals: cost, speed or quality. I map high-volume processes, for example email triage, invoice extraction and call summaries. I score each on value, feasibility and risk. Usually call summaries and email triage win: high volume, low risk, easy to measure. I propose a 6-week pilot on one, with a baseline and a target, for example 25% less handle time."},
+ {k:"Case", q:"An insurer's claims take 15 days on average. The CEO wants 5 days using AI. How do you approach it?", f:["Map the claim journey and where time goes","Separate waiting time from working time","Match AI to the right steps","Set targets and a phased plan"], m:"I map the steps: intake, documents, assessment, approval and payment. Most of the 15 days is usually waiting, not work. AI can extract documents and triage simple claims for fast approval. Rules and workflow changes remove the waiting. A realistic plan: simple claims in 3 days within 6 months, with complex claims still reviewed by people."},
+ {k:"Case", q:"Your AI pilot met its accuracy target, but only 15% of agents use it. What do you do?", f:["Do not blame the users: find the reason","Check workflow fit, trust, training, incentives","Talk to users and watch them work","Fix the top blocker and measure weekly"], m:"Accuracy is not adoption. I would watch agents work and ask why they skip it. Common causes are an extra screen, slow answers, low trust after one bad answer, or targets that punish trying new tools. I fix the top cause, for example by putting the tool inside their main screen, name a champion in each team, and track weekly use."},
+ {k:"Case", q:"A client wants to replace 50% of their support team with AI agents within 6 months. What is your advice?", f:["Separate the goal from the method","Size the opportunity by type of request","Name the risks","Propose a staged path with checkpoints"], m:"I would reframe the goal as cost per resolved ticket with stable quality. I split requests by type: simple, repeatable ones can be automated; complex ones need people. Usually 30–40% can be automated in the first year. I propose stages: assist agents first, then automate simple intents, with a check every quarter on quality and customer effort."},
+ {k:"Case", q:"Two vendors offer AI document extraction. A is cheaper; B is more accurate in the demo. How do you decide?", f:["Agree on criteria and weights first","Test both on the client's own documents","Count the full cost, including human review","Check security, support and exit terms"], m:"I do not trust demos. I test both on 500 of the client's real documents. Accuracy changes the human review cost, so I compare total cost per document, not licence price. I also check data terms and how easy it is to leave. The winner has the lowest total cost at the required accuracy."},
+ {k:"So what", q:"Data: AI cut handle time by 22%, but repeat calls rose 9%, and CSAT is flat. Give the one-line takeaway and the next step.", f:["One line: what it means for the business","Why it matters","One next step"], m:"The time saving is partly fake: agents close calls faster but customers call back. Next step: find which call types drive the repeats and tune the AI for them before scaling."},
+ {k:"So what", q:"Data: 80% of invoice errors come from 3 of 40 suppliers. Give the takeaway and the action.", f:["One line","Why it matters","One action"], m:"The error problem is concentrated, not general. Fix the input from those 3 suppliers, for example with a standard template or e-invoicing, before buying any AI tool."},
+ {k:"So what", q:"Data: The chatbot answers 70% of questions, but 60% of those answers are about only 5 topics. Takeaway?", f:["One line","Why it matters","One action"], m:"Most of the value sits in 5 topics. Make those 5 excellent and visible, and route other topics to people quickly. Do not spread effort over hundreds of rare questions."},
+ {k:"So what", q:"Data: Your study plan shows 20 lessons done, but quiz scores are falling in Phase 2. Takeaway?", f:["One line","Why it matters","One action"], m:"I am moving faster than I am learning. I will slow down: redo the weakest 3 topics with the tutor before starting new ones."},
+ {k:"Pushback", q:"The interviewer says: 'GenAI is just hype. Why should a client invest now?' Answer in 60 seconds.", f:["Agree with what is true","Give evidence for the useful part","Say how you reduce the risk","End with a clear position"], m:"Some of it is hype, and many pilots fail. But the useful part is real: in high-volume text work like support, documents and summaries, companies see measurable savings. I advise clients to invest small and measure: one use case, a clear baseline, and a decision after 8 weeks. That captures the value without betting the company."},
+ {k:"Pushback", q:"A CFO says: 'Your business case assumes 30% savings. That is too optimistic.' How do you respond?", f:["Thank and accept the challenge","Show where the number comes from","Offer a conservative scenario","Propose how to prove it"], m:"That is a fair challenge. The 30% comes from pilot data on 3 process steps, not the whole process. In the conservative case, 15%, the payback moves from 8 to 14 months and still works. I suggest we prove it in a 6-week pilot with your team measuring the baseline."},
+ {k:"Pushback", q:"The interviewer says: 'You are not a coder. Why should we trust your technical judgement?'", f:["Do not get defensive","Name what you know well","Show proof","Explain how you work with engineers"], m:"I am not a software engineer, and I do not need to be for this role. I understand how these systems work: I have built a RAG assistant, written an architecture document and estimated costs. My strength is connecting the technology to the business case. I work closely with engineers and I know which questions to ask."},
+ {k:"Pushback", q:"A client says: 'We tried AI last year and it failed. Why would it work now?'", f:["Ask what happened","Separate the cause from AI itself","Show what is different now","Propose a safer test"], m:"I would first ask what failed: the use case, the data, the model or adoption. Often it was a vague goal or poor data, not AI itself. Models are also much better than a year ago. I would propose a narrow pilot with one measurable goal, so we learn quickly and cheaply."},
+ {k:"Structure", q:"In 60 seconds: 'Tell me about a time you used data to change a decision.'", f:["Situation in one line","Task: what decision","Action: what data and how","Result with a number"], m:"Use your own STAR story: one line of context, the decision at stake, the analysis you did, and the measurable result. End with what you learned."},
+ {k:"Structure", q:"Explain RAG to a non-technical CEO in 3 sentences.", f:["What it does","Why it matters to them","The one risk and how it is handled"], m:"Before the AI answers, it searches your approved documents and reads the relevant parts. So answers use your current, private information and can show the source. The risk is a wrong search result, which we test and monitor."},
+ {k:"Structure", q:"Give three reasons a company should NOT use GenAI for a task. Use one line each.", f:["Precision","Explainability","Cost or volume"], m:"First, when the answer must be exactly right every time, like tax calculations. Second, when every decision needs a clear explanation, like credit approval. Third, when a simple rule or classic model does the job cheaper."}
+];
+
+const STICKS = [{"kind":"num","start":"70","goal":"lt","target":70,"moves":1,"best":"-10","count":2},{"kind":"num","start":"946","goal":"gt","target":946,"moves":1,"best":"996","count":5},{"kind":"num","start":"508","goal":"gt","target":508,"moves":1,"best":"909","count":12},{"kind":"num","start":"381","goal":"lt","target":381,"moves":1,"best":"-391","count":6},{"kind":"num","start":"19","goal":"gt","target":19,"moves":1,"best":"79","count":3},{"kind":"num","start":"225","goal":"gt","target":225,"moves":1,"best":"325","count":3},{"kind":"num","start":"74","goal":"lt","target":74,"moves":1,"best":"-14","count":2},{"kind":"num","start":"10","goal":"gt","target":10,"moves":1,"best":"19","count":2},{"kind":"num","start":"58","goal":"lt","target":58,"moves":1,"best":"-59","count":4},{"kind":"num","start":"963","goal":"lt","target":963,"moves":1,"best":"-963","count":13},{"kind":"num","start":"39","goal":"gt","target":39,"moves":1,"best":"99","count":4},{"kind":"num","start":"612","goal":"gt","target":612,"moves":1,"best":"912","count":2},{"kind":"num","start":"41","goal":"gt","target":41,"moves":1,"best":"71","count":1},{"kind":"num","start":"800","goal":"lt","target":800,"moves":1,"best":"-900","count":4},{"kind":"num","start":"17","goal":"lt","target":17,"moves":1,"best":"-11","count":1},{"kind":"num","start":"356","goal":"gt","target":356,"moves":1,"best":"956","count":7},{"kind":"eq","start":"1+1=6","moves":1,"best":"7-1=6","count":1},{"kind":"eq","start":"7-9=4","moves":1,"best":"7-3=4","count":1},{"kind":"eq","start":"5+2=8","moves":1,"best":"5+3=8","count":1},{"kind":"eq","start":"5-2=7","moves":1,"best":"9-2=7","count":1},{"kind":"eq","start":"6+3=0","moves":1,"best":"5+3=8","count":2},{"kind":"eq","start":"6+1=5","moves":1,"best":"5+1=6","count":1},{"kind":"eq","start":"3-3=2","moves":1,"best":"5-3=2","count":1},{"kind":"eq","start":"9+1=5","moves":1,"best":"5+1=6","count":1},{"kind":"eq","start":"2+8=6","moves":1,"best":"2+6=8","count":1},{"kind":"eq","start":"2+3=3","moves":1,"best":"2+3=5","count":1},{"kind":"eq","start":"3-8=3","moves":1,"best":"9-6=3","count":2},{"kind":"eq","start":"4-5=1","moves":1,"best":"4-3=1","count":1},{"kind":"eq","start":"2+6=9","moves":1,"best":"3+6=9","count":1},{"kind":"eq","start":"5+9=9","moves":1,"best":"6+3=9","count":2},{"kind":"eq","start":"7+5=7","moves":1,"best":"1+6=7","count":1},{"kind":"eq","start":"5-5=6","moves":1,"best":"5-5=0","count":1},{"kind":"eq","start":"9+0=3","moves":1,"best":"9+0=9","count":2},{"kind":"eq","start":"1+6=5","moves":1,"best":"1+5=6","count":1},{"kind":"eq","start":"5-9=8","moves":1,"best":"5+3=8","count":2},{"kind":"eq","start":"7+1=5","moves":1,"best":"7-1=6","count":1},{"kind":"eq","start":"0-6=8","moves":1,"best":"0+6=6","count":1},{"kind":"eq","start":"1+5=0","moves":1,"best":"1+5=6","count":1},{"kind":"eq","start":"7-9=7","moves":1,"best":"7-0=7","count":1},{"kind":"eq","start":"7-4=9","moves":1,"best":"7-4=3","count":1}];
+/* ---------- Think tab ---------- */
+const TH = () => (S.think ||= {solved:{}, off:{}});
+// a small deterministic shuffle so each day gets a different order, and multiple-choice options move around
+function seeded(n){ let x = (n * 2654435761) % 4294967296; return () => (x = (x * 1664525 + 1013904223) % 4294967296) / 4294967296; }
+function shuffled(arr, seed){ const r = seeded(seed + 7), a = arr.map((v, i) => [v, i]); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const offFor = cat => (((TH().off[todayKey()] || {})[cat]) || 0);
+function bump(cat){ const t = TH(), k = todayKey(); t.off[k] = t.off[k] || {}; t.off[k][cat] = (t.off[k][cat] || 0) + 1; save(); }
+const DONE_KEYS = {t:["t","tx","s"], f:["f","fx"], d:["d"]};
+const doneToday = cat => Object.entries(TH().solved).some(([k, v]) => v === todayKey() && DONE_KEYS[cat].includes(k.split(":")[0]));
+function markSolved(cat, id){ const t = TH(); if (!t.solved[cat + ":" + id]){ t.solved[cat + ":" + id] = todayKey(); save(); } renderThinkTop(); }
+const solvedCount = cat => Object.keys(TH().solved).filter(k => k.startsWith(cat + ":")).length;
+
+/* today's teaser: a stick puzzle on one day in seven, a brain teaser on the others */
+function todaysTeaser(){
+  const n = dayIndex() + offFor("t");
+  if (((n % 7) + 7) % 7 === 3) return {type: "stick", i: ((n * 11) % STICKS.length + STICKS.length) % STICKS.length};
+  return {type: "teaser", i: ((n * 37) % TEASERS.length + TEASERS.length) % TEASERS.length};
+}
+const todaysFlaw  = () => { const n = dayIndex() + offFor("f"); return ((n * 23) % FLAWS.length + FLAWS.length) % FLAWS.length; };
+const todaysDrill = () => { const n = dayIndex() + offFor("d"); return ((n * 17) % DRILLS.length + DRILLS.length) % DRILLS.length; };
+
+function renderThinkTop(){
+  const parts = [["t","Brain teaser"],["f","Spot the flaw"],["d","Answer drill"]];
+  const html = parts.map(([c, l]) => `<span class="tchk ${doneToday(c) ? "on" : ""}"><i></i>${l}${doneToday(c) ? " · done" : ""}</span>`).join("");
+  ["thinkToday","thinkTodayTab"].forEach(id => { const el = $(id); if (el) el.innerHTML = html; });
+  const pl = (n, one, many) => n + " " + (n === 1 ? one : many);
+  const tot = $("thinkTotals"); if (tot) tot.textContent = pl(solvedCount("t") + solvedCount("s"), "teaser", "teasers") + " solved · " + pl(solvedCount("f"), "flaw", "flaws") + " spotted · " + pl(solvedCount("d"), "drill", "drills") + " answered";
+  const card = $("thinkCard"); if (card){ const n = ["t","f","d"].filter(doneToday).length; $("thinkCardNote").textContent = n === 3 ? "All three done today. Well thought." : n + " of 3 done today · about 10 minutes"; }
+}
+
+/* answer check for typed answers */
+function matches(input, accepted){
+  const s = String(input).toLowerCase().replace(/[₹,]/g, "").replace(/\brs\.?\s*/g, "").trim();
+  if (!s) return false;
+  const tokens = s.split(/[^0-9a-z./°%]+/).filter(Boolean);
+  return accepted.some(a => { a = a.toLowerCase().replace(/[₹,]/g, "");
+    if (/^[0-9./°%]+$/.test(a)) return tokens.includes(a) || tokens.includes(a.replace(/[°%]/g, ""));
+    return s.includes(a); });
+}
+
+function renderThink(){
+  renderThinkTop();
+  renderTeaser(); renderFlaw(); renderDrill();
+}
+
+/* ---- brain teaser ---- */
+let tAttempts = 0, stickState = null;
+function renderTeaser(){
+  const pk = todaysTeaser(); tAttempts = 0;
+  const box = $("teaserBody");
+  if (pk.type === "stick") return renderStick(STICKS[pk.i], pk.i);
+  const t = TEASERS[pk.i], sk = SKILLS[t.s], done = !!TH().solved["t:" + pk.i];
+  box.innerHTML = `
+    <div class="skill"><span class="hl">${esc(sk[0])}</span></div>
+    <h3 class="tq">${esc(t.q)}</h3>
+    ${t.o ? `<div class="opts" id="tOpts">${shuffled(t.o, pk.i).map(([o, i]) => `<button class="opt" data-to="${i}"><span>${esc(o)}</span></button>`).join("")}</div>`
+          : `<div class="row"><input type="text" id="tAns" placeholder="Your answer" autocomplete="off" style="flex:1;min-width:0"><button class="btn primary" id="tCheck">Check</button></div>`}
+    <p class="note" id="tFb" aria-live="polite"></p>
+    <div class="row"><button class="btn" id="tHint">Hint</button><button class="btn" id="tReveal">Show the answer</button><button class="btn" id="tAI" hidden>Ask the tutor to judge</button></div>
+    <div class="ruled" id="tExplain" hidden></div>
+    <p class="note skilltip">Skill: ${esc(sk[1])}</p>`;
+  const explain = (lead) => { $("tExplain").hidden = false; $("tExplain").innerHTML = (lead ? `<p><mark class="hl ${lead.cls}">${esc(lead.t)}</mark></p>` : "") + `<p>${esc(t.x)}</p>`; };
+  if (done){ $("tFb").textContent = "Solved today. Try another one if you want more."; explain(); }
+  ACT.tHint = () => { $("tFb").innerHTML = "<span class='hint'>" + esc(t.h) + "</span>"; };
+  ACT.tReveal = () => { explain({t: "Answer: " + (t.o ? t.o[t.c] : t.a[0]), cls: ""}); markSolved("tx", pk.i); };
+  ACT.tCheck = () => {
+    const v = $("tAns").value; if (!v.trim()) return;
+    if (matches(v, t.a)){ $("tFb").innerHTML = "<span class='hl hl-g'>Correct.</span> Read why below, then say the thinking skill out loud."; explain(); markSolved("t", pk.i); cheer($("tCheck")); }
+    else { tAttempts++; $("tFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> " + (tAttempts === 1 ? "Slow down and try once more. A hint is there if you want it." : "Try the hint, or ask the tutor if your wording is just different.");
+      $("tAI").hidden = !sample; }
+  };
+  INP.tAns = () => {};
+  ACT.tAI = async () => {
+    const v = $("tAns").value; $("tFb").textContent = "Asking the tutor…";
+    try {
+      const r = await sample.json(`${STYLE}\n\nA puzzle, its correct answer, and Prem's answer. Decide if Prem's answer is correct in meaning, even if worded differently.\nPuzzle: ${t.q}\nCorrect answer: ${t.o ? t.o[t.c] : t.a[0]}. Why: ${t.x}\nPrem's answer: ${v}\nReturn JSON only: {"correct": true or false, "feedback": "one or two short sentences"}`);
+      if (r.correct){ $("tFb").innerHTML = "<span class='hl hl-g'>Correct.</span> " + esc(r.feedback || ""); explain(); markSolved("t", pk.i); }
+      else $("tFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> " + esc(r.feedback || "");
+    } catch(e) { $("tFb").textContent = e.message || "The tutor could not answer."; }
+  };
+  if (t.o) $("tOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const pickI = +b.dataset.to, right = pickI === t.c;
+    $("tOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const i = +x.dataset.to;
+      if (i === t.c) { x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${i === pickI ? "Correct · your answer" : "Correct answer"}</span>`); }
+      else if (i === pickI) { x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Your answer</span>`); } });
+    $("tFb").innerHTML = right ? "<span class='hl hl-g'>Correct.</span>" : "<span class='hl hl-p'>Not this time.</span> A miss is a steering signal. Read why below.";
+    explain(); if (right){ markSolved("t", pk.i); cheer(b); } else markSolved("tx", pk.i);
+  });
+}
+
+/* ---- stick puzzle board ---- */
+const SEGXY = { a:[8,4,38,4], b:[42,8,42,38], c:[42,44,42,74], d:[8,78,38,78], e:[4,44,4,74], f:[4,8,4,38], g:[8,41,38,41], h:[5,41,29,41], v:[17,29,17,53] };
+function renderStick(p, idx){
+  const box = $("teaserBody");
+  const goalText = p.kind === "eq" ? "Move 1 stick to make the equation true." : `Move 1 stick to make a number ${p.goal === "gt" ? "larger" : "smaller"} than ${p.target}.`;
+  stickState = {p, idx, cells: STK.build(p.start, p.kind), lifted: null, used: 0, history: []};
+  box.innerHTML = `
+    <div class="skill"><span class="hl">Visual puzzle</span> <span class="note">Sticks can go anywhere, even as a minus sign in front.</span></div>
+    <h3 class="tq">${esc(goalText)}</h3>
+    <div class="board" id="board"></div>
+    <p class="hint" id="sHelp">Tap a stick to pick it up. Then tap an empty place.</p>
+    <p class="note" id="tFb" aria-live="polite"></p>
+    <div class="row"><button class="btn" id="sReset">Start again</button><button class="btn" id="sHint">Hint</button><button class="btn" id="tReveal">Show the best answer</button></div>
+    <div class="ruled" id="tExplain" hidden></div>`;
+  drawBoard();
+  ACT.sReset = () => renderStick(p, idx);
+  ACT.sHint = () => { const best = STK.solve(p.start, p.kind, 1, p.goal, p.target)[0]; const [[fi], [ti]] = best.path[0]; const pos = c => c === 0 && p.kind === "num" ? "in front of the number" : "in symbol " + (p.kind === "num" ? c : c + 1);
+    $("tFb").innerHTML = "<span class='hint'>The best answer takes a stick from symbol " + (p.kind === "num" ? fi : fi + 1) + " and places it " + pos(ti) + ".</span>"; };
+  ACT.tReveal = () => { const all = STK.solve(p.start, p.kind, 1, p.goal, p.target); $("tExplain").hidden = false; markSolved("tx", "s" + idx);
+    $("tExplain").innerHTML = `<p><mark class="hl">Best answer: ${esc(all[0].text)}</mark></p><p>${all.length > 1 ? "Other answers that work: " + esc(all.slice(1, 6).map(a => a.text).join(", ")) + "." : "This is the only answer."} ${p.kind === "num" ? "Look for moves that change the meaning, like a minus sign, not only the size of one digit." : "Try changing the sign as well as the digits."}</p>`; };
+}
+function drawBoard(){
+  const st = stickState, cells = st.cells, xs = []; let x = 6;
+  cells.forEach(c => { xs.push(x); x += (c.t === "d" ? 46 : c.t === "o" ? 34 : 30) + 10; });
+  const W = x, H = 84, liftedNow = st.lifted;
+  let g = "";
+  cells.forEach((c, i) => {
+    const ox = xs[i];
+    if (c.t === "eq"){ g += `<line class="eqs" x1="${ox+4}" y1="35" x2="${ox+26}" y2="35"/><line class="eqs" x1="${ox+4}" y1="47" x2="${ox+26}" y2="47"/>`; return; }
+    (c.t === "d" ? "abcdefg" : "hv").split("").forEach(sg => {
+      const [x1, y1, x2, y2] = SEGXY[sg], on = c.s.has(sg), isL = liftedNow && liftedNow[0] === i && liftedNow[1] === sg;
+      const L = `x1="${ox+x1}" y1="${y1}" x2="${ox+x2}" y2="${y2}"`;
+      if (on) g += `<g class="stk ${isL ? "lift" : ""}" data-c="${i}" data-s="${sg}"><line class="hit" ${L}/><line class="body" ${L}/><circle class="head" cx="${ox+x1}" cy="${y1}" r="4"/></g>`;
+      else g += `<g class="slot ${c.edge ? "edge" : ""} ${liftedNow ? "open" : ""}" data-c="${i}" data-s="${sg}"><line class="hit" ${L}/><line class="ghost" ${L}/></g>`;
+    });
+  });
+  $("board").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Stick puzzle board">${g}</svg>`;
+  $("board").querySelectorAll("g[data-c]").forEach(el => el.onclick = () => tapStick(+el.dataset.c, el.dataset.s, el.classList.contains("stk")));
+}
+function tapStick(ci, sg, filled){
+  const st = stickState; if (st.used >= st.p.moves) return;
+  if (filled){ st.lifted = (st.lifted && st.lifted[0] === ci && st.lifted[1] === sg) ? null : [ci, sg]; $("sHelp").textContent = st.lifted ? "Now tap an empty place for this stick." : "Tap a stick to pick it up. Then tap an empty place."; drawBoard(); return; }
+  if (!st.lifted) { $("sHelp").textContent = "First tap a stick to pick it up."; return; }
+  const [fi, fs] = st.lifted; st.cells[fi].s.delete(fs); st.cells[ci].s.add(sg); st.lifted = null; st.used++; drawBoard();
+  const r = STK.check(st.cells, st.p);
+  if (r.ok){
+    const best = STK.solve(st.p.start, st.p.kind, 1, st.p.goal, st.p.target)[0];
+    $("tFb").innerHTML = `<span class='hl hl-g'>Correct: ${esc(r.text)}.</span> ` + (st.p.kind === "num" && best.text !== r.text ? `Good. The best possible is ${esc(best.text)}. Can you see how?` : "That is the best answer.");
+    markSolved("s", st.idx); $("sHelp").textContent = ""; cheer($("board"));
+  } else { $("tFb").innerHTML = `<span class='hl hl-p'>Not yet.</span> ${esc(r.why || "")} Tap Start again to try another move.`; $("sHelp").textContent = ""; }
+}
+
+/* ---- spot the flaw ---- */
+function renderFlaw(){
+  const i = todaysFlaw(), f = FLAWS[i], done = TH().solved["f:" + i] || TH().solved["fx:" + i];
+  $("flawBody").innerHTML = `
+    <p class="claim">${esc(f.q)}</p>
+    <p class="note">Which thinking error is in this argument?</p>
+    <div class="opts" id="fOpts">${shuffled(f.o, i).map(([o, k]) => `<button class="opt" data-fo="${k}"><span>${esc(o)}</span></button>`).join("")}</div>
+    <div class="ruled" id="fExplain" hidden></div>`;
+  $("fOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const p = +b.dataset.fo, right = p === f.c;
+    $("fOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const k = +x.dataset.fo;
+      if (k === f.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${k === p ? "Correct · your answer" : "Correct answer"}</span>`); }
+      else if (k === p){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Your answer</span>`); } });
+    $("fExplain").hidden = false; $("fExplain").innerHTML = `<p>${esc(f.x)}</p><p class="note">In an interview, name the error, then say what evidence would settle it.</p>`;
+    markSolved(right ? "f" : "fx", i); if (right) cheer(b);
+  });
+}
+
+/* ---- answer drill ---- */
+function renderDrill(){
+  const i = todaysDrill(), d = DRILLS[i], draft = (TH().drafts || {})[i] || "";
+  $("drillBody").innerHTML = `
+    <div class="skill"><span class="hl hl-b">${esc(d.k)}</span></div>
+    <h3 class="tq">${esc(d.q)}</h3>
+    <div class="frame"><div class="note">Use this frame</div><ol>${d.f.map(s => `<li>${esc(s)}</li>`).join("")}</ol></div>
+    <textarea id="dAns" placeholder="Say it out loud first, then type the short version here.">${esc(draft)}</textarea>
+    <div class="row"><button class="btn primary" id="dGrade">Grade my answer</button><button class="btn" id="dModel">Show a strong answer</button></div>
+    <div class="md ruled" id="dOut" hidden></div>
+    <div class="ruled" id="dModelBox" hidden><p>${esc(d.m)}</p></div>`;
+  INP.dAns = () => { const t = TH(); (t.drafts ||= {})[i] = $("dAns").value; save(); };
+  ACT.dModel = () => { $("dModelBox").hidden = !$("dModelBox").hidden; };
+  ACT.dGrade = async () => {
+    const a = $("dAns").value.trim(), out = $("dOut"); out.hidden = false;
+    if (!a){ out.innerHTML = "<p class='muted'>Type your answer first. Short is fine.</p>"; return; }
+    if (!sample){ out.innerHTML = "<p class='muted'>Grading uses Gemini. Add your key in Settings. For now, compare with the strong answer.</p>"; $("dModelBox").hidden = false; markSolved("d", i); return; }
+    out.innerHTML = "<p class='muted'>Grading…</p>";
+    try {
+      const r = await sample.json(`${STYLE}\n\nYou coach Prem to answer interview questions for an AI Consultant role smartly: structured, clear, with stated assumptions and a clear conclusion.\nDrill type: ${d.k}\nQuestion: ${d.q}\nExpected frame: ${d.f.join(" | ")}\nOne strong answer: ${d.m}\nPrem's answer: ${a}\nGrade fairly. A different but sound answer can score high. Return JSON only: {"score": integer 1-10, "structure": "one sentence on his structure", "good": [up to 2 short strings], "improve": [up to 2 short strings], "better": "his answer rewritten to be sharper, 60-100 words, in his voice"}`);
+      out.innerHTML = `<div class="score">${Number(r.score) || "?"}/10</div>` + md("#### Structure\n" + (r.structure || "") + "\n#### What worked\n" + (r.good || []).map(s => "- " + s).join("\n") + "\n#### Sharpen\n" + (r.improve || []).map(s => "- " + s).join("\n") + "\n#### A sharper version\n" + (r.better || ""));
+      markSolved("d", i);
+    } catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "Grading did not work.") + " Compare with the strong answer for now.</p>"; $("dModelBox").hidden = false; }
+  };
+}
+
+function cheer(el){ try { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2); } catch(e) {} }
+ACT.tNext = () => { bump("t"); renderTeaser(); renderThinkTop(); };
+ACT.fNext = () => { bump("f"); renderFlaw(); };
+ACT.dNext = () => { bump("d"); renderDrill(); };
+ACT.thinkGo = () => show("think");
+
 const PRINCIPLES = [
  ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm AI consultant you are becoming."],
  ["Rehearse in your imagination","Your nervous system responds to a vivid imagined scene much like a real one. Each morning rehearsal makes the real interview feel familiar."],
@@ -1911,12 +2373,21 @@ function renderMorning(){
     $("upBtn").textContent = "Start today's hour";
     ACT.upBtn = () => { viewDay=null; backTo=null; show("learn"); };
   } else {
-    $("upEyebrow").textContent = "Up next";
-    $("upTitle").textContent = "Rest. Today's work is done.";
-    $("upWhy").textContent = "Tomorrow: " + dayLabel(c) + ", " + x.t + ". A short mock interview is a good extra if you have energy.";
-    $("upBtn").textContent = "Open a mock interview";
-    ACT.upBtn = () => show("mock");
+    if (["t","f","d"].some(c => !doneToday(c))){
+      $("upEyebrow").textContent = "Up next · 10 minutes";
+      $("upTitle").textContent = "Think: today's puzzles";
+      $("upWhy").textContent = "One brain teaser, one flaw to spot, one answer drill.";
+      $("upBtn").textContent = "Open Think";
+      ACT.upBtn = () => show("think");
+    } else {
+      $("upEyebrow").textContent = "Up next";
+      $("upTitle").textContent = "Rest. Today's work is done.";
+      $("upWhy").textContent = "Tomorrow: " + dayLabel(c) + ", " + x.t + ". A short mock interview is a good extra if you have energy.";
+      $("upBtn").textContent = "Open a mock interview";
+      ACT.upBtn = () => show("mock");
+    }
   }
+  renderThinkTop();
   // rings: Learn (green), Practice (blue), Morning calm (terracotta)
   const tk = todayKey();
   const learnedToday = Object.values(S.done).includes(tk) ? 1 : 0;
@@ -2138,14 +2609,14 @@ function show(v){
   if(v!=="learn") VL.stop();
   document.querySelectorAll("section.view").forEach(s=>s.hidden = s.id!=="v-"+v);
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current", b.dataset.v===v?"page":"false"));
-  if(v==="learn") renderLearn(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
+  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
   window.scrollTo(0,0);
   try{ sessionStorage.setItem("p100v",v); }catch(e){}
 }
 function renderRemote(){
   renderTop(); renderMorning();
   const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v;
-  if (v==="plan") renderPlan(); if (v==="projects") renderProjects();
+  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop();
   if (v==="learn"){ const d=viewDay||current(); $("doneBtn").textContent = S.done[d] ? "Day complete · undo" : "Mark this day complete"; $("doneBtn").className = S.done[d] ? "btn" : "btn primary"; }
 }
 function renderAll(){ renderTop(); renderMorning(); const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v; if(v!=="morning") show(v); }
@@ -2397,7 +2868,7 @@ if (G.key){ sample = gemini; wireClaude(); }
 try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e) {}
 if ("serviceWorker" in navigator && location.protocol === "https:") { navigator.serviceWorker.register("sw.js").catch(() => {}); }
 
-window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; } };
+window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS };
 window.__p100cleanup = () => {
   AC.abort();
   try { clearInterval(breathTimer); } catch(e) {}
