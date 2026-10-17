@@ -245,6 +245,28 @@ svg .hd text{font:700 12.5px var(--read)}
 .sheet{max-height:88vh;overflow-y:auto}
 input[type=password]{width:100%;font-size:1rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;font-family:var(--mono)}
 body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+/* mentor */
+.mnote{font:1.02rem/1.6 var(--read)}
+.mtasks{display:flex;flex-direction:column;gap:8px}
+.mtasks .check span{font:1rem/1.45 var(--read)}
+.sc{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font:.92rem var(--ui)}
+.sc b{font-weight:700}
+.sc i{grid-column:1/-1;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.sc s{display:block;height:100%;background:var(--parta);border-radius:99px;transition:width .9s}
+.sc s.full{background:var(--good)}
+.scores{display:flex;flex-direction:column;gap:12px}
+.mrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding-block:8px;border-bottom:1px solid var(--line);min-width:0}
+.mrow .mtitle{min-width:0;overflow-wrap:anywhere;font:.98rem/1.4 var(--read)}
+.mrow .mtitle:first-child{grid-column:1/3}
+.mtype{font:700 .72rem var(--ui);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.pill{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;min-height:34px;font:700 .8rem var(--ui);color:var(--ink)}
+.pill.s-draft,.pill.st-applied{background:var(--hl-blue)} .pill.s-done,.pill.st-offer{background:var(--hl-green);border-color:var(--good)}
+.pill.st-interview{background:var(--hl-yellow)} .pill.st-closed{opacity:.6}
+.xbtn{border:0;background:none;color:var(--muted);font-size:1.3rem;min-width:34px;min-height:34px}
+.mform{display:flex;gap:8px;flex-wrap:wrap}
+.mform input[type=text],.mform select{flex:1 1 140px;min-width:0;width:auto}
+.tally{line-height:2.1}
+.woop{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
 /* think */
 .skill{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font:700 .82rem var(--ui)}
 .tq{font-size:1.12rem;line-height:1.45}
@@ -294,6 +316,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="eyebrow" id="dateLine">Friday, 9 October</div>
       <h1 id="greet">Good morning, <span class="hand">Prem</span></h1>
       <div class="intent" id="intentLine" hidden></div>
+      <div class="intent ifthen" id="ifThenLine" hidden></div>
     </div>
 
     <div class="card upnext" id="upNext">
@@ -328,6 +351,13 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="row"><button class="btn" id="thinkGo">Open today's puzzles</button></div>
     </div>
 
+    <div class="card" id="mentorCard">
+      <div class="secthead"><div class="eyebrow" id="mcWeek">Mentor</div><span class="note" id="mcProg"></span></div>
+      <h3 id="mcTitle"></h3>
+      <p class="note" id="mcNext"></p>
+      <div class="row"><button class="btn" id="mentorGo">Open Mentor</button></div>
+    </div>
+
     <div class="principle">
       <div class="eyebrow">Psycho-Cybernetics idea for today</div>
       <h3 id="pTitle">Your self-image sets your limits</h3>
@@ -355,6 +385,13 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
           <h3>Theatre of the mind</h3>
           <p class="muted">Close your eyes for 3 minutes. See the scene in detail: sounds, colours, how calm your body feels.</p>
           <div class="ruled" id="script"></div>
+          <div class="woop">
+            <div class="note">Then name the obstacle. Picturing success alone can lower effort; planning for the obstacle raises it.</div>
+            <label class="note" for="woopO">What could get in the way today?</label>
+            <input type="text" id="woopO" placeholder="Example: I feel tired after work and skip the lesson">
+            <label class="note" for="woopP">If that happens, then I will…</label>
+            <input type="text" id="woopP" placeholder="Example: do only the 10-minute Think tab, then decide">
+          </div>
           <div class="row"><button class="btn primary" id="visualDone">I saw it</button><button class="btn" id="scriptAI" hidden>Write a fresh scene for me</button></div>
         </div>
       </div>
@@ -473,6 +510,13 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="md ruled" id="gradeOut" hidden></div>
       <div class="ruled" id="modelAns" hidden></div>
     </div>
+    <div class="card">
+      <div class="eyebrow">Teach it back · 2 minutes</div>
+      <p>Explain today's idea out loud to someone, or record a voice note. Teaching it is the fastest way to learn it, and it trains your interview voice.</p>
+      <textarea id="teachTxt" placeholder="Optional: type your 3-sentence explanation for a non-technical CEO."></textarea>
+      <div class="row"><button class="btn primary" id="teachDone">I explained it out loud</button><button class="btn" id="teachCheck">Would a CEO understand?</button></div>
+      <div class="md ruled" id="teachOut" hidden></div>
+    </div>
     <div class="row"><button class="btn primary" id="doneBtn">Mark this day complete</button><span class="note" id="doneNote"></span></div>
   </div>
 </section>
@@ -541,9 +585,61 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   </div>
 </section>
 
+<!-- MENTOR -->
+<section class="view" id="v-mentor" hidden>
+  <div class="wrap" style="padding:0">
+    <div class="card upnext" id="mWeek"></div>
+    <p class="intent" id="mLastChange" hidden></p>
+    <div class="card"><div class="eyebrow">This week's numbers · things you control</div><div class="scores" id="mScore"></div></div>
+    <div class="card" id="rvCard">
+      <div class="eyebrow">Sunday review · 10 minutes</div>
+      <label class="note" for="rvWell">What went well this week?</label><textarea id="rvWell"></textarea>
+      <label class="note" for="rvBlock">What got in the way?</label><textarea id="rvBlock"></textarea>
+      <label class="note" for="rvChange">One change for next week</label><input type="text" id="rvChange" placeholder="Example: study at 6:30 am before work, not at night">
+      <div class="row"><button class="btn primary" id="rvMentor">Get mentor feedback</button><button class="btn" id="rvSave">Save review</button></div>
+      <div class="md ruled" id="rvNote" hidden></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Positioning line</div>
+      <p class="note">One sentence that says who you help and how. It goes in your LinkedIn headline and opens every interview answer.</p>
+      <input type="text" id="mPos" placeholder="I help ___ use AI to ___">
+      <div class="row"><button class="btn" id="mPosAI">Suggest sharper versions</button></div>
+      <div class="opts" id="mPosOut" hidden></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Proof of work · case studies, memos, posts</div>
+      <p class="note">Tap a status to move it: Idea → Draft → Done. A case study is one page: problem, approach, result with a number, lesson.</p>
+      <div id="mProofs"></div>
+      <div class="mform"><select id="pfType"><option>Case study</option><option>Opportunity memo</option><option>LinkedIn post</option><option>Demo video</option></select><input type="text" id="pfTitle" placeholder="Title"><button class="btn" id="pfAdd">Add</button></div>
+    </div>
+    <div class="card">
+      <div class="secthead"><div class="eyebrow">Job posts · what the market asks for</div><span class="note" id="mJobCount"></span></div>
+      <div class="tally" id="mTally"></div>
+      <div class="mform"><input type="text" id="jbCompany" placeholder="Company"><input type="text" id="jbRole" placeholder="Role"><input type="text" id="jbSkills" placeholder="Skills, comma separated: RAG, stakeholder management, Azure"><button class="btn" id="jbAdd">Add</button></div>
+      <div id="mJobs"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Applications · tap the stage to move it</div>
+      <div id="mApps"></div>
+      <div class="mform"><input type="text" id="apCompany" placeholder="Company"><input type="text" id="apRole" placeholder="Role"><label class="check"><input type="checkbox" id="apPractice"><span class="note">Practice</span></label><button class="btn" id="apAdd">Add</button></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">People · conversations and messages</div>
+      <div id="mPeople"></div>
+      <div class="mform"><input type="text" id="plName" placeholder="Name"><input type="text" id="plNote" placeholder="Company, topic, next step"><button class="btn" id="plAdd">Log</button></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Later list · parked until January</div>
+      <div id="mParked"></div>
+      <div class="mform"><input type="text" id="pkText" placeholder="A project or idea to park"><button class="btn" id="pkAdd">Park it</button></div>
+    </div>
+    <div class="row"><button class="btn" id="projGo">Course projects (6)</button></div>
+  </div>
+</section>
+
 <!-- PROJECTS -->
 <section class="view" id="v-projects" hidden>
-  <div class="wrap" style="padding:0" id="projList"></div>
+  <div class="wrap" style="padding:0"><button class="linkbtn back" id="projBack">‹ Back to Mentor</button><div class="wrap" style="padding:0" id="projList"></div></div>
 </section>
 
 </main>
@@ -554,7 +650,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   <button data-v="think"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Think</button>
   <button data-v="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Plan</button>
   <button data-v="mock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/></svg>Mock</button>
-  <button data-v="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8M20 12v7H4V5h11"/></svg>Projects</button>
+  <button data-v="mentor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Mentor</button>
 </div></nav>
 
 <div id="sheetHost"></div>
@@ -2251,6 +2347,205 @@ ACT.fNext = () => { bump("f"); renderFlaw(); };
 ACT.dNext = () => { bump("d"); renderDrill(); };
 ACT.thinkGo = () => show("think");
 
+
+/* ===== Mentor ===== */
+/* ---------- Mentor: 12-week roadmap to an AI Consultant role by 9 Jan 2027 ---------- */
+const MENTOR_START = new Date(2026, 9, 19);          // Monday 19 Oct 2026 = week 1
+const WEEKLY = [                                      // the five numbers you control
+  {k:"lessons",  label:"Lessons done",              target:6},
+  {k:"think",    label:"Think days",                target:5},
+  {k:"reps",     label:"Mock or real interviews",   target:2},
+  {k:"people",   label:"People contacted",          target:3},
+  {k:"proof",    label:"Proof-of-work pieces done", target:1}
+];
+const ROADMAP = [
+ {t:"Aim before you shoot", note:"This week is about direction. You will know exactly what the market asks for, and you will say who you are in one line.",
+  tasks:["Collect 10 AI Consultant job posts in the Mentor tab and tag their skills","Write your positioning line: \"I help ___ use AI to ___\"","Update your LinkedIn headline with that line","Park every side project on the Later list"]},
+ {t:"Your first proof", note:"A case study turns 'I built a website' into 'I solved a business problem'. Write it like a consultant: problem, approach, result, lesson.",
+  tasks:["Collect 10 more job posts (20 in total) and look at the top skills","Write case study 1: the clinic appointment site","Have 2 conversations with people in AI consulting or GenAI roles","Post one short LinkedIn note about something you learned"]},
+ {t:"Show how you think", note:"Your first opportunity memo is the most unusual thing in this plan. It shows a company the exact skill they would hire you for.",
+  tasks:["Write case study 2: the WhatsApp assistant (include what failed and how you handled it)","Write opportunity memo 1 for a company you admire","Send the memo to one person there on LinkedIn","Do one full mock interview in the Mock tab"]},
+ {t:"Start the interview reps", note:"Apply to a few roles as practice. A low-stakes interview makes the high-stakes ones feel familiar. Treat rejections as data.",
+  tasks:["Apply to 3 roles as practice (mark them 'practice')","Write opportunity memo 2","Ask 2 people for a 15-minute chat about their AI work","Record yourself answering 'Tell me about yourself' and improve one thing"]},
+ {t:"Build something you can demo", note:"Interviewers trust what they can see. This week your RAG project from the course becomes a live demo.",
+  tasks:["Finish the RAG chatbot project and record a 2-minute demo","Write case study 3: this study app (Gemini, offline app, saving)","Post the demo on LinkedIn with one lesson learned","2 mock interviews: one concepts, one case"]},
+ {t:"Go for real targets", note:"Now apply where you want to work. Ask for referrals before applying: a referral is worth many cold applications.",
+  tasks:["List 10 target companies and find one contact at each","Ask for 3 referrals","Apply to 5 real target roles","Write opportunity memo 3"]},
+ {t:"Sharpen your story", note:"Most interviews are won on the story: who you are, what you did, why this role. Make every story short and full of numbers.",
+  tasks:["Write 6 STAR stories with one number each","Practise 'Why AI consulting? Why now?' until it takes 60 seconds","Do 2 interviews (mock or real)","Contact 3 more people"]},
+ {t:"Depth in architecture", note:"Senior people test whether you can design, not just describe. This week you draw an AI solution end to end.",
+  tasks:["Finish the GenAI architecture document project","Do 2 system design mocks in the Mock tab","Write case study 4 from the architecture document","Apply to 5 roles"]},
+ {t:"Interview sprint 1", note:"Volume and feedback. After each interview, write down two questions you found hard and fix them the same day.",
+  tasks:["Do 3 interviews (mock or real)","Fix the 3 weakest answers from your notes","Send 2 follow-up messages to people you spoke to","Write opportunity memo 4"]},
+ {t:"Interview sprint 2", note:"Keep the pipeline full. Most offers come after many conversations, so keep yours going while you interview.",
+  tasks:["Do 3 interviews","Apply to 5 roles","Ask 2 more people for referrals","Post one LinkedIn note on a lesson from interviews"]},
+ {t:"Close strong", note:"Prepare to negotiate before an offer arrives. Know your number, your alternatives and what matters to you besides salary.",
+  tasks:["Research salary ranges for the roles in your pipeline","Write your negotiation notes: target, walk-away, priorities","Do 2 final mocks on your weakest area","Thank everyone who helped you so far"]},
+ {t:"Decide and keep going", note:"Whatever the result this week, you are now a person with a portfolio, a network and interview skill. That stays with you.",
+  tasks:["Compare offers or next steps calmly with the weekly review","Update every case study with final numbers","Plan the next 90 days","Celebrate what you built, with your family"]}
+];
+function mentorWeek(d = new Date()){ const ms = new Date(d); ms.setHours(0,0,0,0); return Math.floor((ms - MENTOR_START) / (7 * 864e5)) + 1; }
+function weekRange(w){ const s = new Date(MENTOR_START); s.setDate(s.getDate() + (w - 1) * 7); const e = new Date(s); e.setDate(s.getDate() + 6); return [s, e]; }
+
+/* ---------- Mentor tab ---------- */
+const MN = () => { const m = (S.mentor ||= {}); m.tasks ||= {}; m.jobs ||= []; m.apps ||= []; m.people ||= []; m.parked ||= [];
+  m.reviews ||= {}; m.reps ||= [];
+  if (!m.proofs){ m.proofs = [
+    {id:"p1", type:"Case study", title:"Clinic appointment and chair scheduling site", status:"Idea"},
+    {id:"p2", type:"Case study", title:"WhatsApp assistant for dental clinics", status:"Idea"},
+    {id:"p3", type:"Case study", title:"Clinic duty rota site", status:"Idea"},
+    {id:"p4", type:"Case study", title:"This study app: Gemini tutor, offline app", status:"Idea"} ]; }
+  return m; };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const inWeek = (key, w) => { if (!key) return false; const [s, e] = weekRange(w); const d = new Date(String(key).slice(0, 10) + "T00:00"); return d >= s && d <= e; };
+const STAGES = ["Applied", "Interview", "Offer", "Closed"];
+const PSTAT = ["Idea", "Draft", "Done"];
+
+function weekNumbers(w){
+  const m = MN(), t = TH();
+  const thinkDays = new Set(Object.values(t.solved || {}).filter(d => inWeek(d, w)));
+  return {
+    lessons: Object.values(S.done).filter(d => inWeek(d, w)).length,
+    think: thinkDays.size,
+    reps: m.reps.filter(d => inWeek(d, w)).length + m.apps.filter(a => a.iv && inWeek(a.iv, w)).length,
+    people: m.people.filter(p => inWeek(p.date, w)).length,
+    proof: m.proofs.filter(p => p.status === "Done" && inWeek(p.doneDate, w)).length
+  };
+}
+const curWeek = () => Math.min(12, Math.max(1, mentorWeek()));
+
+function renderMentor(){
+  const m = MN(), raw = mentorWeek(), w = curWeek(), R = ROADMAP[w - 1], [ws, we] = weekRange(w);
+  const fmt = d => d.toLocaleDateString("en-IN", {day: "numeric", month: "short"});
+  const nums = weekNumbers(w), tasks = (m.tasks[w] ||= []);
+  $("mWeek").innerHTML = `
+    <div class="eyebrow">${raw < 1 ? "Starts Monday " + fmt(ws) : "Week " + w + " of 12 · " + fmt(ws) + " – " + fmt(we)}</div>
+    <h2>${esc(R.t)}</h2>
+    <p class="mnote">${esc(R.note)}</p>
+    <div class="mtasks">${R.tasks.map((x, i) => `<label class="check"><input type="checkbox" id="mt-${w}-${i}" data-mt="${i}" ${tasks[i] ? "checked" : ""}><span>${esc(x)}</span></label>`).join("")}</div>`;
+  $("mScore").innerHTML = WEEKLY.map(n => { const v = nums[n.k], pct = Math.min(1, v / n.target);
+    return `<div class="sc"><span>${n.label}</span><b>${v} / ${n.target}</b><i><s style="width:${Math.round(pct * 100)}%" class="${v >= n.target ? "full" : ""}"></s></i></div>`; }).join("");
+  // Sunday review
+  const rv = m.reviews[w] || {};
+  ["rvWell","rvBlock","rvChange"].forEach(id => setVal(id, rv[id] || ""));
+  $("rvNote").hidden = !rv.note; $("rvNote").innerHTML = rv.note ? md(rv.note) : "";
+  const dow = new Date().getDay(); $("rvCard").classList.toggle("upnext", dow === 0 || dow === 6);
+  setVal("mPos", m.positioning || "");
+  renderProofs(); renderJobs(); renderApps(); renderPeople(); renderParked();
+  const prev = m.reviews[w - 1]; $("mLastChange").hidden = !(prev && prev.rvChange); $("mLastChange").innerHTML = prev && prev.rvChange ? `<span class="hand">Your change for this week:</span> ${esc(prev.rvChange)}` : "";
+}
+
+/* proof of work */
+function renderProofs(){
+  const m = MN();
+  $("mProofs").innerHTML = m.proofs.map(p => `<div class="mrow"><span class="mtype">${esc(p.type)}</span><span class="mtitle">${esc(p.title)}</span>
+    <button class="pill s-${p.status.toLowerCase()}" data-pf="${p.id}" aria-label="Status: ${p.status}. Tap to change.">${p.status}</button>
+    <button class="xbtn" data-pfdel="${p.id}" aria-label="Remove">×</button></div>`).join("") || "<p class='muted'>No pieces yet.</p>";
+}
+/* job posts with a skill tally */
+function renderJobs(){
+  const m = MN(), tally = {};
+  m.jobs.forEach(j => String(j.skills || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean).forEach(s => tally[s] = (tally[s] || 0) + 1));
+  const top = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  $("mJobCount").textContent = m.jobs.length + " of 20 collected";
+  $("mTally").innerHTML = top.length ? top.map(([s, n]) => `<span class="hl ${n >= 3 ? "" : "hl-b"}">${esc(s)} · ${n}</span>`).join(" ") : "<span class='muted'>Skills you tag appear here, most frequent first. Study and write towards the top ones.</span>";
+  $("mJobs").innerHTML = m.jobs.slice().reverse().map(j => `<div class="mrow"><span class="mtitle"><b>${esc(j.company)}</b> · ${esc(j.role || "")}<br><span class="note">${esc(j.skills || "")}</span></span><button class="xbtn" data-jbdel="${j.id}" aria-label="Remove">×</button></div>`).join("");
+}
+/* applications pipeline */
+function renderApps(){
+  const m = MN();
+  $("mApps").innerHTML = m.apps.slice().reverse().map(a => `<div class="mrow"><span class="mtitle"><b>${esc(a.company)}</b> · ${esc(a.role || "")}${a.practice ? ' <span class="hl hl-b">practice</span>' : ""}</span>
+    <button class="pill st-${a.stage.toLowerCase()}" data-ap="${a.id}" aria-label="Stage: ${a.stage}. Tap to change.">${a.stage}</button><button class="xbtn" data-apdel="${a.id}" aria-label="Remove">×</button></div>`).join("") || "<p class='muted'>Applications appear here. Practice ones count as interview reps too.</p>";
+}
+function renderPeople(){
+  const m = MN();
+  $("mPeople").innerHTML = m.people.slice().reverse().slice(0, 30).map(p => `<div class="mrow"><span class="mtitle"><b>${esc(p.name)}</b>${p.note ? " · " + esc(p.note) : ""}<br><span class="note">${new Date(p.date + "T00:00").toLocaleDateString("en-IN", {day: "numeric", month: "short"})}</span></span><button class="xbtn" data-pldel="${p.id}" aria-label="Remove">×</button></div>`).join("") || "<p class='muted'>Log each conversation or message here.</p>";
+}
+function renderParked(){
+  const m = MN();
+  $("mParked").innerHTML = m.parked.map((p, i) => `<div class="mrow"><span class="mtitle">${esc(p)}</span><button class="xbtn" data-pkdel="${i}" aria-label="Remove">×</button></div>`).join("") || "<p class='muted'>Nothing parked yet.</p>";
+}
+
+/* handlers (page-wide, so they survive any redraw) */
+docOn("change", e => { const t = e.target; if (t.dataset && t.dataset.mt !== undefined){ const w = curWeek(); (MN().tasks[w] ||= [])[+t.dataset.mt] = t.checked; save(); if (t.checked) toast("Task done", "One step closer. Keep the pace calm."); } });
+docOn("click", e => {
+  const b = e.target.closest && e.target.closest("button"); if (!b) return; const m = MN(), d = b.dataset;
+  if (d.pf){ const p = m.proofs.find(x => x.id === d.pf); p.status = PSTAT[(PSTAT.indexOf(p.status) + 1) % PSTAT.length]; p.doneDate = p.status === "Done" ? todayKey() : null; save(); renderMentor(); if (p.status === "Done") toast("Proof of work done", "Share it on LinkedIn this week."); }
+  else if (d.pfdel){ m.proofs = m.proofs.filter(x => x.id !== d.pfdel); save(); renderProofs(); }
+  else if (d.jbdel){ m.jobs = m.jobs.filter(x => x.id !== d.jbdel); save(); renderJobs(); }
+  else if (d.ap){ const a = m.apps.find(x => x.id === d.ap); a.stage = STAGES[(STAGES.indexOf(a.stage) + 1) % STAGES.length]; if (a.stage === "Interview" && !a.iv) a.iv = todayKey(); save(); renderMentor(); }
+  else if (d.apdel){ m.apps = m.apps.filter(x => x.id !== d.apdel); save(); renderMentor(); }
+  else if (d.pldel){ m.people = m.people.filter(x => x.id !== d.pldel); save(); renderMentor(); }
+  else if (d.pkdel !== undefined){ m.parked.splice(+d.pkdel, 1); save(); renderParked(); }
+});
+ACT.pfAdd = () => { const t = $("pfTitle").value.trim(); if (!t) return; MN().proofs.push({id: uid(), type: $("pfType").value, title: t, status: "Idea"}); $("pfTitle").value = ""; save(); renderProofs(); };
+ACT.jbAdd = () => { const c = $("jbCompany").value.trim(); if (!c) return; MN().jobs.push({id: uid(), company: c, role: $("jbRole").value.trim(), skills: $("jbSkills").value.trim(), date: todayKey()}); ["jbCompany","jbRole","jbSkills"].forEach(id => $(id).value = ""); save(); renderJobs(); };
+ACT.apAdd = () => { const c = $("apCompany").value.trim(); if (!c) return; MN().apps.push({id: uid(), company: c, role: $("apRole").value.trim(), stage: "Applied", practice: $("apPractice").checked, date: todayKey()}); ["apCompany","apRole"].forEach(id => $(id).value = ""); $("apPractice").checked = false; save(); renderApps(); };
+ACT.plAdd = () => { const n = $("plName").value.trim(); if (!n) return; MN().people.push({id: uid(), name: n, note: $("plNote").value.trim(), date: todayKey()}); ["plName","plNote"].forEach(id => $(id).value = ""); save(); renderMentor(); };
+ACT.pkAdd = () => { const t = $("pkText").value.trim(); if (!t) return; MN().parked.push(t); $("pkText").value = ""; save(); renderParked(); };
+INP.mPos = () => { MN().positioning = $("mPos").value; save(); };
+["rvWell","rvBlock","rvChange"].forEach(id => { INP[id] = () => { const w = curWeek(), m = MN(); (m.reviews[w] ||= {})[id] = $(id).value; save(); }; });
+ACT.rvSave = () => { const w = curWeek(), r = (MN().reviews[w] ||= {}); r.date = todayKey(); save(); toast("Review saved", "Next week starts with your one change."); };
+ACT.rvMentor = async () => {
+  const w = curWeek(), m = MN(), r = (m.reviews[w] ||= {}), out = $("rvNote"); out.hidden = false;
+  if (!sample){ out.innerHTML = "<p class='muted'>Mentor feedback uses Gemini. Add your key in Settings.</p>"; return; }
+  const nums = weekNumbers(w), R = ROADMAP[w - 1], N = ROADMAP[Math.min(11, w)], tasks = m.tasks[w] || [];
+  out.innerHTML = "<p class='muted'>Your mentor is reading your week…</p>";
+  const prompt = `${STYLE}
+
+You are Prem's mentor. He wants an AI Consultant role by 9 January 2027, studies 1 hour a day, and sometimes feels anxious. You are warm but honest: you never flatter, you name the real problem kindly, and you always end with clear next steps. Use ideas from deliberate practice, implementation intentions ("if X, then I will Y") and mental contrasting where they fit.
+
+Week ${w} of 12. Focus: ${R.t}.
+Tasks: ${R.tasks.map((t, i) => (tasks[i] ? "[done] " : "[not done] ") + t).join("; ")}
+Numbers (actual / target): ${WEEKLY.map(n => n.label + " " + nums[n.k] + "/" + n.target).join("; ")}
+Positioning line: ${m.positioning || "(not written yet)"}
+Job posts collected: ${m.jobs.length}. Applications: ${m.apps.length}. Proof pieces done: ${m.proofs.filter(p => p.status === "Done").length}.
+His review — what went well: ${r.rvWell || "-"}; what got in the way: ${r.rvBlock || "-"}; his one change: ${r.rvChange || "-"}.
+Next week's focus: ${N.t}.
+
+Write a short mentor note, under 180 words:
+#### What I see
+(2-3 sentences, honest, specific to the numbers)
+#### Your if-then plan
+(one implementation intention for his main obstacle)
+#### Next week, in order
+(3 numbered actions)`;
+  try { const res = await sample(prompt, {onText: ({text}) => { out.innerHTML = md(text); }}); r.note = res.text; save(); out.innerHTML = md(res.text); }
+  catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "The mentor could not answer.") + "</p>"; }
+};
+ACT.mPosAI = async () => {
+  const v = $("mPos").value.trim(), out = $("mPosOut"); out.hidden = false;
+  if (!sample){ out.textContent = "Add your Gemini key in Settings to get suggestions."; return; }
+  out.textContent = "Thinking…";
+  try { const r = await sample.json(`${STYLE}\n\nPrem wants an AI Consultant role. Background: MBA, business planning and revenue forecasting at a BPM (business process management) company, client delivery projects, AI consulting work with large enterprise clients, and he has built AI apps himself. His draft positioning line: "${v || "(none)"}". Suggest 3 sharper one-line options in the form "I help ___ use AI to ___", each under 20 words, concrete, no hype. Return JSON only: {"options": ["...","...","..."]}`);
+    out.innerHTML = (r.options || []).map(o => `<button class="opt" data-posopt="${esc(o)}"><span>${esc(o)}</span></button>`).join(""); }
+  catch(e) { out.textContent = e.message || "No suggestions this time."; }
+};
+docOn("click", e => { const b = e.target.closest && e.target.closest("[data-posopt]"); if (b){ $("mPos").value = b.dataset.posopt; MN().positioning = b.dataset.posopt; save(); $("mPosOut").hidden = true; toast("Positioning saved", "Use it in your LinkedIn headline."); } });
+ACT.mentorGo = () => show("mentor");
+
+function renderMentorCard(){
+  const raw = mentorWeek(), w = curWeek(), R = ROADMAP[w - 1], tasks = (MN().tasks[w] || []), done = R.tasks.filter((_, i) => tasks[i]).length;
+  const next = R.tasks.find((_, i) => !tasks[i]);
+  $("mcWeek").textContent = raw < 1 ? "Mentor · starts Monday" : "Mentor · week " + w + " of 12";
+  $("mcTitle").textContent = R.t;
+  $("mcProg").textContent = done + " of " + R.tasks.length + " tasks";
+  $("mcNext").textContent = next ? "Next: " + next : "All tasks done this week. Do the Sunday review.";
+}
+INP.woopO = () => { M().woopO = $("woopO").value; save(); };
+INP.woopP = () => { M().woopP = $("woopP").value; save(); };
+ACT.projGo = () => { backTo = null; show("projects"); };
+ACT.projBack = () => show("mentor");
+ACT.teachDone = () => { (S.teach ||= {})[viewDay || current()] = todayKey(); save(); toast("Taught it back", "That is the habit that makes it stick."); };
+ACT.teachCheck = async () => {
+  const d = viewDay || current(), x = DAYS[d - 1], a = $("teachTxt").value.trim(), out = $("teachOut"); out.hidden = false;
+  if (!a){ out.innerHTML = "<p class='muted'>Type your 3-sentence version first.</p>"; return; }
+  if (!sample){ out.innerHTML = "<p class='muted'>This check uses Gemini. Add your key in Settings.</p>"; return; }
+  out.innerHTML = "<p class='muted'>Reading it as a CEO would…</p>";
+  try { const r = await sample(`${STYLE}\n\nPrem explains "${x.t}" to a busy, non-technical CEO. Core facts: ${x.n}\nHis explanation: ${a}\nReply as the CEO's honest advisor, under 90 words: #### Would a CEO understand? (yes / mostly / not yet, and why in one sentence)\n#### One jargon word to remove or explain\n#### A clearer version (3 sentences)`, {onText: ({text}) => { out.innerHTML = md(text); }});
+    out.innerHTML = md(r.text); (S.teach ||= {})[d] = todayKey(); save(); }
+  catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "No answer this time.") + "</p>"; }
+};
 const PRINCIPLES = [
  ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm AI consultant you are becoming."],
  ["Rehearse in your imagination","Your nervous system responds to a vivid imagined scene much like a real one. Each morning rehearsal makes the real interview feel familiar."],
@@ -2358,6 +2653,9 @@ function renderMorning(){
   $("greet").innerHTML = (h<12?"Good morning":h<17?"Good afternoon":"Good evening") + ', <span class="hand">Prem</span>';
   const m = M(), c = current(), x = DAYS[c-1], p = PH(c);
   $("intentLine").hidden = !m.intent; $("intentLine").textContent = m.intent ? "Today: " + m.intent : "";
+  $("ifThenLine").hidden = !(m.woopO && m.woopP); $("ifThenLine").textContent = m.woopO && m.woopP ? "If " + m.woopO.replace(/^if\s+/i, "") + ", then I " + m.woopP.replace(/^(then\s+)?(i\s+(will\s+)?)?/i, "") : "";
+  setVal("woopO", m.woopO || ""); setVal("woopP", m.woopP || "");
+  renderMentorCard();
   // up next
   const rc = ritualCount(m);
   if (rc < 4){
@@ -2373,7 +2671,13 @@ function renderMorning(){
     $("upBtn").textContent = "Start today's hour";
     ACT.upBtn = () => { viewDay=null; backTo=null; show("learn"); };
   } else {
-    if (["t","f","d"].some(c => !doneToday(c))){
+    if (new Date().getDay() === 0 && !(MN().reviews[curWeek()] || {}).date && mentorWeek() >= 1){
+      $("upEyebrow").textContent = "Up next · Sunday · 10 minutes";
+      $("upTitle").textContent = "Weekly review with your mentor";
+      $("upWhy").textContent = "Look at your five numbers, name one change, and get honest feedback.";
+      $("upBtn").textContent = "Open the review";
+      ACT.upBtn = () => { show("mentor"); setTimeout(() => $("rvCard").scrollIntoView({behavior: "smooth", block: "start"}), 50); };
+    } else if (["t","f","d"].some(c => !doneToday(c))){
       $("upEyebrow").textContent = "Up next · 10 minutes";
       $("upTitle").textContent = "Think: today's puzzles";
       $("upWhy").textContent = "One brain teaser, one flaw to spot, one answer drill.";
@@ -2576,6 +2880,7 @@ async function mockTurn(){
   catch(e){ b.innerHTML="<p class='muted'>The interviewer could not reply. Send again.</p>"; mock.pop(); }
 }
 async function startMock(){
+  MN().reps.push(todayKey()); save();
   const mode=$("mockMode").value, c=current();
   const studied = DAYS.slice(0, Math.max(c-1,3)).map((d,i)=>(i+1)+". "+d.t).join("; ");
   $("chat").innerHTML=""; $("mockInRow").hidden=false; $("mockEnd").hidden=false;
@@ -2609,14 +2914,14 @@ function show(v){
   if(v!=="learn") VL.stop();
   document.querySelectorAll("section.view").forEach(s=>s.hidden = s.id!=="v-"+v);
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current", b.dataset.v===v?"page":"false"));
-  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
+  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="mentor") renderMentor(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
   window.scrollTo(0,0);
   try{ sessionStorage.setItem("p100v",v); }catch(e){}
 }
 function renderRemote(){
   renderTop(); renderMorning();
   const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v;
-  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop();
+  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop(); if (v==="mentor") renderMentor();
   if (v==="learn"){ const d=viewDay||current(); $("doneBtn").textContent = S.done[d] ? "Day complete · undo" : "Mark this day complete"; $("doneBtn").className = S.done[d] ? "btn" : "btn primary"; }
 }
 function renderAll(){ renderTop(); renderMorning(); const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v; if(v!=="morning") show(v); }
