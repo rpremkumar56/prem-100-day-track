@@ -245,6 +245,11 @@ svg .hd text{font:700 12.5px var(--read)}
 .sheet{max-height:88vh;overflow-y:auto}
 input[type=password]{width:100%;font-size:1rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;font-family:var(--mono)}
 body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+/* life experiments */
+.lrow{display:flex;flex-direction:column;gap:8px;padding-block:10px;border-top:1px solid var(--line)}
+.lrow:first-of-type{border-top:0;padding-top:0}
+.lrow .lhead{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.lrow h3{font-size:1.02rem}
 /* mentor */
 .mnote{font:1.02rem/1.6 var(--read)}
 .mtasks{display:flex;flex-direction:column;gap:8px}
@@ -317,6 +322,30 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <h1 id="greet">Good morning, <span class="hand">Prem</span></h1>
       <div class="intent" id="intentLine" hidden></div>
       <div class="intent ifthen" id="ifThenLine" hidden></div>
+    </div>
+
+    <div class="card" id="lifeCard">
+      <div class="lrow">
+        <div class="lhead"><h3 id="mkHead">Make one thing before you consume anything</h3></div>
+        <div id="mkBody" class="plain" style="padding:0">
+          <p class="hint" id="mkPrompt"></p>
+          <div class="chips" id="mkKinds"><button class="chip" data-mk="Writing">Writing</button><button class="chip" data-mk="Sketch">Sketch</button><button class="chip" data-mk="Code">Code</button><button class="chip" data-mk="Voice note">Voice note</button></div>
+          <textarea id="mkText" placeholder="Write here, or make your sketch, code or voice note and tap the button."></textarea>
+          <div class="row"><button class="btn primary" id="mkSave">I made it</button></div>
+          <p class="note" id="mkNote"></p>
+        </div>
+        <p id="mkDone" hidden></p>
+      </div>
+      <div class="lrow">
+        <div class="lhead"><div class="eyebrow">Friction of the day</div></div>
+        <p id="frText"></p>
+        <div class="row"><button class="btn" id="frBtn">I did it</button></div>
+      </div>
+      <div class="lrow">
+        <div class="lhead"><div class="eyebrow">14-day experiment</div></div>
+        <div id="exRow" hidden><p id="exText"></p><div class="row"><button class="btn" id="exBtn">I did it today</button></div></div>
+        <div id="exNone"><p class="note">No experiment running.</p><div class="row"><button class="btn" id="exGo">Start one</button></div></div>
+      </div>
     </div>
 
     <div class="card upnext" id="upNext">
@@ -566,6 +595,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   <div class="wrap" style="padding:0">
     <div class="thinkhead">
       <h2>Think</h2>
+      <p class="hint">Pen first: solve the teaser on paper before you type. A little friction makes it stick.</p>
       <p class="muted">Three short exercises a day. Try first, then check. The point is how you think, so read the explanation even when you are right.</p>
       <div class="tchks" id="thinkTodayTab"></div>
       <p class="note" id="thinkTotals"></p>
@@ -632,6 +662,31 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="eyebrow">Later list · parked until January</div>
       <div id="mParked"></div>
       <div class="mform"><input type="text" id="pkText" placeholder="A project or idea to park"><button class="btn" id="pkAdd">Park it</button></div>
+    </div>
+    <div class="card" id="expCard">
+      <div class="eyebrow">14-day experiments · act against a label</div>
+      <div id="exActive"></div>
+      <div id="exLearnBox" hidden><label class="note" for="exLearn" id="exLearnLabel"></label><textarea id="exLearn"></textarea><div class="row"><button class="btn primary" id="exLearnSave">Save the lesson</button></div></div>
+      <div id="exStart" class="plain" style="padding:0">
+        <label class="note" for="exLabel">A label I hold about myself</label><input type="text" id="exLabel" placeholder="I always plan carefully">
+        <label class="note" for="exAct">For 14 days, I will…</label><input type="text" id="exAct" placeholder="decide every low-stakes choice in under 30 seconds">
+        <div class="row"><button class="btn primary" id="exBegin">Start the 14 days</button></div>
+        <details><summary class="note">Ideas</summary><div class="opts" id="exIdeas"></div></details>
+      </div>
+      <div id="exHistory"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Beginner's hours · 3 hours a week of being bad at something</div>
+      <p class="note">Pick something with zero career value: a rhythm instrument, watercolours, wood carving. It lowers perfectionism and makes being a beginner feel normal again.</p>
+      <input type="text" id="hbName" placeholder="My useless skill, for example: tabla">
+      <div id="hbProg"></div>
+      <div class="row"><button class="btn" id="hb30">+30 min</button><button class="btn" id="hb60">+1 hour</button></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Whose scoreboard?</div>
+      <p class="note">Write three things you feel "behind" on. For each, ask: whose standard is this? Would I trade lives with that person? If not, drop it until April 2027.</p>
+      <div id="phList"></div>
+      <div class="mform"><input type="text" id="phText" placeholder="I feel behind on…"><input type="text" id="phWhose" placeholder="Whose scoreboard? (relatives, peers, my 22-year-old self)"><button class="btn" id="phAdd">Add</button></div>
     </div>
     <div class="row"><button class="btn" id="projGo">Course projects (6)</button></div>
   </div>
@@ -2431,7 +2486,7 @@ function renderMentor(){
   $("rvNote").hidden = !rv.note; $("rvNote").innerHTML = rv.note ? md(rv.note) : "";
   const dow = new Date().getDay(); $("rvCard").classList.toggle("upnext", dow === 0 || dow === 6);
   setVal("mPos", m.positioning || "");
-  renderProofs(); renderJobs(); renderApps(); renderPeople(); renderParked();
+  renderProofs(); renderJobs(); renderApps(); renderPeople(); renderParked(); renderLifeMentor();
   const prev = m.reviews[w - 1]; $("mLastChange").hidden = !(prev && prev.rvChange); $("mLastChange").innerHTML = prev && prev.rvChange ? `<span class="hand">Your change for this week:</span> ${esc(prev.rvChange)}` : "";
 }
 
@@ -2501,6 +2556,7 @@ Numbers (actual / target): ${WEEKLY.map(n => n.label + " " + nums[n.k] + "/" + n
 Positioning line: ${m.positioning || "(not written yet)"}
 Job posts collected: ${m.jobs.length}. Applications: ${m.apps.length}. Proof pieces done: ${m.proofs.filter(p => p.status === "Done").length}.
 His review — what went well: ${r.rvWell || "-"}; what got in the way: ${r.rvBlock || "-"}; his one change: ${r.rvChange || "-"}.
+Life experiments this week: ${lifeSummary(w)}
 Next week's focus: ${N.t}.
 
 Write a short mentor note, under 180 words:
@@ -2546,6 +2602,123 @@ ACT.teachCheck = async () => {
     out.innerHTML = md(r.text); (S.teach ||= {})[d] = todayKey(); save(); }
   catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "No answer this time.") + "</p>"; }
 };
+
+/* ===== Life experiments ===== */
+/* ---------- Life experiments: make before you take, friction, 14-day experiments, beginner's hours, scoreboards ---------- */
+const LF = () => { const l = (S.life ||= {}); l.make ||= {}; l.friction ||= {}; l.exps ||= []; l.hobby ||= {name: "", logs: []}; l.phantoms ||= []; return l; };
+const MAKE_PROMPTS = [
+  "200 words: why do smooth accounts get ramped down?",
+  "Sketch the ramp-down early-warning idea on paper. Boxes and arrows are enough.",
+  "Voice note: one wild idea your company could try with AI.",
+  "Outline a LinkedIn post about one thing you learned this week.",
+  "20 lines of code with Claude Code: any tiny tool you want.",
+  "200 words: what would a client's CFO say about your account?",
+  "Write 5 questions you would ask a client sponsor in a quarterly review.",
+  "Sketch your positioning line three different ways.",
+  "200 words: what does AI do to per-person (FTE) pricing in BPM?",
+  "Voice note: explain yesterday's lesson as if to your manager.",
+  "List 10 signals that a client is about to leave. Do not filter.",
+  "Write the first paragraph of a case study about something you built."
+];
+const FRICTIONS = [
+  "Solve today's brain teaser on paper before you type anything.",
+  "Cook or make tea without looking at a screen.",
+  "Walk somewhere nearby without maps. Notice three new things.",
+  "Write today's to-do list by hand.",
+  "Do one calculation today in your head or on paper, not on a calculator.",
+  "Read one page of a printed book slowly, with a pen.",
+  "Explain today's lesson out loud without notes.",
+  "Write a short letter or note by hand to someone in your family.",
+  "Draw a map of a process at work from memory.",
+  "Eat one meal with no phone on the table."
+];
+const EXP_IDEAS = [
+  ["I always plan carefully", "Decide every low-stakes choice in under 30 seconds"],
+  ["I am not technical", "Explain one technical idea to someone every day"],
+  ["I wait until it is perfect", "Share work at 70% done, every day"],
+  ["I avoid speaking up", "Ask one question or give one opinion in every meeting"],
+  ["I get anxious with strangers", "Start one short conversation with someone new each day"],
+  ["I am an employee, not a consultant", "Send one improvement idea to a leader each workday"],
+  ["I need to know before I try", "Try one new tool or method before reading about it"],
+  ["I say yes to everything", "Say no, or 'not now', to one request each day"]
+];
+const PHANTOM_DROP_UNTIL = "April 2027";
+const dayN = d => Math.floor(new Date(d + "T00:00") / 864e5);
+const activeExp = () => LF().exps.find(e => !e.ended && (dayN(todayKey()) - dayN(e.start)) < 14);
+
+function renderLife(){
+  const l = LF(), tk = todayKey(), now = new Date(), early = now.getHours() < 10, mk = l.make[tk];
+  const pi = dayIndex() % MAKE_PROMPTS.length, fi = dayIndex() % FRICTIONS.length;
+  // make before you take
+  $("mkHead").textContent = mk ? "Made today" + (mk.before10 ? " before 10 AM" : "") : (early ? "Make one thing before you consume anything" : "Make one thing today");
+  $("mkBody").hidden = !!mk;
+  $("mkDone").hidden = !mk;
+  if (mk) $("mkDone").innerHTML = `<span class="hl hl-g">${esc(mk.kind)}</span> at ${esc(mk.at)}${mk.text ? " · " + mk.text.trim().split(/\s+/).length + " words" : ""}. <span class="note">Now you may read, scroll and listen.</span>`;
+  else { $("mkPrompt").textContent = "Idea: " + MAKE_PROMPTS[pi]; $("mkNote").textContent = early ? "Before 10 AM: no feeds, news or messages until you make something. Rough is fine." : "The 10 AM window has passed. Make something anyway, and try the window tomorrow."; }
+  document.querySelectorAll("#mkKinds .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.mk === (l.mkKind || "Writing"))));
+  setVal("mkText", (l.draft || {})[tk] || "");
+  // friction of the day
+  $("frText").textContent = FRICTIONS[fi];
+  $("frBtn").textContent = l.friction[tk] ? "Done today" : "I did it";
+  $("frBtn").disabled = !!l.friction[tk];
+  // experiment check
+  const ex = activeExp();
+  $("exRow").hidden = !ex; $("exNone").hidden = !!ex;
+  if (ex){ const n = dayN(tk) - dayN(ex.start) + 1; $("exText").textContent = `Day ${n} of 14: ${ex.act}`; $("exBtn").textContent = (ex.checks || {})[tk] ? "Done today" : "I did it today"; $("exBtn").disabled = !!(ex.checks || {})[tk]; }
+}
+docOn("click", e => { const c = e.target.closest && e.target.closest("[data-mk]"); if (c){ LF().mkKind = c.dataset.mk; save(); renderLife(); } });
+INP.mkText = () => { const l = LF(); (l.draft ||= {})[todayKey()] = $("mkText").value; save(); };
+ACT.mkSave = () => { const l = LF(), tk = todayKey(), now = new Date(), t = $("mkText").value.trim(), kind = l.mkKind || "Writing";
+  if (kind === "Writing" && !t){ $("mkText").focus(); toast("Write a few lines first", "Rough is fine. 200 words is the target."); return; }
+  l.make[tk] = {kind, text: t, at: now.toLocaleTimeString("en-IN", {hour: "numeric", minute: "2-digit"}), before10: now.getHours() < 10};
+  if (l.draft) delete l.draft[tk];
+  save(); renderLife(); renderMorning(); toast(now.getHours() < 10 ? "Made before 10 AM" : "Made today", "Your brain starts the day as a maker, not a reader."); };
+ACT.frBtn = () => { LF().friction[todayKey()] = true; save(); renderLife(); toast("Friction done", "Small effort, full attention. That is the point."); };
+ACT.exBtn = () => { const ex = activeExp(); if (!ex) return; (ex.checks ||= {})[todayKey()] = true; save(); renderLife(); toast("Experiment logged", "You acted against the label. Notice what actually happened."); };
+ACT.exGo = () => { show("mentor"); setTimeout(() => $("expCard").scrollIntoView({behavior: "smooth", block: "start"}), 50); };
+
+/* Mentor tab parts */
+function renderLifeMentor(){
+  const l = LF(), tk = todayKey(), ex = activeExp();
+  // experiments
+  $("exActive").innerHTML = ex ? (() => { const n = dayN(tk) - dayN(ex.start) + 1, done = Object.keys(ex.checks || {}).length;
+      return `<p><span class="hl">Day ${Math.min(n, 14)} of 14</span> · ${done} days acted</p><p><b>Label:</b> ${esc(ex.label)}<br><b>For 14 days I:</b> ${esc(ex.act)}</p><div class="row"><button class="btn" id="exEnd">End early and write the lesson</button></div>`; })()
+    : `<p class="note">No experiment running. Pick a label you hold about yourself, then act against it for 14 days. You are not building a habit; you are testing a belief.</p>`;
+  $("exStart").hidden = !!ex;
+  $("exIdeas").innerHTML = EXP_IDEAS.map(([a, b], i) => `<button class="opt" data-exi="${i}"><span><b>${esc(a)}</b> → ${esc(b)}</span></button>`).join("");
+  const finished = l.exps.filter(e => e !== ex);
+  const pending = finished.find(e => !e.learn);
+  $("exLearnBox").hidden = !pending;
+  if (pending){ $("exLearnLabel").textContent = `What did you learn from "${pending.act}"?`; $("exLearnBox").dataset.id = pending.id; }
+  $("exHistory").innerHTML = finished.filter(e => e.learn).slice().reverse().map(e => `<div class="mrow"><span class="mtitle"><b>${esc(e.act)}</b><br><span class="note">${esc(e.learn)}</span></span></div>`).join("");
+  // beginner's hours
+  const [ws, we] = weekRange(curWeek()), mins = l.hobby.logs.filter(g => { const d = new Date(g.date + "T00:00"); return d >= ws && d <= we; }).reduce((a, g) => a + g.min, 0);
+  setVal("hbName", l.hobby.name || "");
+  $("hbProg").innerHTML = `<div class="sc"><span>This week</span><b>${Math.round(mins / 6) / 10} / 3 hrs</b><i><s style="width:${Math.min(100, Math.round(mins / 180 * 100))}%" class="${mins >= 180 ? "full" : ""}"></s></i></div>`;
+  // scoreboards
+  $("phList").innerHTML = l.phantoms.map((p, i) => `<div class="mrow"><span class="mtitle"><b>${esc(p.text)}</b><br><span class="note">Scoreboard of: ${esc(p.whose || "?")}${p.drop ? ` · <span class="hl hl-p">dropped until ${PHANTOM_DROP_UNTIL}</span>` : p.keep ? ' · <span class="hl hl-g">kept: it is mine</span>' : ""}</span></span>
+     ${p.drop || p.keep ? "" : `<button class="pill" data-phk="${i}">Keep</button><button class="pill" data-phd="${i}">Drop</button>`}<button class="xbtn" data-phx="${i}" aria-label="Remove">×</button></div>`).join("") || "<p class='muted'>Nothing listed yet.</p>";
+}
+docOn("click", e => {
+  const b = e.target.closest && e.target.closest("button"); if (!b) return; const l = LF(), d = b.dataset;
+  if (d.exi !== undefined){ const [a, x] = EXP_IDEAS[+d.exi]; $("exLabel").value = a; $("exAct").value = x; }
+  else if (d.phk !== undefined){ l.phantoms[+d.phk].keep = true; save(); renderLifeMentor(); }
+  else if (d.phd !== undefined){ l.phantoms[+d.phd].drop = true; save(); renderLifeMentor(); toast("Dropped until " + PHANTOM_DROP_UNTIL, "Watch what happens. Usually: nothing bad."); }
+  else if (d.phx !== undefined){ l.phantoms.splice(+d.phx, 1); save(); renderLifeMentor(); }
+});
+ACT.exBegin = () => { const a = $("exLabel").value.trim(), x = $("exAct").value.trim(); if (!a || !x){ toast("Fill both lines", "Your label, and what you will do for 14 days."); return; }
+  LF().exps.push({id: uid(), label: a, act: x, start: todayKey(), checks: {}}); $("exLabel").value = ""; $("exAct").value = ""; save(); renderLifeMentor(); renderLife(); toast("Experiment started", "14 days. Check in once a day on Today."); };
+docOn("click", e => { if (e.target.closest && e.target.closest("#exEnd")){ const ex = activeExp(); if (ex){ ex.ended = todayKey(); save(); renderLifeMentor(); renderLife(); } } });
+ACT.exLearnSave = () => { const id = $("exLearnBox").dataset.id, t = $("exLearn").value.trim(); if (!t) return; const ex = LF().exps.find(e => e.id === id); if (ex){ ex.learn = t; $("exLearn").value = ""; save(); renderLifeMentor(); toast("Lesson saved", "Pick the next label to test."); } };
+INP.hbName = () => { LF().hobby.name = $("hbName").value; save(); };
+const logHobby = min => { LF().hobby.logs.push({date: todayKey(), min}); save(); renderLifeMentor(); toast("Logged " + min + " minutes", "Being bad at it is the point."); };
+ACT.hb30 = () => logHobby(30); ACT.hb60 = () => logHobby(60);
+ACT.phAdd = () => { const t = $("phText").value.trim(); if (!t) return; LF().phantoms.push({text: t, whose: $("phWhose").value.trim(), date: todayKey()}); $("phText").value = ""; $("phWhose").value = ""; save(); renderLifeMentor(); };
+function lifeSummary(w){ const l = LF(), [ws, we] = weekRange(w), inW = k => { const d = new Date(k + "T00:00"); return d >= ws && d <= we; };
+  const made = Object.entries(l.make).filter(([k]) => inW(k)), early = made.filter(([, v]) => v.before10).length, ex = activeExp() || l.exps[l.exps.length - 1];
+  const mins = l.hobby.logs.filter(g => inW(g.date)).reduce((a, g) => a + g.min, 0);
+  return `Made something on ${made.length} days (${early} before 10 AM). Friction tasks: ${Object.keys(l.friction).filter(inW).length}. Beginner's hours (${l.hobby.name || "no hobby chosen"}): ${Math.round(mins / 6) / 10} of 3. Experiment: ${ex ? ex.act + " (" + Object.keys(ex.checks || {}).length + " days acted)" : "none"}. Dropped scoreboards: ${l.phantoms.filter(p => p.drop).map(p => p.text).join("; ") || "none"}.`; }
+
 const PRINCIPLES = [
  ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm AI consultant you are becoming."],
  ["Rehearse in your imagination","Your nervous system responds to a vivid imagined scene much like a real one. Each morning rehearsal makes the real interview feel familiar."],
@@ -2656,9 +2829,16 @@ function renderMorning(){
   $("ifThenLine").hidden = !(m.woopO && m.woopP); $("ifThenLine").textContent = m.woopO && m.woopP ? "If " + m.woopO.replace(/^if\s+/i, "") + ", then I " + m.woopP.replace(/^(then\s+)?(i\s+(will\s+)?)?/i, "") : "";
   setVal("woopO", m.woopO || ""); setVal("woopP", m.woopP || "");
   renderMentorCard();
+  renderLife();
   // up next
   const rc = ritualCount(m);
-  if (rc < 4){
+  if (new Date().getHours() < 10 && !LF().make[todayKey()]){
+    $("upEyebrow").textContent = "Up next · before 10 AM";
+    $("upTitle").textContent = "Make one thing first";
+    $("upWhy").textContent = "Before any feed, news or message: write 200 words, sketch, code or record a voice note. Then the calm routine.";
+    $("upBtn").textContent = "Make it now";
+    ACT.upBtn = () => { $("lifeCard").scrollIntoView({behavior: "smooth", block: "start"}); setTimeout(() => $("mkText").focus(), 400); };
+  } else if (rc < 4){
     $("upEyebrow").textContent = "Up next · " + rc + " of 4 calm steps done";
     $("upTitle").textContent = "Morning calm";
     $("upWhy").textContent = "Ten quiet minutes: breathe, picture the goal, read your note, log one win.";
