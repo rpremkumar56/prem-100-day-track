@@ -319,6 +319,17 @@ pre.dzg{font-size:12px}
 #designRoot .chip{text-align:left;line-height:1.3;height:auto}
 #drBody{display:flex;flex-direction:column;gap:14px}
 #drBody > p,#drBody > h3{margin:0}
+.dzstep{display:flex;flex-direction:column;gap:10px;border-top:1px dashed var(--line);padding-top:12px}
+.dzstep p{margin:0}
+.dzthink{background:var(--surface-2);border-radius:12px;padding:10px 14px}
+.dzthink summary{cursor:pointer;font:600 1rem/1.45 var(--read);list-style:none}
+.dzthink summary::-webkit-details-marker{display:none}
+.dzthink summary::after{content:"Tap to compare ›";display:block;font:700 .8rem var(--ui);color:var(--accent);margin-top:6px}
+.dzthink[open] summary::after{content:""}
+.dzthink[open] p{margin-top:8px}
+.dzterms dl{margin:8px 0 0;display:grid;gap:6px}
+.dzterms dt{font:700 .95rem var(--ui)}
+.dzterms dd{margin:0 0 4px;font:.95rem/1.45 var(--read);color:var(--ink)}
 .drstep{border-left:3px solid var(--line);padding-left:12px;display:flex;flex-direction:column;gap:6px}
 .drstep p{margin:0}
 .drstep.now{border-left-color:var(--accent)}
@@ -3285,7 +3296,7 @@ const DECISIONS = [
  w:[["MCP",["Your agent needs to use tools or read data","You control the agent; the tool is passive"]],
     ["A2A (Agent2Agent)",["Agents from different vendors or teams must delegate tasks to each other","Each agent keeps its own logic and only exchanges tasks and results"]]],
  r:["Using agent-to-agent messaging for what is really a tool call","Treating protocol choice as a strategy, without a use case"],
- s:"MCP is agent-to-tool; A2A is agent-to-agent. Both now sit under the Linux Foundation's Agentic AI Foundation, so they complement each other rather than compete.",
+ s:"MCP is agent-to-tool; A2A is agent-to-agent. Both are open standards under the Linux Foundation, so they complement each other rather than compete.",
  g:"[Agent] ──MCP──▶ tools & data\n[Agent A] ◀──A2A──▶ [Agent B from another vendor]",
  q:{s:"Your claims agent must ask a partner's fraud-scoring agent for a risk opinion.",o:["MCP","A2A","Email"],c:1,x:"Two independent agents exchange a task and a result. That is the A2A case."},
  ob:"Pick one protocol for everything.", bs:"Most real systems need both. The harder problems are identity, permissions and audit across organisations, not the protocol."},
@@ -3588,8 +3599,847 @@ const PATTERNS = [
 ];
 
 
-/* ---------- Design tab: decision of the day, defend it out loud, scenario drill, pattern library ---------- */
-const DZ = () => { const z = (S.design ||= {}); z.seen ||= {}; z.test ||= {}; z.drills ||= {}; z.off ||= {}; z.asked ||= []; return z; };
+/* ---------- Design: teach-first layer for each decision card ----------
+   what, why, like (everyday comparison), terms, pics [[label, diagram]] (max 36 chars wide),
+   think [[question, answer]] asked BEFORE the decision is shown */
+const LEARN = {
+"wf-agent": {
+ what: "A workflow is a fixed list of steps. Your code decides the order. An agent is a loop where the model decides the next step itself. It picks a tool, looks at the result, then decides again.",
+ why: "Models can now use tools such as search, databases and email. This lets them handle tasks with no fixed path. But each free choice adds cost, time and a risk of a wrong step.",
+ like: "A workflow is a train on rails. It always stops at the same stations. An agent is a taxi driver. You give the address, and the driver picks the route.",
+ terms: [["Tool","A function the model can ask to run, such as 'search orders' or 'send email'."],["LLM step","One call to a language model inside a bigger process."]],
+ pics: [["Workflow: your code decides",
+` email
+   │
+   ▼
+ [LLM: read the fields]
+   │
+   ▼
+ [rule: check the PO]
+   │
+   ▼
+ [post to SAP]`],
+ ["Agent: the model decides",
+` goal
+   │
+   ▼
+ ┌▶ think: what next?
+ │    │
+ │    ▼
+ │  use a tool
+ │    │
+ │    ▼
+ └─ look at the result
+      │ done?
+      ▼
+    answer`]],
+ think: [["An invoice process has the same 5 steps every time. What does the model's freedom to choose the next step add here?","Almost nothing. The steps are already known. The freedom only adds cost, time and new ways to fail."],
+         ["A customer writes: 'My order is wrong and I was charged twice.' Can you list every step in advance?","Only partly. The path depends on what the agent finds: the order, the payment, the refund rules. This is where an agent can help."]]},
+
+"single-multi": {
+ what: "A single agent is one model loop with one set of tools. A multi-agent system has several agents. Each agent has its own instructions and tools, and the agents pass work to each other.",
+ why: "When one agent has too many tools and instructions, it gets confused and picks wrong tools. Splitting the work can help. But each hand-off between agents loses some context and adds cost.",
+ like: "One skilled generalist versus a small team of specialists. A team is faster on big, varied work. But a team needs hand-overs, and things get lost between people.",
+ terms: [["Context","Everything the model can see in one call: instructions, chat history and tool results."],["Hand-off","One agent passes the task and its notes to another agent."],["Orchestrator","The agent that splits the work and gives the parts to other agents."]],
+ pics: [["Single agent",
+` user
+  │
+  ▼
+ [one agent]
+  ├─ tool A
+  ├─ tool B
+  └─ tool C`],
+ ["Multi-agent",
+` user
+  │
+  ▼
+ [orchestrator]
+  ├──▶ [research agent]
+  ├──▶ [writer agent]
+  └──▶ [review agent]
+         │
+         ▼
+       answer`]],
+ think: [["Three agents pass a summary down the line. Each summary drops 10% of the details. How much is lost by the end?","About 27% of the details. Hand-offs leak information. This is why you split only when you must."],
+         ["When does a team of specialists clearly beat one generalist?","When the parts need very different knowledge, or can run at the same time. For example: research five companies in parallel."]]},
+
+"lc-lg": {
+ what: "LangChain and LangGraph are open-source code libraries from the same company. LangChain gives ready-made parts: model connections, tools and a standard agent. LangGraph lets developers draw the process as a graph of steps and control each step.",
+ why: "Building an agent from zero means writing the loop, memory, retries and tool code yourself. Libraries give you these parts. LangGraph exists because real business processes need pauses, branches and saved progress.",
+ like: "LangChain is a meal kit: fast and standard, good for most dinners. LangGraph is a professional kitchen: you control every station, the order and the timing. Since version 1.0, the meal kit is cooked in that same kitchen.",
+ terms: [["Library or framework","Code someone else wrote that you reuse, so you do not start from zero."],["Graph","Boxes (steps) and arrows (what comes next). Arrows can branch and loop."],["State","The saved facts about one running task: what is done and what is next."],["Checkpoint","A saved copy of the state. The task can restart from it after a crash or a pause."]],
+ pics: [["LangChain: a ready-made agent",
+` create_agent(model, tools)
+        │
+        ▼
+ standard loop:
+ think → use a tool → repeat
+        │
+ (runs on the LangGraph
+  runtime underneath)`],
+ ["LangGraph: you draw the steps",
+` [extract]
+    │
+    ▼
+ [check] ──fail──▶ [fix]
+    │ ok             │
+    ▼ ◀──────────────┘
+ [PAUSE: human approves]
+    │  (state saved)
+    ▼
+ [pay out]`]],
+ think: [["A claim waits two days for a manager's approval. The server restarts on day one. What must the system remember to continue?","Which claim it is, what is done, what the AI found, and that it waits for approval. LangGraph checkpoints save exactly this state."],
+         ["A team builds a simple FAQ bot. Does it need pauses, branches or saved progress?","No. A standard LangChain agent, or even the plain model SDK, is enough. LangGraph would add code without a benefit."]]},
+
+"fw-sdk": {
+ what: "An SDK is the official code kit from a model provider. It lets your code call the model in a few lines. A framework is a bigger layer on top. It adds memory, retries, tracing and human approval steps.",
+ why: "Developers want to ship faster, and frameworks save time on common needs. But each layer is more code to learn, update and debug. A layer can also hide what is sent to the model.",
+ like: "The SDK is a manual car: you control everything, and nothing is hidden. A framework is a car with many automatic systems: easier on long trips, but harder to fix when one system fails.",
+ terms: [["SDK","Software development kit: the provider's own code to call its model."],["Tracing","A record of every step an AI app took, used for debugging."],["Dependency","Outside code your app needs. Each one must be kept up to date."]],
+ pics: [["Plain SDK",
+` your app
+   │ (you write the loop)
+   ▼
+ model SDK ──▶ model`],
+ ["Framework",
+` your app
+   │
+   ▼
+ framework
+  ├─ memory and state
+  ├─ retries
+  ├─ tracing
+  └─ approvals
+   │
+   ▼
+ models + tools`]],
+ think: [["Your app calls one model with one tool. How many framework features do you really use?","Very few. You would carry the whole framework for one simple call."],
+         ["The framework releases a new version, and your app breaks. Who fixes it, and how fast?","Your team, and only if they understand the framework. This is the hidden cost of a dependency."]]},
+
+"fw-pick": {
+ what: "Several companies offer agent frameworks. LangGraph works with models from any provider. Microsoft Agent Framework fits Azure and .NET. OpenAI Agents SDK and Google ADK fit their own models and clouds.",
+ why: "Each big provider wants you to build on its stack. The choice affects which models you can use, where the app runs, and which skills your team needs.",
+ like: "Choosing a phone ecosystem. An iPhone works best with other Apple devices. Android works with many brands. The best choice depends on what you already own.",
+ terms: [["Model-agnostic","Works with models from any provider."],["Lock-in","When moving to another vendor becomes slow and costly."],[".NET and C#","Microsoft's programming platform and language, common in banks and large companies."]],
+ pics: [["Start from the client's stack",
+` What does the client run?
+        │
+  ┌─────┼──────────┐
+  ▼     ▼          ▼
+ Azure  any cloud  one provider,
+ .NET   any model  all-in
+  │     │          │
+  ▼     ▼          ▼
+ MS     LangGraph  that provider's
+ Agent             SDK (OpenAI
+ Framework         or Google ADK)`]],
+ think: [["A client's developers all write C#, and the company runs on Azure. What happens if you pick a Python-only framework?","The client team cannot maintain it. You become the permanent support team, or the system dies when you leave."],
+         ["A client wants the freedom to switch model providers next year. Which kind of framework protects that?","A model-agnostic one, such as LangGraph. A provider's own SDK makes switching harder."]]},
+
+"mcp-fc": {
+ what: "Function calling means the model asks your app to run a tool, and your app runs it. MCP (Model Context Protocol) is a shared standard for tools. A team builds a tool once as an MCP server, and any AI app that speaks MCP can use it.",
+ why: "Without a standard, every AI app writes its own code for every system: CRM, tickets, files. Three apps and two systems already means six integrations. MCP turns this into one server per system.",
+ like: "Function calling is wiring a lamp straight into the wall. MCP is a standard plug socket. You build the plug once, and it fits in every room.",
+ terms: [["Protocol","An agreed set of rules for how two programs talk."],["MCP server","A small program that offers tools or data in the MCP format."],["Integration","Code that connects two systems."]],
+ pics: [["Without MCP: 6 integrations",
+` app A ─┬─▶ CRM
+        └─▶ tickets
+ app B ─┬─▶ CRM
+        └─▶ tickets
+ app C ─┬─▶ CRM
+        └─▶ tickets`],
+ ["With MCP: 2 servers for all apps",
+` app A ─┐
+ app B ─┼─▶ MCP ─┬─▶ [CRM server]
+ app C ─┘        └─▶ [ticket server]`]],
+ think: [["Ten AI apps need the ticket system. Each app holds an admin password. One app is hacked. What is exposed?","Full access to the ticket system. With one MCP server, you control permissions and logs in one place."],
+         ["One app needs one small tool that no other app will use. Is an MCP server worth it?","Usually not. Direct function calling is simpler. MCP pays off when tools are shared."]]},
+
+"mcp-a2a": {
+ what: "MCP connects an agent to tools and data. A2A (Agent2Agent) connects one agent to another agent. With A2A, your agent can send a task to another company's agent and get the result back.",
+ why: "Companies now build their own agents. Soon a bank's agent will need to ask a partner's agent for help. The two agents need a common language, and A2A is one.",
+ like: "MCP is an employee using office tools: a printer, a database, a calculator. A2A is one company's employee asking another company's employee to do a piece of work. The other employee decides how to do it.",
+ terms: [["A2A","Agent2Agent: a protocol, started by Google, for agents to talk to each other."],["AAIF","The Agentic AI Foundation under the Linux Foundation. It looks after MCP, and A2A is moving there too."]],
+ pics: [["MCP: agent to tools",
+` [agent] ──▶ [CRM]
+         ──▶ [database]
+ (the tools do not think)`],
+ ["A2A: agent to agent",
+` [your claims agent]
+        │ task
+        ▼
+ [partner's fraud agent]
+        │ result
+        ▼
+ [your claims agent]`]],
+ think: [["Your agent reads a database table. Is the database 'thinking' about the request?","No. It only returns data. This is a tool, so MCP fits."],
+         ["A partner's agent will not show you its prompts, data or tools. It only accepts tasks. Which protocol fits?","A2A. Each agent keeps its own logic private and only exchanges tasks and results."]]},
+
+"rag-ft": {
+ what: "RAG (retrieval-augmented generation) finds the right documents first, then gives them to the model with the question. Fine-tuning trains the model more on your examples, so its behaviour changes. Long context means you paste a whole document into one prompt.",
+ why: "A model only knows what it saw in training. It does not know your company's policies. You must give it that knowledge somehow, and each method has a different cost.",
+ like: "RAG is an open-book exam: the student looks up the right page. Fine-tuning is a training course: it changes how the student works, but the facts get old. Long context is handing the student the whole book for every question.",
+ terms: [["Retrieval","Searching a document store for the parts that match the question."],["Embedding","A list of numbers that represents the meaning of a text, so similar texts can be found."],["Context window","The maximum amount of text a model can read in one call."]],
+ pics: [["RAG",
+` question
+   │
+   ▼
+ [search the documents]
+   │ top 5 passages
+   ▼
+ [model: answer from them]
+   │
+   ▼
+ answer + sources`],
+ ["Which one?",
+` new or changing facts
+   ──▶ RAG
+ style, format, narrow skill
+   ──▶ prompt, then fine-tune
+ one big document, low volume
+   ──▶ long context`]],
+ think: [["A policy changes next month. With fine-tuning, what must you do?","Retrain and retest the model. With RAG, you only replace the document."],
+         ["A manager asks, 'Where did the bot get this answer?' Which method can show the source?","RAG. It knows which passages it used. A fine-tuned model cannot point to a source."]]},
+
+"vector": {
+ what: "A vector database stores embeddings and finds the closest ones fast. pgvector is an add-on that gives the same ability to PostgreSQL, a common database that many companies already run.",
+ why: "RAG needs a fast 'find similar meaning' search. Special vector databases appeared for this. Later, normal databases added the same feature, so you may not need a new system.",
+ like: "You need a fridge for medicine. You can buy a separate medical fridge, or use a shelf in the fridge you already own. A separate fridge only makes sense when you have a lot of medicine.",
+ terms: [["Vector","The list of numbers in an embedding."],["PostgreSQL (Postgres)","A popular, free relational database."],["Similarity search","Find the stored items that are closest in meaning to the question."]],
+ pics: [["Option 1: one system",
+` app ──▶ [Postgres]
+          ├ business tables
+          └ pgvector index`],
+ ["Option 2: two systems",
+` app ──▶ [Postgres]
+   └───▶ [vector database]
+  (you must keep both in sync)`]],
+ think: [["A document is deleted in Postgres but not in the separate vector database. What can the assistant still do?","Still find and quote the deleted text. Two stores must be kept in sync, and that is a hidden job."],
+         ["Each new system needs a security review, backups and skills. When does that cost pay off?","At very large scale or high query load, when Postgres can no longer keep up."]]},
+
+"memory": {
+ what: "A model forgets everything between calls. Agent memory is what the app saves and sends back to the model. Short-term memory is the current chat. Long-term memory is facts saved across sessions.",
+ why: "Users expect the assistant to remember their name, their case or their last request. The model cannot do this alone, so the app must store facts and choose what to send.",
+ like: "Short-term memory is a sticky note on your desk for today's task. Long-term memory is a customer file in a cabinet. A summary is the one-page note you write before the sticky notes pile up.",
+ terms: [["Session","One conversation or one task, from start to end."],["Summary memory","A short version of a long chat, sent instead of the full history."]],
+ pics: [["What the app sends each time",
+` new message
+     │
+     ▼
+ [the app collects]
+  ├ recent chat (short-term)
+  ├ chat summary
+  └ saved facts (long-term)
+     │
+     ▼
+ [model] ──▶ reply`]],
+ think: [["A chat has 300 messages. You resend all of them on every call. What grows?","Cost and delay grow with every message, and the model can lose focus. Summaries keep this under control."],
+         ["The assistant saved a customer's old address. The customer moved. What happens?","The agent confidently uses the wrong address. Memory needs a way to update, expire and delete facts."]]},
+
+"hitl": {
+ what: "Human-in-the-loop means a person checks the AI's work at chosen points. The person can approve, change or reject the work, before or after the action.",
+ why: "AI makes mistakes, and some mistakes are costly or cannot be undone. A human check stops the worst errors. But too many checks remove the speed benefit.",
+ like: "A bank teller can pay out small amounts alone. A manager must sign for large withdrawals. The rule depends on the risk, not on the teller.",
+ terms: [["Confidence score","A number for how sure the system is about one result."],["Irreversible","Cannot be undone, such as money sent or an email delivered."],["Rubber-stamping","Approving without really checking."]],
+ pics: [["Review by risk",
+` AI result
+     │
+     ▼
+ risky or unsure?
+   │yes        │no
+   ▼           ▼
+ [human      [act now]
+  approves]     │
+   │            ▼
+   ▼        [5% spot check]
+ [act]`]],
+ think: [["A person must approve 2,000 items a day. What happens to their attention by item 300?","It drops. They start clicking 'approve' without reading. The control looks safe but is not."],
+         ["Which is worse: a wrong internal draft, or a wrong refund paid to a customer?","The refund. Money that leaves is hard to get back. Put approval before irreversible actions."]]},
+
+"evals": {
+ what: "Evals are tests for AI. You run the AI on a fixed set of real examples with known good answers, and you score the results. For agents, you also check the path: which tools it used and how many steps.",
+ why: "AI output changes when you change the prompt, the model or the data. Without tests, you find problems only when users complain. Normal software tests do not work well, because AI answers vary.",
+ like: "A golden set is a standard exam paper. Every new version of the student takes the same exam, so you can compare the scores fairly.",
+ terms: [["Golden set","A fixed list of real inputs with agreed good answers."],["Trajectory","The full path an agent took: each step and each tool call."],["LLM-as-judge","Using a model to grade another model's answers."],["Regression","Something that worked before and now fails."]],
+ pics: [["The eval loop",
+` change (prompt or model)
+        │
+        ▼
+ [run the golden set]
+        │
+   pass? ──no──▶ fix it
+        │yes
+        ▼
+ release
+        │
+        ▼
+ [watch live: cost, errors]
+        │ new failure
+        ▼
+ add it to the golden set`]],
+ think: [["A new model gives the same answers but uses 3 times more steps. Does an answer-accuracy test catch this?","No. Only trajectory and cost metrics catch it. The bill triples while the test passes."],
+         ["Your eval set has only the 10 examples from the demo. What does a pass prove?","Very little. Demo examples are the easy cases. A golden set must include messy, real cases."]]},
+
+"model-size": {
+ what: "Model providers offer large models, small models and reasoning models. Large and reasoning models are smarter but slower, and they cost more per call. A router sends each request to the cheapest model that can handle it.",
+ why: "At high volume, model cost becomes a large bill. Most requests are simple. Paying for the biggest model on every request wastes money and time.",
+ like: "A hospital does not send every patient to the senior surgeon. A nurse handles the simple cases, and the hard cases go up. This is triage.",
+ terms: [["Reasoning model","A model that works through extra steps before it answers. It is better at hard problems and slower."],["Latency","The time the user waits for an answer."],["Router","A step that classifies a request and picks the model for it."]],
+ pics: [["Routing",
+` request
+    │
+    ▼
+ [router: simple or hard?]
+   │simple       │hard
+   ▼             ▼
+ [small model] [large model]
+  fast, cheap   slow, costly`]],
+ think: [["A large model costs 20 times more than a small one. 85 of every 100 requests are simple. About how much does routing save?","About 80%. All-large costs 100 × 20 = 2,000 units. Routed costs 85 × 1 + 15 × 20 = 385 units."],
+         ["How do you prove the small model is good enough?","Run both models on the golden set and compare. Do not assume. Measure."]]},
+
+"sync-async": {
+ what: "A synchronous call means the user waits until the answer comes back. An async job means the app accepts the task, puts it in a queue, and workers do it later. The app tells the user when it is done.",
+ why: "Some AI tasks take minutes, but web requests time out after seconds. Model providers also limit how many calls you can make per minute. A queue lets work wait safely instead of failing.",
+ like: "Synchronous is a coffee counter: you stand and wait. Async is a dry cleaner: you get a ticket, leave, and collect your clothes when they are ready.",
+ terms: [["Queue","A waiting line of tasks. Workers take tasks from the front."],["Worker","A program that takes a task from the queue and does it."],["Rate limit","The maximum number of calls a provider accepts per minute."],["Idempotent","Running the same task twice gives the same result, with no duplicate action."]],
+ pics: [["Synchronous",
+` user ──▶ app ──▶ model
+ user waits ........ answer`],
+ ["Async queue",
+` user ──▶ app ──▶ [queue]
+  ▲                  │
+  │               workers
+  │                  │
+  │                  ▼
+  └── "done" ◀── model + tools`]],
+ think: [["10,000 documents arrive at 9 AM. The model allows 500 calls a minute. What happens without a queue?","Most calls fail with rate-limit errors, and work is lost. A queue lets the extra work wait its turn: about 20 minutes here."],
+         ["A worker crashes after it sends an email but before it marks the task done. The task runs again. What must you design?","Idempotency: check if the email was already sent, so the customer does not get it twice."]]},
+
+"site-app": {
+ what: "A static site is a set of fixed files, sent the same way to every visitor. A server web app builds each page on a server, often with a database and logins. A single-page app (SPA) loads once and then runs like an app in the browser.",
+ why: "Each type solves a different need. The more dynamic types give more features. They also need more code, hosting and security work.",
+ like: "A static site is a printed brochure. A server web app is a shop counter where staff look up your order. An SPA is a self-service kiosk with a rich screen.",
+ terms: [["Server","A computer that runs your app's code and answers requests."],["CDN","Content delivery network: servers around the world that deliver files fast."],["Front end and back end","The front end runs in the browser. The back end runs on the server."]],
+ pics: [["Three shapes",
+` STATIC
+ browser ──▶ CDN (files)
+
+ SERVER WEB APP
+ browser ──▶ server ──▶ database
+
+ SPA
+ browser (app code)
+    │ data only
+    ▼
+ API ──▶ database`]],
+ think: [["Your 100-Day Track runs on GitHub Pages, with no server. Why can it still save your progress?","It saves to your own browser's storage. That works for one person on one phone. It cannot share data between people."],
+         ["A team of 30 must see the same records. Can a static site alone do this?","No. Shared data needs a server and a database."]]},
+
+"k8s": {
+ what: "A container packs an app with everything it needs, so it runs the same everywhere. Kubernetes is a system that runs many containers across many machines. It restarts failed containers, adds copies when load grows and connects them.",
+ why: "Large companies run hundreds of services. Starting, scaling and repairing them by hand is impossible. Kubernetes automates this, but it is a complex system that needs its own experts.",
+ like: "A container is a shipping container: the same box fits any ship. Kubernetes is the port: cranes, schedules and staff for thousands of boxes. If you send two boxes a month, you use a courier, not your own port.",
+ terms: [["Container","A packaged app that runs the same on any machine."],["Cluster","A group of machines that Kubernetes manages as one."],["Serverless","The cloud runs your code only when it is needed. You manage no machines."],["Managed containers","The cloud runs your containers for you, with no cluster to manage. Examples: Cloud Run, Azure Container Apps."]],
+ pics: [["Few services",
+` [container] [container]
+        │
+        ▼
+ managed service runs them
+ (no cluster to look after)`],
+ ["Many services",
+` [c][c][c][c][c][c][c][c]
+        │
+        ▼
+ KUBERNETES CLUSTER
+  ├ restarts failures
+  ├ scales copies
+  └ routes traffic
+ + a team to run it`]],
+ think: [["A cluster needs upgrades, security patches and monitoring every month. Who does this for a two-service app?","Someone the client must pay and keep. For two services, managed containers remove this work."],
+         ["A client already has a platform team that runs Kubernetes for 80 services. Does the answer change?","Yes. One more service on a well-run cluster is cheap. The cost of the cluster is already paid."]]},
+
+"mono-micro": {
+ what: "A monolith is one application that holds all features, and it goes live as one unit. Microservices split the features into many small apps. Each small app has its own code, data and releases.",
+ why: "Large companies have many teams. If all teams change one big app, they block each other. Microservices let teams release on their own, but they add network calls and many moving parts.",
+ like: "A monolith is one restaurant kitchen where all cooks share the space. Microservices are a food court: each stall works alone, but customers walk between stalls, and any stall can be closed.",
+ terms: [["Deploy","Put a new version of the software live."],["Modular monolith","One app with clear internal sections that can be split later."],["Service","A small app that does one job and talks to others through an API."]],
+ pics: [["Monolith",
+` [UI | claims | billing | users]
+              │
+              ▼
+          [database]`],
+ ["Microservices",
+` [claims] ──▶ DB 1
+    │ API call
+    ▼
+ [billing] ──▶ DB 2
+    │ API call
+    ▼
+ [users] ──▶ DB 3`]],
+ think: [["Inside a monolith, one function calls another. In microservices, the same call goes over the network. What new problems appear?","The call can be slow, fail or time out. You need retries, monitoring and tracing across services."],
+         ["Four people build a new portal. Do they need to release parts independently?","No. One team means one release. A modular monolith is faster now and can split later."]]},
+
+"api-style": {
+ what: "An API is how one program asks another for data or actions. REST uses a simple web address for each thing, such as /claims/123. GraphQL lets the caller ask for exactly the fields it needs in one request. gRPC is a fast, strict format for calls between internal services.",
+ why: "Different callers have different needs. Partners want simple and stable. Rich screens want flexible data. Internal services want speed.",
+ like: "REST is a set menu: each dish has a fixed number. GraphQL is a buffet: you take exactly what you want on one plate. gRPC is the kitchen's internal order system: fast and coded, not for customers.",
+ terms: [["API","Application programming interface: the agreed way one program talks to another."],["Endpoint","One address in an API, such as /claims."],["Contract","The exact rules for requests and responses that both sides agree on."]],
+ pics: [["Who uses which",
+` partners ──REST──▶ [API]
+
+ web + mobile
+   ──GraphQL──▶ [gateway]
+
+ service A ──gRPC──▶ service B`]],
+ think: [["40 broker firms with different tech teams must read claim status. What do they need most?","Something simple, documented and stable. REST is what almost every developer already knows."],
+         ["A mobile screen needs data from 6 places and makes 6 calls. What does GraphQL change?","One request returns all the fields. But the server must now control the cost and permissions of each query."]]},
+
+"queue-stream": {
+ what: "A message queue holds tasks until one worker takes each task and finishes it. An event stream is a log of events that many systems can read, each at its own pace, and replay later. SQS and RabbitMQ are queues. Kafka is a stream.",
+ why: "Systems must pass work and news to each other without waiting. Some messages are jobs for one worker. Other messages are facts that many systems care about.",
+ like: "A queue is the token system at a bank counter: one clerk serves each token once. A stream is a newspaper: many people read the same news, and old issues stay in the archive.",
+ terms: [["Producer","The system that sends messages."],["Consumer","The system that reads messages."],["Replay","Read old events again, for example to rebuild data after a bug."],["Dead-letter queue","A place for tasks that failed many times, so a person can check them."]],
+ pics: [["Queue: each task once",
+` producer ──▶ [t3][t2][t1]
+                       │
+                  one worker`],
+ ["Stream: everyone reads all",
+` producer ──▶ [e1 e2 e3 e4 …]
+                 │   │   │
+                 ▼   ▼   ▼
+           billing  CRM  analytics`]],
+ think: [["A 'claim approved' event must update billing, notify the customer and feed analytics. Does one worker taking it once work?","No. Three systems need the same event. This is the stream case."],
+         ["You need to process 300 uploads a day, each one once. Is running Kafka worth it?","No. A managed queue does this simply and cheaply."]]},
+
+"batch-rt": {
+ what: "Batch processing collects data and processes it together at set times, such as every night. Real-time processing handles each event within seconds or less, as it happens.",
+ why: "Real-time is attractive but costly. It needs always-on systems and careful monitoring. Batch is cheaper, and many AI providers give discounts for batch jobs.",
+ like: "Batch is the postman who delivers once a day. Real-time is a phone call. You call only when the news cannot wait.",
+ terms: [["Batch API","A provider option where you send many requests at once and get the results later, often at a lower price."],["Latency","How long it takes to get a result."]],
+ pics: [["Batch",
+` collect all day
+      │ at 2 AM
+      ▼
+ process together ──▶ report`],
+ ["Real-time",
+` event ──▶ process ──▶ act
+     (seconds or less)`]],
+ think: [["Team leads read call summaries at 9 AM the next day. What does real-time add?","Nothing they use. They act once a day, so batch is enough and cheaper."],
+         ["A card payment must be checked for fraud before approval. Can it wait for tonight's batch?","No. The value disappears after the payment. This is the real-time case."]]},
+
+"cache": {
+ what: "A cache keeps a copy of a recent answer close to the user, so the next request is faster and cheaper. A cache can sit in many places: a CDN, an in-memory store such as Redis, or the model provider's prompt cache.",
+ why: "Many requests repeat. Asking the database or the model again for the same answer wastes time and money. But a copy can become old, or reach the wrong user.",
+ like: "A cache is the answer sheet a help-desk worker keeps for common questions. It saves time. But it must change when the policy changes, and private answers must not go on it.",
+ terms: [["Cache hit and miss","Hit: the answer was in the cache. Miss: it was not, so the app asks the source."],["Expiry (TTL)","How long a cached copy stays valid before the app gets a fresh one."],["Redis","A popular, fast in-memory store, often used as a cache."],["Prompt caching","The model provider reuses the processed start of a repeated prompt, for lower cost and delay."]],
+ pics: [["How a cache works",
+` request
+    │
+    ▼
+ in cache? ──yes──▶ answer (fast)
+    │no
+    ▼
+ ask the source (DB or model)
+    │
+    ▼
+ save a copy + expiry
+    │
+    ▼
+ answer`]],
+ think: [["A cached answer says 'You have 12 leave days left.' Another employee asks the same question. What goes wrong?","They see someone else's personal data. Never share cached answers that depend on the user."],
+         ["The policy changes today. The cache keeps answers for 30 days. What do users see?","The old policy, for up to 30 days. Put the policy version in the cache key, so a new version gets fresh answers."]]},
+
+"push-pull": {
+ what: "Polling means your app asks another system again and again: 'Any news?' A webhook means the other system calls your app when something happens. A WebSocket keeps an open line between server and browser for live updates.",
+ why: "Apps need to know when things change, such as a payment done or a job finished. Asking all the time wastes calls. Being told is faster and cheaper.",
+ like: "Polling is a child asking 'Are we there yet?' every minute. A webhook is the driver saying 'We are here.' A WebSocket is an open phone line during the whole trip.",
+ terms: [["Webhook","A web address in your app that another system calls when an event happens."],["Signature","A code that proves a webhook really came from the expected sender."],["Server-sent events","A simple one-way live stream from server to browser. Chat apps use it to show an AI answer word by word."]],
+ pics: [["Three ways to hear news",
+` POLLING
+ you ──"news?"──▶ them (repeat)
+
+ WEBHOOK
+ them ──"it happened"──▶ you
+
+ WEBSOCKET
+ server ◀══open line══▶ browser`]],
+ think: [["A job finishes once a day. Your app polls every 10 seconds. How many calls a day are wasted?","About 8,640 calls for one event. A webhook needs one call."],
+         ["Anyone on the internet can call your webhook address. What must your app check?","The signature, so it accepts only real events. It must also handle the same event arriving twice."]]},
+
+"sql-nosql": {
+ what: "A SQL (relational) database stores data in tables with rows and columns, and it links tables together. A NoSQL database stores data in other shapes, such as flexible documents or simple key-value pairs.",
+ why: "Business data has many links: customers have orders, and orders have lines. SQL handles links and safe transactions well. NoSQL appeared for data that is huge, fast-changing or has no fixed shape.",
+ like: "SQL is a well-organised filing cabinet with an index and cross-references. NoSQL is a set of labelled boxes: fast to fill and very large, but harder to cross-check.",
+ terms: [["Table","Rows and columns, like a strict spreadsheet."],["Transaction","A group of changes that all succeed or all fail together, such as moving money between two accounts."],["Schema","The defined structure of the data: which fields, and which types."]],
+ pics: [["SQL: linked tables",
+` customers ──< invoices
+                  │
+                  ▼
+              payments`],
+ ["NoSQL: documents",
+` { claim: 123,
+   notes: [ ... ],
+   extra: { any shape } }`]],
+ think: [["A payment is recorded, but the system crashes before the invoice is marked paid. What protects you?","A transaction. Both changes succeed together, or neither happens. Relational databases do this by design."],
+         ["Each AI run saves a log with a different set of fields. Which fits better?","A document (NoSQL) store, or a JSON column in Postgres. The data has no fixed shape."]]},
+
+"region": {
+ what: "A cloud region is a group of data centres in one area, such as Mumbai or Frankfurt. Each region has several zones: separate buildings with their own power. Multi-region means you run your system in two or more regions.",
+ why: "Data centres can fail, and some contracts or laws require data to stay in one place. Users far away also get slower responses. Multi-region solves these, but it doubles the hard problems.",
+ like: "Zones are several branches of a bank in one city. Multi-region is branches in different countries: safer and closer to customers, but each branch must follow local rules and keep accounts in sync.",
+ terms: [["Zone","A separate data centre inside a region."],["Data residency","A rule that some data must stay in a given country or region."],["Failover","Moving traffic to a backup site when the main site fails."]],
+ pics: [["Single region, three zones",
+` region: Mumbai
+  [zone 1] [zone 2] [zone 3]`],
+ ["Multi-region",
+` [EU region]    EU data stays
+      ▲
+      │ only allowed data
+      ▼
+ [India region] India data`]],
+ think: [["One building in a region loses power. Does a single-region app across three zones stay up?","Yes, if it runs across the zones. Zone redundancy handles most failures at a lower cost."],
+         ["The client's contract says EU customer data must stay in the EU. Can speed or cost change this decision?","No. The rule decides first. Then you design around it."]]},
+
+"build-buy": {
+ what: "Build means your team creates the software. Buy means you pay for an existing product. Partner means a specialist firm builds it with you and teaches your team.",
+ why: "AI tools appear every month, and many common needs are already solved. Building costs more than the first version: you must maintain it for years.",
+ like: "You can cook at home, order from a restaurant, or hire a chef to teach you. You cook your signature dish yourself. You order the dishes that everyone makes well.",
+ terms: [["TCO","Total cost of ownership: the build or licence cost plus years of running, support and updates."],["Differentiator","Something that makes a company better than its competitors."]],
+ pics: [["The decision path",
+` Is the problem common?
+   │yes          │no
+   ▼             ▼
+  BUY       Is it core to
+            how we win?
+             │yes      │no
+             ▼         ▼
+           BUILD     BUY or a
+       (or partner   simple tool
+       if skills
+       are missing)`]],
+ think: [["A built tool costs ₹20 lakh to make and ₹8 lakh a year to run. A product costs ₹10 lakh a year. Which is cheaper over 3 years?","Buy. Build: 20 + 3 × 8 = ₹44 lakh. Buy: 3 × 10 = ₹30 lakh. Build wins only if the tool gives an edge."],
+         ["Meeting summaries are already inside Microsoft 365. What does a custom build add?","Usually nothing that pays back. Spend build effort where the client's own data and process create an edge."]]},
+
+"api-selfhost": {
+ what: "A model API means you send text to a provider's model over the internet, and you pay per use. Self-hosting means you run an open-weight model on your own GPUs, inside your own network.",
+ why: "Some data cannot leave a company's network. At very high, steady volume, owning GPUs can also cost less than paying per token. But you take over all the operations work.",
+ like: "The API is a taxi: pay per trip, no maintenance. Self-hosting is buying a car: worth it if you drive a lot every day. You pay for parking, servicing and a driver even when the car stands still.",
+ terms: [["Open-weight model","A model whose trained weights are published, so you can run it yourself."],["Token","A small piece of text, about three-quarters of a word. Providers charge per token."],["GPU","The special chip that runs AI models fast."],["Utilisation","How much of the time your GPUs do useful work."]],
+ pics: [["Model API",
+` app ──internet──▶ provider
+ pay per token, no servers`],
+ ["Self-hosted",
+` app ──▶ [your GPUs + model]
+         inside your network
+ pay for GPUs + staff, 24 × 7`]],
+ think: [["Your GPUs are busy only 15% of the day. Do you pay for the other 85%?","Yes. Owned capacity costs money even when it is idle. Low utilisation makes self-hosting expensive."],
+         ["A defence client forbids data leaving its network. Does price still decide?","No. The data rule decides first. Self-hosting becomes the only path."]]},
+
+"direct-cloud": {
+ what: "You can use a model straight from the model company, such as OpenAI or Anthropic. You can also use many of the same models through a cloud platform, such as Azure AI Foundry, Amazon Bedrock or Google Vertex AI.",
+ why: "Large companies already have contracts, security rules and private networks with one cloud. Using models through that cloud reuses all of it. The direct route can get new models or features first.",
+ like: "Buying a brand from its own store, or through the supermarket where you already have an account, delivery and credit.",
+ terms: [["Private networking","Traffic stays inside the company's own cloud network, not the public internet."],["Procurement","The company process to approve and buy from a new vendor."]],
+ pics: [["Direct",
+` app ──internet──▶ model company
+ (new contract, new review)`],
+ ["Through your cloud",
+` app ──private──▶ cloud AI platform
+                       │
+                       ▼
+                     model
+ (existing contract + security)`]],
+ think: [["A new vendor needs a 6-month security review. The same model is approved in the client's cloud today. What wins?","The cloud route, almost always. Approval time is often the real delay in large companies."],
+         ["A feature you need exists only on the direct API. What do you check?","When the feature reaches the cloud platform, and in which regions. Then decide if the wait is acceptable."]]},
+
+"gateway": {
+ what: "An LLM gateway is one central service between all your apps and all the model providers. Every model call goes through it. It holds the API keys, sets limits per team, logs each call, routes to the right model and tracks the cost.",
+ why: "At first, one team calls one model with one key. Soon many teams use many models. Keys get copied everywhere, nobody knows the total cost, and nobody can switch providers quickly. The gateway puts control in one place.",
+ like: "An LLM gateway is a company's travel desk. Employees do not each hold the company credit card. They book through the desk. The desk applies the travel policy, tracks spend per department and can switch airlines.",
+ terms: [["API key","A secret password that lets an app call a model. The bill goes to the key's owner."],["Quota","A limit, such as 'Team A may spend ₹50,000 a month'."],["Routing","Choosing which model or provider gets each request."],["Fallback","Sending the request to a backup model when the first one fails or is busy."]],
+ pics: [["Without a gateway",
+` app A ──key 1──▶ OpenAI
+ app B ──key 2──▶ Gemini
+ app C ──key 3──▶ Claude
+ keys everywhere, cost unknown`],
+ ["With a gateway",
+` app A ─┐
+ app B ─┼─▶ [LLM GATEWAY]
+ app C ─┘     ├ keys
+              ├ quotas
+              ├ logs + cost
+              └ routing
+                 │
+          ┌──────┼──────┐
+          ▼      ▼      ▼
+       OpenAI Gemini Claude`]],
+ think: [["Six apps each store a model key. One key leaks on GitHub. What must you do, and in how many places?","Revoke the key and replace it in every app that uses it. With a gateway, apps never hold provider keys, so you rotate the key in one place."],
+         ["Finance asks: 'How much did the HR team spend on AI last month?' Without a gateway, where does the answer come from?","From scattered bills and guesses. A gateway logs every call with the team name, so the answer is one report."],
+         ["Your 100-Day Track switches to another Gemini model when one is busy. What does a gateway do with that idea?","It does the same for every app in the company at once. This is routing and fallback."]]},
+
+"rpa-agent": {
+ what: "API integration connects systems through their official interfaces. RPA (robotic process automation) is software that clicks and types on screens like a person. An AI step can read unstructured input and decide what it means.",
+ why: "Many BPM processes touch old systems with no API. RPA filled that gap. AI now adds the ability to read emails and documents. Each tool is good at a different part of the job.",
+ like: "An API is a direct phone line between two offices. RPA is a robot at a desk that types into the old computer. AI is the clerk who reads the messy letter and understands what the customer wants.",
+ terms: [["RPA","Robotic process automation: bots that copy human clicks and keystrokes."],["Unstructured data","Text without fixed fields, such as emails, letters and chat."]],
+ pics: [["Each tool does its part",
+` messy email or document
+        │
+        ▼
+ [AI: understand + extract]
+        │
+        ▼
+ [rules: check]
+        │
+ API available?
+   │yes        │no
+   ▼           ▼
+ [API call]  [RPA bot]
+   └────┬──────┘
+        ▼
+  system updated`]],
+ think: [["The old system's screen layout changes. What happens to the RPA bot?","It breaks until someone fixes it. RPA is fragile, so use an API whenever one exists."],
+         ["Why not let an AI agent click through the screens instead of RPA?","It is slower, costs more per item and is less predictable. Use AI for reading and judgement, not for clicking."]]}
+};
+
+/* narrow reference designs for the scenario drills (phone width) */
+const DRILL_REF = {
+claims:
+` email + PDF
+    │
+    ▼
+ [queue] ──▶ workers
+    │
+    ▼
+ [small model: extract,
+  classify]
+    │
+    ▼
+ [rules: policy checks]
+    │
+ unsure or high value?
+   │yes          │no
+   ▼             ▼
+ [human        [auto]
+  approval]      │
+ (state saved)   │
+   └──────┬──────┘
+          ▼
+ complex? ──▶ [stronger model
+               or agent]
+          ▼
+ [API or RPA: update
+  the claims system]
+          │
+          ▼
+ traces, evals,
+ cost per claim`,
+policy:
+` employee
+    │ company login (SSO)
+    ▼
+ [web app]
+    │
+    ▼
+ [search with permission
+  filter: Postgres +
+  pgvector]
+    │
+    ▼
+ [LLM gateway] ──▶ model
+    │
+    ▼
+ answer + citations
+    │
+    ▼
+ logs, evals, feedback`,
+triage:
+` shared inbox
+    │
+    ▼
+ [queue]
+    │
+    ▼
+ [small model: classify
+  + extract]
+    │
+    ├─▶ billing
+    ├─▶ claims
+    └─▶ general
+          │
+          ▼
+ [model: draft reply]
+          │
+          ▼
+ [agent approves] ──▶ send
+          │
+          ▼
+ accuracy, edit rate`,
+invoice:
+` supplier PDF
+    │
+    ▼
+ [queue]
+    │
+    ▼
+ [document model: extract]
+    │
+    ▼
+ [rules: PO match, limits]
+   │sure          │unsure
+   ▼              ▼
+ [SAP API     [review
+  post]        queue] ──▶ post
+    │
+    ▼
+ straight-through rate,
+ cost per invoice`,
+research:
+` sales user
+    │
+    ▼
+ [agent]
+  ├ plan
+  ├ search the web
+  ├ read CRM (MCP,
+  │  user's permissions)
+  └ write the brief
+    │
+ limits: max steps,
+ cost budget, time-out
+    │
+    ▼
+ brief + sources
+    │
+    ▼
+ user feedback`,
+tracker:
+` 40 users
+    │ company login
+    ▼
+ [web app on managed
+  hosting]
+    │
+    ▼
+ [managed SQL database]
+
+ optional:
+ [Summarise] button
+    │
+    ▼
+ model API`
+};
+
+/* teach-first notes and narrow diagrams for the pattern library */
+const PATTERN_LEARN = [
+ {p:"The work goes through fixed LLM steps, one after another. Each step does one small job well.", g:
+` input
+   │
+   ▼
+ [LLM step 1]
+   │
+   ▼
+ [check]
+   │
+   ▼
+ [LLM step 2]
+   │
+   ▼
+ output`},
+ {p:"A first step sorts each input into a category. Each category goes to its own handler or model.", g:
+` input
+   │
+   ▼
+ [classifier]
+   ├─▶ handler A
+   ├─▶ handler B
+   └─▶ handler C`},
+ {p:"Several model calls run at the same time. A last step merges or votes on their results.", g:
+` input
+   ├─▶ [LLM a] ─┐
+   ├─▶ [LLM b] ─┼─▶ [merge
+   └─▶ [LLM c] ─┘    or vote]
+                       │
+                       ▼
+                    output`},
+ {p:"A lead model plans the work at run time and hands parts to worker models. Then it combines the results.", g:
+` goal
+   │
+   ▼
+ [orchestrator: plan]
+   ├─▶ worker 1
+   ├─▶ worker 2
+   └─▶ worker 3
+         │
+         ▼
+ [orchestrator: combine]
+         │
+         ▼
+       result`},
+ {p:"One model writes a draft. A second model grades it against clear criteria. The first model revises until the draft passes.", g:
+` [generator]
+   │ draft
+   ▼
+ [evaluator] ──pass──▶ output
+   │ feedback
+   ▼
+ back to the generator
+ (cap the rounds)`},
+ {p:"The model works in a loop. It decides, acts with a tool, looks at the result, and repeats until the goal is met.", g:
+` goal
+   │
+   ▼
+ ┌▶ think
+ │   │
+ │   ▼
+ │  act with a tool
+ │   │
+ │   ▼
+ └─ observe
+     │ done
+     ▼
+   answer`},
+ {p:"The app searches company documents first, within the user's permissions. The model answers only from what it found, with sources.", g:
+` question
+   │
+   ▼
+ [search, with permissions]
+   │
+   ▼
+ [LLM]
+   │
+   ▼
+ answer + sources`},
+ {p:"The agent proposes an action and stops. The system saves the state. A person approves, and then the action runs.", g:
+` [agent proposes]
+   │
+   ▼
+ PAUSE (state saved)
+   │
+   ▼
+ [human approves]
+   │
+   ▼
+ [action runs]`},
+ {p:"Tasks go into a waiting line. A pool of workers takes them one by one, so spikes and rate limits do not break the system.", g:
+` producer
+   │
+   ▼
+ [queue]
+   │
+   ▼
+ worker pool
+   │
+   ▼
+ results store
+   │
+   ▼
+ notify the user`}
+];
+
+
+/* ---------- Design tab: learn it, picture it, think first, then decide; defend out loud; scenario drill ---------- */
+const DZ = () => { const z = (S.design ||= {}); z.seen ||= {}; z.test ||= {}; z.drills ||= {}; z.off ||= {}; z.asked ||= []; z.open ||= {}; z.alt ||= {}; return z; };
 const FRAME_DEFEND = "Speak out loud for 60 seconds, as in a design review: (1) Your decision in 1 sentence → (2) Two alternatives you rejected, and why → (3) What would make you change your mind.";
 const dzOff = k => ((DZ().off[todayKey()] || {})[k] || 0);
 function dzBump(k){ const z = DZ(), t = todayKey(); z.off = {[t]: Object.assign({}, z.off[t], {[k]: dzOff(k) + 1})}; save(); }
@@ -3605,57 +4455,86 @@ function dzProgressText(){
   return `${c} of ${DECISIONS.length} decisions practised · ${s} of ${DRILLS_ARCH.length} scenarios worked through`;
 }
 const ulist = a => `<ul>${(a || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
-function decisionBody(c){
-  return `<h3 class="tq">${esc(c.t)}</h3>
+
+/* the teaching part: what it is, why it exists, a comparison, pictures, key words, think-first questions */
+function learnHTML(L, id, live){
+  if (!L) return "";
+  const alt = live && DZ().alt[id];
+  return `<div class="dzstep"><p class="eyebrow">Step 1 · Learn it</p>
+      <p><mark class="hl"><b>What it is:</b></mark> ${esc(L.what)}</p>
+      <p><b>Why it exists:</b> ${esc(L.why)}</p>
+      ${L.like ? `<div><p class="eyebrow">Think of it like this</p><p class="claim">${esc(L.like)}</p></div>` : ""}
+      ${live ? `<div class="row"><button class="btn" data-dzsay="${esc(id)}">Listen</button><button class="btn" data-dzalt="${esc(id)}">${alt ? "Show the other explanation" : "Explain it another way"}</button></div>
+      <div class="md ruled dzalt" hidden>${alt ? md(alt) : ""}</div>` : ""}
+    </div>
+    ${(L.pics && L.pics.length) || (L.terms && L.terms.length) ? `<div class="dzstep"><p class="eyebrow">Step 2 · Picture it</p>
+      ${(L.pics || []).map(([lab, g]) => `<p class="note"><b>${esc(lab)}</b></p><pre class="dzg">${esc(g)}</pre>`).join("")}
+      ${L.terms && L.terms.length ? `<details class="dzterms"><summary class="note">Key words (${L.terms.length})</summary><dl>${L.terms.map(([t, d]) => `<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("")}</dl></details>` : ""}
+    </div>` : ""}
+    ${L.think && L.think.length ? `<div class="dzstep"><p class="eyebrow">Step 3 · Think first</p>
+      <p class="note">Answer each question in your head or out loud first. Then tap it to compare.</p>
+      ${L.think.map(([q, a]) => `<details class="dzthink"><summary><span>${esc(q)}</span></summary><p><mark class="hl hl-g">A strong answer:</mark> ${esc(a)}</p></details>`).join("")}
+    </div>` : ""}`;
+}
+/* the decision itself */
+function decisionBody(c, opt){
+  opt = opt || {};
+  return `${opt.title === false ? "" : `<h3 class="tq">${esc(c.t)}</h3>`}
     <p><mark class="hl"><b>Default:</b></mark> ${esc(c.d)}</p>
     <div class="dzws">${(c.w || []).map(([n, ws]) => `<div class="dzw md"><p><mark class="hl hl-b">${esc(n)}</mark> wins when:</p>${ulist(ws)}</div>`).join("")}</div>
-    ${c.g ? `<pre class="dzg">${esc(c.g)}</pre>` : ""}
+    ${c.g && opt.g !== false ? `<pre class="dzg">${esc(c.g)}</pre>` : ""}
     <div class="md"><p><mark class="hl hl-p">Red flags in a design review</mark></p>${ulist(c.r)}</div>
     ${c.s ? `<div><p class="eyebrow">Say it in one breath</p><p class="claim">${esc(c.s)}</p></div>` : ""}`;
 }
 function renderDesign(){
-  const z = DZ(), ci = todaysDecision(), c = DECISIONS[ci], si = todaysArchDrill(), sc = DRILLS_ARCH[si], pick = z.test[c.id];
+  const z = DZ(), ci = todaysDecision(), c = DECISIONS[ci], L = LEARN[c.id], si = todaysArchDrill(), sc = DRILLS_ARCH[si], pick = z.test[c.id];
+  const open = !L || !!z.open[c.id];
   const areas = [...new Set(DECISIONS.map(d => d.a))];
   $("designRoot").innerHTML = `
     <div class="thinkhead">
       <h2>Design</h2>
-      <p class="muted">Train architecture judgement: when to choose what, and why. Agentic AI first, plus the app and infrastructure calls that come up in every design discussion. About 15 minutes.</p>
+      <p class="muted">Learn one architecture idea from the start, think about it, then make the call. Agentic AI first, plus the app and infrastructure choices that come up in every design discussion. About 15 minutes.</p>
       <p class="note" id="dzProgress">${dzProgressText()}</p>
     </div>
 
     <div class="card upnext" id="dzCard">
-      <div class="secthead"><div class="eyebrow">1 · Decision of the day · ${esc(c.a)}</div><button class="linkbtn" id="dzNext">Another decision ›</button></div>
-      ${decisionBody(c)}
-      <div class="ruled">
-        <p class="eyebrow">Quick check</p>
+      <div class="secthead"><div class="eyebrow">Decision of the day · ${esc(c.a)}</div><button class="linkbtn" id="dzNext">Another decision ›</button></div>
+      <h3 class="tq">${esc(c.t)}</h3>
+      ${learnHTML(L, c.id, true)}
+      <div class="dzstep"><p class="eyebrow">Step ${L ? 4 : 1} · The decision</p>
+        ${open ? decisionBody(c, {title: false, g: !L}) : `<p class="note">Try the questions above first. Then see how an architect decides.</p><div class="row"><button class="btn primary" id="dzOpen">I have thought about it · show the decision</button></div>`}
+      </div>
+      ${open ? `<div class="dzstep ruled">
+        <p class="eyebrow">Step ${L ? 5 : 2} · Quick check</p>
         <p>${esc(c.q.s)}</p>
         <div class="opts" id="dzOpts">${shuffled(c.q.o, ci + dayIndex()).map(([o, k]) => `<button class="opt" data-dzo="${k}"><span>${esc(o)}</span></button>`).join("")}</div>
         <div id="dzWhy" hidden></div>
-      </div>
+      </div>` : ""}
     </div>
 
     <div class="card">
-      <div class="eyebrow">2 · Defend it out loud</div>
+      <div class="eyebrow">Defend it out loud</div>
+      <p class="note">Do this after the decision. Speaking it is what makes it stick in an interview.</p>
       ${rehearsalHTML("dz:" + c.id, "A senior architect asks you: “" + c.t + "” Give your recommendation for this case: " + c.q.s, FRAME_DEFEND)}
     </div>
 
     <div class="card" id="dzDrill">
-      <div class="secthead"><div class="eyebrow">3 · Scenario drill</div><button class="linkbtn" id="drNext">Another scenario ›</button></div>
+      <div class="secthead"><div class="eyebrow">Scenario drill</div><button class="linkbtn" id="drNext">Another scenario ›</button></div>
       <div id="drBody"></div>
     </div>
 
     <div class="card">
       <div class="eyebrow">Ask the architect</div>
-      <p class="note">Type any “X or Y?” question from an interview or a meeting. You get a decision card in the same format. Do not type client names or company data.</p>
-      <div class="row"><input type="text" id="dzQ" placeholder="Example: When is Kubernetes worth it for an AI product?" style="flex:1;min-width:0"><button class="btn" id="dzAsk">Ask</button></div>
+      <p class="note">Type any “X or Y?” question from an interview or a meeting, or any term you do not know. You get a lesson and a decision card in the same format. Do not type client names or company data.</p>
+      <div class="row"><input type="text" id="dzQ" placeholder="Example: What is an API gateway, and when do I need one?" style="flex:1;min-width:0"><button class="btn" id="dzAsk">Ask</button></div>
       <div id="dzAns"></div>
-      ${z.asked.length ? `<details><summary class="note">Earlier questions</summary>${z.asked.map(a => `<details class="dzlib"><summary>${esc(a.c.t || a.q)}</summary>${decisionBody(a.c)}</details>`).join("")}</details>` : ""}
+      ${z.asked.length ? `<details><summary class="note">Earlier questions</summary>${z.asked.map(a => `<details class="dzlib"><summary>${esc(a.c.t || a.q)}</summary>${learnHTML(a.L, "", false)}${decisionBody(a.c, {title: false})}</details>`).join("")}</details>` : ""}
     </div>
 
     <div class="card">
       <div class="eyebrow">Pattern library</div>
       <p class="note">Reference shapes for agent systems. Review two before a design discussion.</p>
-      ${PATTERNS.map(p => `<details class="dzlib"><summary>${esc(p.t)}</summary><p><mark class="hl hl-g">Use when:</mark> ${esc(p.w)}</p><pre class="dzg">${esc(p.g)}</pre><p><mark class="hl hl-p">Watch for:</mark> ${esc(p.r)}</p></details>`).join("")}
+      ${PATTERNS.map((p, i) => { const pl = PATTERN_LEARN[i] || {}; return `<details class="dzlib"><summary>${esc(p.t)}</summary>${pl.p ? `<p><mark class="hl">What it is:</mark> ${esc(pl.p)}</p>` : ""}<p><mark class="hl hl-g">Use when:</mark> ${esc(p.w)}</p><pre class="dzg">${esc(pl.g || p.g)}</pre><p><mark class="hl hl-p">Watch for:</mark> ${esc(p.r)}</p></details>`; }).join("")}
     </div>
 
     <div class="card">
@@ -3668,9 +4547,9 @@ function renderDesign(){
     blind: () => ({ob: c.ob, bs: c.bs}),
     model: () => c.s,
     onCompare: () => dzSeen(c.id),
-    feedbackPrompt: notes => `${STYLE}\n\nPrem rehearsed defending an architecture decision out loud, as in a design review.\nDecision: ${c.t}\nCase: ${c.q.s}\nReference default: ${c.d}\nReference answer: ${c.q.o[c.q.c]}. Why: ${c.q.x}\nHis notes: ${notes}\nJudge him as a principal architect would. Check three things: did he state one clear decision, did he reject two alternatives with reasons, and did he say what would change his mind. ${FEEDBACK_JSON}`
+    feedbackPrompt: notes => `${STYLE}\n\nPrem rehearsed defending an architecture decision out loud, as in a design review.\nDecision: ${c.t}\nCase: ${c.q.s}\nReference default: ${c.d}\nReference answer: ${c.q.o[c.q.c]}. Why: ${c.q.x}\nHis notes: ${notes}\nJudge him as a principal architect would. Check three things: did he state one clear decision, did he reject two alternatives with reasons, and did he say what would change his mind. If his notes show he misunderstands the basic concept, explain the concept in 2 plain sentences first. ${FEEDBACK_JSON}`
   };
-  if (pick != null) dzShowTest(c, pick);
+  if (open && pick != null) dzShowTest(c, pick);
   renderArchDrill(sc);
 }
 function dzShowTest(c, pickI){
@@ -3687,13 +4566,22 @@ function renderArchDrill(sc){
     return `<div class="drstep"><p class="note">Step ${i + 1} · ${esc(p.q)}</p><p><b>${esc(p.o[st.picks[i]])}</b> · ${ok ? "<mark class='hl hl-g'>On target</mark>" : "<mark class='hl hl-p'>Course correction</mark>"}</p><p class="note">${esc(p.f[st.picks[i]])}${ok ? "" : " <b>Better:</b> " + esc(p.o[p.c]) + ". " + esc(p.f[p.c].replace(/^Right:\s*(.)/, (m, ch) => ch.toUpperCase()))}</p></div>`; }).join("");
   if (k < sc.steps.length){
     const p = sc.steps[k];
-    h += `<div class="drstep now"><p class="eyebrow">Step ${k + 1} of ${sc.steps.length}</p><p><b>${esc(p.q)}</b></p><div class="opts">${shuffled(p.o, k + sc.id.length).map(([o, i]) => `<button class="opt" data-dro="${i}"><span>${esc(o)}</span></button>`).join("")}</div></div>`;
+    h += `<div class="drstep now"><p class="eyebrow">Step ${k + 1} of ${sc.steps.length}</p><p><b>${esc(p.q)}</b></p><p class="note">Not sure of a term? Tap it in All decisions below, or ask the architect.</p><div class="opts">${shuffled(p.o, k + sc.id.length).map(([o, i]) => `<button class="opt" data-dro="${i}"><span>${esc(o)}</span></button>`).join("")}</div></div>`;
   } else {
-    h += `<div class="ruled"><p class="eyebrow">Reference design</p><pre class="dzg">${esc(sc.ref)}</pre>
-      <p class="note">Now draw it once on paper from memory, then explain it out loud in 60 seconds: the flow, one trade-off, and what breaks at scale.</p>
+    h += `<div class="ruled"><p class="eyebrow">Reference design</p><pre class="dzg">${esc(DRILL_REF[sc.id] || sc.ref)}</pre>
+      <p class="note">Now draw it once on paper from memory. Then explain it out loud in 60 seconds: the flow, one trade-off, and what breaks at scale.</p>
       <div class="row"><button class="btn" id="drRestart">Try this scenario again</button></div></div>`;
   }
   $("drBody").innerHTML = h;
+}
+function dzSpeak(text, btn){
+  try {
+    if (speechSynthesis.speaking){ speechSynthesis.cancel(); btn.textContent = "Listen"; return; }
+    const u = new SpeechSynthesisUtterance(text), vs = speechSynthesis.getVoices() || [];
+    u.voice = vs.find(v => /en[-_]IN/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null; u.rate = 0.95;
+    u.onend = u.onerror = () => { btn.textContent = "Listen"; };
+    window.__dzU = u; speechSynthesis.speak(u); btn.textContent = "Stop";
+  } catch(e) { btn.textContent = "No sound on this device"; }
 }
 docOn("click", e => {
   const b = e.target.closest && e.target.closest("button"); if (!b || !$("designRoot") || !$("designRoot").contains(b)) return;
@@ -3701,8 +4589,21 @@ docOn("click", e => {
   if (d.dzo != null){ const c = DECISIONS[todaysDecision()], pickI = +d.dzo; DZ().test[c.id] = pickI; save(); dzShowTest(c, pickI); dzSeen(c.id); if (pickI === c.q.c) cheer(b); }
   else if (d.dro != null){ const sc = DRILLS_ARCH[todaysArchDrill()], st = DZ().drills[sc.id]; st.picks.push(+d.dro); if (st.picks.length === sc.steps.length) st.done = todayKey(); save(); renderArchDrill(sc); const p = $("dzProgress"); if (p) p.textContent = dzProgressText(); }
   else if (d.dzpick){ DZ().pick = {date: todayKey(), id: d.dzpick}; save(); renderDesign(); $("dzCard").scrollIntoView({behavior: "smooth", block: "start"}); }
+  else if (d.dzsay){ const L = LEARN[d.dzsay]; if (L) dzSpeak([L.what, L.why, L.like].filter(Boolean).join(" "), b); }
+  else if (d.dzalt){
+    const id = d.dzalt, c = DECISIONS.find(x => x.id === id), L = LEARN[id], out = b.closest(".dzstep").querySelector(".dzalt"), z = DZ();
+    out.hidden = false;
+    if (z.alt[id]){ out.innerHTML = md(z.alt[id]); return; }
+    if (!sample){ out.innerHTML = "<p class='muted'>This uses Gemini. Add your free key in Settings.</p>"; return; }
+    out.innerHTML = "<p class='muted'>Finding another way to explain it…</p>"; b.disabled = true;
+    sample(`${STYLE}\n\nPrem is learning this idea for the first time: "${c.t}". He has no engineering background. He already read this explanation: ${L.what} ${L.why} Comparison used: ${L.like}\nExplain it another way. Use a different comparison. Use exactly these sections:\n#### In one line\n(1 sentence)\n#### An example from BPM operations\n(3-4 sentences: one concrete process, such as claims, invoices or a contact centre, with numbers)\n#### Picture it\n(an ASCII diagram in a code block, max 32 characters wide, max 10 lines)\n#### Check yourself\n(1 question on one line, then the answer on the next line, starting with "Answer:")\nUnder 180 words. No tables.`)
+      .then(res => { const t = (res && res.text) || ""; if (!t.trim()) throw new Error("No answer this time. Try again in a minute."); z.alt[id] = t; save(); out.innerHTML = md(t); b.textContent = "Show the other explanation"; })
+      .catch(err => { out.innerHTML = "<p class='muted'>" + esc(err.message || "No answer this time. Try again in a minute.") + "</p>"; })
+      .finally(() => { b.disabled = false; });
+  }
 });
-ACT.dzNext = () => { const z = DZ(); if (z.pick) delete z.pick; dzBump("c"); renderDesign(); };
+ACT.dzOpen = () => { const c = DECISIONS[todaysDecision()]; DZ().open[c.id] = todayKey(); save(); const y = window.scrollY; renderDesign(); window.scrollTo(0, y); };
+ACT.dzNext = () => { const z = DZ(); if (z.pick) delete z.pick; dzBump("c"); try { speechSynthesis.cancel(); } catch(e) {} renderDesign(); $("dzCard").scrollIntoView({block: "start"}); };
 ACT.drNext = () => { dzBump("s"); renderDesign(); $("dzDrill").scrollIntoView({block: "start"}); };
 ACT.drRestart = () => { const sc = DRILLS_ARCH[todaysArchDrill()]; DZ().drills[sc.id] = {picks: [], done: DZ().drills[sc.id].done}; save(); renderArchDrill(sc); };
 INP.dzQ = () => {};
@@ -3711,10 +4612,12 @@ ACT.dzAsk = async () => {
   if (!sample){ out.innerHTML = "<p class='muted'>This uses Gemini. Add your free key in Settings.</p>"; return; }
   out.innerHTML = "<p class='muted'>Thinking like an architect…</p>"; $("dzAsk").disabled = true;
   try {
-    const r = await sample.json(`${STYLE}\n\nYou are a principal solutions architect coaching Prem for design discussions and interviews. Today is ${new Date().toDateString()}. If the question involves fast-moving tools or frameworks, say which facts may have changed recently.\nQuestion: ${q}\nReturn JSON only: {"t": "the decision as a short question", "d": "the default recommendation, 1-2 sentences", "w": [["option name", ["2-3 conditions when it wins"]], ["option name", ["2-3 conditions"]]], "r": ["2-3 red flags in a design review"], "s": "a 1-2 sentence answer he can say in a meeting", "g": "a small ASCII diagram, max 5 lines, max 60 characters wide", "ob": "the obvious answer most people give", "bs": "the expert blind spot: the hidden cost, failure mode or second-order effect"}`);
-    const c = {t: r.t || q, d: r.d || "", w: Array.isArray(r.w) ? r.w.filter(x => Array.isArray(x) && x.length === 2) : [], r: r.r || [], s: r.s || "", g: r.g || ""};
-    out.innerHTML = `<div class="ruled">${decisionBody(c)}${r.ob ? blindHTML({ob: r.ob, bs: r.bs || ""}) : ""}</div>`;
-    const z = DZ(); z.asked.unshift({q, c, at: todayKey()}); z.asked.length = Math.min(z.asked.length, 12); save();
+    const r = await sample.json(`${STYLE}\n\nYou are a principal solutions architect and a patient teacher. Prem is an AI consultant with no engineering background. Teach first, then decide. Today is ${new Date().toDateString()}. If the question involves fast-moving tools or frameworks, say which facts may have changed recently.\nQuestion: ${q}\nReturn JSON only:\n{"what": "what the main thing is, in plain words, 2-3 short sentences", "why": "why it exists: the problem it solves, 2 sentences", "like": "an everyday comparison, 2 sentences", "terms": [["term", "plain definition"]], "pics": [["label", "ASCII diagram, max 32 characters wide, max 10 lines"]], "think": [["a question to answer before seeing the decision", "a strong answer in 1-2 sentences"], ["question", "answer"]], "t": "the decision as a short question", "d": "the default recommendation, 1-2 sentences", "w": [["option name", ["2-3 conditions when it wins"]], ["option name", ["2-3 conditions"]]], "r": ["2-3 red flags in a design review"], "s": "a 1-2 sentence answer he can say in a meeting", "ob": "the obvious answer most people give", "bs": "the expert blind spot: the hidden cost, failure mode or second-order effect"}`);
+    const pairs = a => Array.isArray(a) ? a.filter(x => Array.isArray(x) && x.length === 2) : [];
+    const L = {what: r.what || "", why: r.why || "", like: r.like || "", terms: pairs(r.terms), pics: pairs(r.pics), think: pairs(r.think)};
+    const c = {t: r.t || q, d: r.d || "", w: pairs(r.w), r: r.r || [], s: r.s || ""};
+    out.innerHTML = `<div class="ruled"><h3 class="tq">${esc(c.t)}</h3>${L.what ? learnHTML(L, "", false) : ""}<div class="dzstep"><p class="eyebrow">The decision</p>${decisionBody(c, {title: false})}</div>${r.ob ? blindHTML({ob: r.ob, bs: r.bs || ""}) : ""}</div>`;
+    const z = DZ(); z.asked.unshift({q, c, L, at: todayKey()}); z.asked.length = Math.min(z.asked.length, 12); save();
   } catch(err) { out.innerHTML = "<p class='muted'>" + esc(err.message || "No answer this time. Try again in a minute.") + "</p>"; }
   $("dzAsk").disabled = false;
 };
@@ -4357,7 +5260,7 @@ if (G.key){ sample = gemini; wireClaude(); }
 try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e) {}
 if ("serviceWorker" in navigator && location.protocol === "https:") { navigator.serviceWorker.register("sw.js").catch(() => {}); }
 
-window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS, DEEP, todaysDeep, DECISIONS, DRILLS_ARCH, PATTERNS, renderDesign, todaysDecision, todaysArchDrill };
+window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS, DEEP, todaysDeep, DECISIONS, DRILLS_ARCH, PATTERNS, renderDesign, todaysDecision, todaysArchDrill, LEARN, DRILL_REF, PATTERN_LEARN };
 window.__p100cleanup = () => {
   AC.abort();
   try { clearInterval(breathTimer); } catch(e) {}
