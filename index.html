@@ -245,6 +245,10 @@ svg .hd text{font:700 12.5px var(--read)}
 .sheet{max-height:88vh;overflow-y:auto}
 input[type=password]{width:100%;font-size:1rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;font-family:var(--mono)}
 body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+/* market */
+#marketRoot a,.card a{color:var(--parta);text-underline-offset:2px}
+#marketRoot details{border-top:1px solid var(--line);padding-block:8px}
+#marketRoot summary{cursor:pointer;min-height:32px}
 /* life experiments */
 .lrow{display:flex;flex-direction:column;gap:8px;padding-block:10px;border-top:1px solid var(--line)}
 .lrow:first-of-type{border-top:0;padding-top:0}
@@ -324,69 +328,6 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="intent ifthen" id="ifThenLine" hidden></div>
     </div>
 
-    <div class="card" id="lifeCard">
-      <div class="lrow">
-        <div class="lhead"><h3 id="mkHead">Make one thing before you consume anything</h3></div>
-        <div id="mkBody" class="plain" style="padding:0">
-          <p class="hint" id="mkPrompt"></p>
-          <div class="chips" id="mkKinds"><button class="chip" data-mk="Writing">Writing</button><button class="chip" data-mk="Sketch">Sketch</button><button class="chip" data-mk="Code">Code</button><button class="chip" data-mk="Voice note">Voice note</button></div>
-          <textarea id="mkText" placeholder="Write here, or make your sketch, code or voice note and tap the button."></textarea>
-          <div class="row"><button class="btn primary" id="mkSave">I made it</button></div>
-          <p class="note" id="mkNote"></p>
-        </div>
-        <p id="mkDone" hidden></p>
-      </div>
-      <div class="lrow">
-        <div class="lhead"><div class="eyebrow">Friction of the day</div></div>
-        <p id="frText"></p>
-        <div class="row"><button class="btn" id="frBtn">I did it</button></div>
-      </div>
-      <div class="lrow">
-        <div class="lhead"><div class="eyebrow">14-day experiment</div></div>
-        <div id="exRow" hidden><p id="exText"></p><div class="row"><button class="btn" id="exBtn">I did it today</button></div></div>
-        <div id="exNone"><p class="note">No experiment running.</p><div class="row"><button class="btn" id="exGo">Start one</button></div></div>
-      </div>
-    </div>
-
-    <div class="card upnext" id="upNext">
-      <div class="eyebrow" id="upEyebrow">Up next</div>
-      <h2 id="upTitle">Morning calm</h2>
-      <p class="muted" id="upWhy"></p>
-      <div class="row"><button class="btn primary" id="upBtn">Start</button></div>
-    </div>
-
-    <div class="card">
-      <div class="eyebrow">Today</div>
-      <div class="stats">
-        <svg class="rings" viewBox="0 0 120 120" role="img" aria-labelledby="ringsLabel" id="rings"><title id="ringsLabel">Today's progress rings</title></svg>
-        <div class="rkey" id="rkey"></div>
-      </div>
-      <div>
-        <div class="note">This week, lesson days</div>
-        <div class="week" id="week"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="pace">
-        <div><span class="eyebrow">Role goal</span><b id="goalDays">92</b><span class="note">days to 9 Jan 2027</span></div>
-        <div><span class="eyebrow">Pace</span><b id="paceNum">0 of 100</b><span class="note" id="paceNote">lessons done</span></div>
-      </div>
-    </div>
-
-    <div class="card" id="thinkCard">
-      <div class="secthead"><div class="eyebrow">Think</div><span class="note" id="thinkCardNote">0 of 3 done today</span></div>
-      <div class="tchks" id="thinkToday"></div>
-      <div class="row"><button class="btn" id="thinkGo">Open today's puzzles</button></div>
-    </div>
-
-    <div class="card" id="mentorCard">
-      <div class="secthead"><div class="eyebrow" id="mcWeek">Mentor</div><span class="note" id="mcProg"></span></div>
-      <h3 id="mcTitle"></h3>
-      <p class="note" id="mcNext"></p>
-      <div class="row"><button class="btn" id="mentorGo">Open Mentor</button></div>
-    </div>
-
     <div class="principle">
       <div class="eyebrow">Psycho-Cybernetics idea for today</div>
       <h3 id="pTitle">Your self-image sets your limits</h3>
@@ -453,6 +394,44 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       </div>
     </div>
 
+    <div class="card upnext" id="upNext">
+      <div class="eyebrow" id="upEyebrow">Up next</div>
+      <h2 id="upTitle">Morning calm</h2>
+      <p class="muted" id="upWhy"></p>
+      <div class="row"><button class="btn primary" id="upBtn">Start</button></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Today</div>
+      <div class="stats">
+        <svg class="rings" viewBox="0 0 120 120" role="img" aria-labelledby="ringsLabel" id="rings"><title id="ringsLabel">Today's progress rings</title></svg>
+        <div class="rkey" id="rkey"></div>
+      </div>
+      <div>
+        <div class="note">This week, lesson days</div>
+        <div class="week" id="week"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="pace">
+        <div><span class="eyebrow">Role goal</span><b id="goalDays">92</b><span class="note">days to 9 Jan 2027</span></div>
+        <div><span class="eyebrow">Pace</span><b id="paceNum">0 of 100</b><span class="note" id="paceNote">lessons done</span></div>
+      </div>
+    </div>
+
+    <div class="card" id="thinkCard">
+      <div class="secthead"><div class="eyebrow">Think</div><span class="note" id="thinkCardNote">0 of 3 done today</span></div>
+      <div class="tchks" id="thinkToday"></div>
+      <div class="row"><button class="btn" id="thinkGo">Open today's puzzles</button></div>
+    </div>
+
+    <div class="card" id="marketCard">
+      <div class="secthead"><div class="eyebrow">Market brief</div><span class="note" id="mkcDate"></span></div>
+      <p id="mkcText" class="note">Your analyst reads the news on AI in BPM, hiring and client moves, and tells you how to prepare.</p>
+      <div class="row"><button class="btn" id="marketGo">Open Market</button></div>
+    </div>
+
     <div class="row"><button class="btn" id="sosBtn">I feel anxious right now</button></div>
     <div class="sos" id="sos" hidden>
       <h3>Slow down. You are safe right now.</h3>
@@ -478,6 +457,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
 <section class="view" id="v-learn" hidden>
   <div class="wrap" style="padding:0">
     <button class="linkbtn back" id="backBtn" hidden>‹ Back to Plan</button>
+    <div class="secthead"><span></span><button class="linkbtn" id="planGo">All days and projects ›</button></div>
     <div class="daynav"><button class="btn" id="prevDay">Previous</button><button class="btn" id="todayDay">Today</button><button class="btn" id="nextDay">Next</button></div>
     <div class="card dayhead">
       <span class="phasechip" id="lPhase"><i></i><span></span></span>
@@ -553,6 +533,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
 <!-- PLAN -->
 <section class="view" id="v-plan" hidden>
   <div class="wrap" style="padding:0">
+    <button class="linkbtn back" id="planBack">‹ Back to Learn</button>
     <div class="card">
       <h2>The 100 days</h2>
       <p class="muted">One hour a day. Tap any day to open it. A filled square is a finished day. The square with a terracotta outline is today. The last row is the optional bonus module on AI agent evals. You can open it at any time.</p>
@@ -563,6 +544,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="eyebrow">Your 3-month goal</div>
       <p>The track ends on day 100. Your role goal is 3 months away, so start applying in phase 5. Use the Mock tab twice a week from day 60.</p>
     </div>
+    <div class="row"><button class="btn" id="projGo">Course projects (6)</button></div>
   </div>
 </section>
 
@@ -605,8 +587,8 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div id="teaserBody" class="plain" style="padding:0"></div>
     </div>
     <div class="card">
-      <div class="secthead"><div class="eyebrow">2 · Smart answers · Spot the flaw</div><button class="linkbtn" id="fNext">Another one ›</button></div>
-      <div id="flawBody" class="plain" style="padding:0"></div>
+      <div class="secthead"><div class="eyebrow">2 · Deep puzzle · 3–5 minutes</div><button class="linkbtn" id="pNext">Another one ›</button></div>
+      <div id="deepBody" class="plain" style="padding:0"></div>
     </div>
     <div class="card">
       <div class="secthead"><div class="eyebrow">3 · Smart answers · Answer drill</div><button class="linkbtn" id="dNext">Another one ›</button></div>
@@ -615,54 +597,37 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   </div>
 </section>
 
-<!-- MENTOR -->
-<section class="view" id="v-mentor" hidden>
+<!-- MAKE -->
+<section class="view" id="v-make" hidden>
   <div class="wrap" style="padding:0">
-    <div class="card upnext" id="mWeek"></div>
-    <p class="intent" id="mLastChange" hidden></p>
-    <div class="card"><div class="eyebrow">This week's numbers · things you control</div><div class="scores" id="mScore"></div></div>
-    <div class="card" id="rvCard">
-      <div class="eyebrow">Sunday review · 10 minutes</div>
-      <label class="note" for="rvWell">What went well this week?</label><textarea id="rvWell"></textarea>
-      <label class="note" for="rvBlock">What got in the way?</label><textarea id="rvBlock"></textarea>
-      <label class="note" for="rvChange">One change for next week</label><input type="text" id="rvChange" placeholder="Example: study at 6:30 am before work, not at night">
-      <div class="row"><button class="btn primary" id="rvMentor">Get mentor feedback</button><button class="btn" id="rvSave">Save review</button></div>
-      <div class="md ruled" id="rvNote" hidden></div>
+    <div class="thinkhead">
+      <h2>Make</h2>
+      <p class="muted">Small experiments that train how you work: make before you consume, add a little friction, and test the labels you hold about yourself.</p>
     </div>
-    <div class="card">
-      <div class="eyebrow">Positioning line</div>
-      <p class="note">One sentence that says who you help and how. It goes in your LinkedIn headline and opens every interview answer.</p>
-      <input type="text" id="mPos" placeholder="I help ___ use AI to ___">
-      <div class="row"><button class="btn" id="mPosAI">Suggest sharper versions</button></div>
-      <div class="opts" id="mPosOut" hidden></div>
+    <div class="card" id="lifeCard">
+      <div class="lrow">
+        <div class="lhead"><h3 id="mkHead">Make one thing before you consume anything</h3></div>
+        <div id="mkBody" class="plain" style="padding:0">
+          <p class="hint" id="mkPrompt"></p>
+          <div class="chips" id="mkKinds"><button class="chip" data-mk="Writing">Writing</button><button class="chip" data-mk="Sketch">Sketch</button><button class="chip" data-mk="Code">Code</button><button class="chip" data-mk="Voice note">Voice note</button></div>
+          <textarea id="mkText" placeholder="Write here, or make your sketch, code or voice note and tap the button."></textarea>
+          <div class="row"><button class="btn primary" id="mkSave">I made it</button></div>
+          <p class="note" id="mkNote"></p>
+        </div>
+        <p id="mkDone" hidden></p>
+      </div>
+      <div class="lrow">
+        <div class="lhead"><div class="eyebrow">Friction of the day</div></div>
+        <p id="frText"></p>
+        <div class="row"><button class="btn" id="frBtn">I did it</button></div>
+      </div>
+      <div class="lrow">
+        <div class="lhead"><div class="eyebrow">14-day experiment</div></div>
+        <div id="exRow" hidden><p id="exText"></p><div class="row"><button class="btn" id="exBtn">I did it today</button></div></div>
+        <div id="exNone"><p class="note">No experiment running.</p><div class="row"><button class="btn" id="exGo">Start one</button></div></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="eyebrow">Proof of work · case studies, memos, posts</div>
-      <p class="note">Tap a status to move it: Idea → Draft → Done. A case study is one page: problem, approach, result with a number, lesson.</p>
-      <div id="mProofs"></div>
-      <div class="mform"><select id="pfType"><option>Case study</option><option>Opportunity memo</option><option>LinkedIn post</option><option>Demo video</option></select><input type="text" id="pfTitle" placeholder="Title"><button class="btn" id="pfAdd">Add</button></div>
-    </div>
-    <div class="card">
-      <div class="secthead"><div class="eyebrow">Job posts · what the market asks for</div><span class="note" id="mJobCount"></span></div>
-      <div class="tally" id="mTally"></div>
-      <div class="mform"><input type="text" id="jbCompany" placeholder="Company"><input type="text" id="jbRole" placeholder="Role"><input type="text" id="jbSkills" placeholder="Skills, comma separated: RAG, stakeholder management, Azure"><button class="btn" id="jbAdd">Add</button></div>
-      <div id="mJobs"></div>
-    </div>
-    <div class="card">
-      <div class="eyebrow">Applications · tap the stage to move it</div>
-      <div id="mApps"></div>
-      <div class="mform"><input type="text" id="apCompany" placeholder="Company"><input type="text" id="apRole" placeholder="Role"><label class="check"><input type="checkbox" id="apPractice"><span class="note">Practice</span></label><button class="btn" id="apAdd">Add</button></div>
-    </div>
-    <div class="card">
-      <div class="eyebrow">People · conversations and messages</div>
-      <div id="mPeople"></div>
-      <div class="mform"><input type="text" id="plName" placeholder="Name"><input type="text" id="plNote" placeholder="Company, topic, next step"><button class="btn" id="plAdd">Log</button></div>
-    </div>
-    <div class="card">
-      <div class="eyebrow">Later list · parked until January</div>
-      <div id="mParked"></div>
-      <div class="mform"><input type="text" id="pkText" placeholder="A project or idea to park"><button class="btn" id="pkAdd">Park it</button></div>
-    </div>
+
     <div class="card" id="expCard">
       <div class="eyebrow">14-day experiments · act against a label</div>
       <div id="exActive"></div>
@@ -688,13 +653,17 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div id="phList"></div>
       <div class="mform"><input type="text" id="phText" placeholder="I feel behind on…"><input type="text" id="phWhose" placeholder="Whose scoreboard? (relatives, peers, my 22-year-old self)"><button class="btn" id="phAdd">Add</button></div>
     </div>
-    <div class="row"><button class="btn" id="projGo">Course projects (6)</button></div>
   </div>
+</section>
+
+<!-- MARKET -->
+<section class="view" id="v-market" hidden>
+  <div class="wrap" style="padding:0" id="marketRoot"></div>
 </section>
 
 <!-- PROJECTS -->
 <section class="view" id="v-projects" hidden>
-  <div class="wrap" style="padding:0"><button class="linkbtn back" id="projBack">‹ Back to Mentor</button><div class="wrap" style="padding:0" id="projList"></div></div>
+  <div class="wrap" style="padding:0"><button class="linkbtn back" id="projBack">‹ Back to Plan</button><div class="wrap" style="padding:0" id="projList"></div></div>
 </section>
 
 </main>
@@ -703,9 +672,9 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   <button data-v="morning" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v3M4.9 8.9l2 2M19.1 8.9l-2 2"/></svg>Today</button>
   <button data-v="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>Learn</button>
   <button data-v="think"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Think</button>
-  <button data-v="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Plan</button>
+  <button data-v="make"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Make</button>
   <button data-v="mock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/></svg>Mock</button>
-  <button data-v="mentor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Mentor</button>
+  <button data-v="market"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Market</button>
 </div></nav>
 
 <div id="sheetHost"></div>
@@ -2209,6 +2178,88 @@ const DRILLS = [
  {k:"Structure", q:"Give three reasons a company should NOT use GenAI for a task. Use one line each.", f:["Precision","Explainability","Cost or volume"], m:"First, when the answer must be exactly right every time, like tax calculations. Second, when every decision needs a clear explanation, like credit approval. Third, when a simple rule or classic model does the job cheaper."}
 ];
 
+/* Deep puzzles: 3-5 minutes each. Fields: q, h (hints, revealed one at a time), a (typed answers) or o + c (options), x (worked solution), s (skill) */
+const DEEP = [
+ {q:"Four people must cross a narrow bridge at night with one torch. At most two can cross at a time, and anyone crossing must carry the torch. They take 1, 2, 5 and 10 minutes. A pair walks at the slower person's speed. What is the shortest total time for all four to cross?", a:["17","17 minutes"],
+  h:["Sending the fastest person back every time gives 19 minutes. You can do better.","What if the two slowest people cross together, so their times overlap?","Plan: 1+2 cross, 1 returns, 5+10 cross, 2 returns, 1+2 cross."],
+  x:"1 and 2 cross (2 min). 1 returns (1). 5 and 10 cross together (10). 2 returns (2). 1 and 2 cross (2). Total 2 + 1 + 10 + 2 + 2 = 17 minutes. The trick is to pair the two slowest people.", s:"assume"},
+ {q:"A king has 1,000 bottles of wine. Exactly one is poisoned. The poison kills in about 24 hours, even in a tiny sip. The party is in 25 hours. What is the smallest number of tasters needed to find the poisoned bottle for certain?", a:["10","ten"],
+  h:["Each taster gives one yes/no result: dead or alive.","How many different yes/no patterns can 10 tasters produce?","Number the bottles in binary. Taster k drinks from every bottle whose k-th bit is 1."],
+  x:"Write each bottle number (1–1,000) in binary, which needs 10 digits. Taster k drinks from every bottle with a 1 in position k. After 24 hours, the pattern of who died spells the poisoned bottle's number in binary. 2^10 = 1,024 ≥ 1,000, and 9 tasters give only 512 patterns.", s:"info"},
+ {q:"Five pirates of strict rank share 100 gold coins. The most senior proposes a split, and everyone votes. If at least half vote yes (the proposer votes too), the split is accepted. Otherwise the proposer is thrown overboard and the next pirate proposes. Pirates are perfectly logical: first they want to live, then they want gold, then they enjoy throwing others overboard. How many coins does the most senior pirate keep?", a:["98"],
+  h:["Start from the end: what happens with only 2 pirates left?","With 2 pirates, the senior one keeps all 100: his own vote is half. So pirate 3 can buy pirate 5's vote with 1 coin.","Work back one pirate at a time. Each proposer buys the cheapest votes: pirates who would get nothing in the next round."],
+  x:"2 pirates (D, E): D takes 100. 3 pirates (C, D, E): C gives E 1 coin and keeps 99. 4 pirates (B–E): B gives D 1 coin and keeps 99 (B + D = half). 5 pirates (A–E): A gives C 1 and E 1, and keeps 98. Those two would get nothing otherwise, so they vote yes.", s:"back"},
+ {q:"100 ants stand at random points on a 1-metre stick. Each ant faces left or right at random and walks at 1 metre per minute. When two ants meet, both turn around. An ant that reaches an end falls off. What is the longest time before every ant has fallen off?", a:["1","1 minute","one minute"],
+  h:["Collisions look complicated. Can you ignore them?","When two identical ants bounce, it looks exactly like they passed through each other.","So each 'ant path' just walks straight to an end."],
+  x:"Two ants bouncing is the same, from outside, as two ants passing through each other. So every ant path walks straight off the stick. The longest path is the full 1 metre, which takes 1 minute.", s:"assume"},
+ {q:"A 3×3×3 cube is painted red on the outside, then cut into 27 small cubes. How many small cubes have exactly two red faces?", a:["12","twelve"],
+  h:["Corner cubes have 3 red faces. Where are the cubes with 2?","They sit on the edges of the big cube, but not at the corners.","A cube has 12 edges."],
+  x:"Each of the 12 edges of the big cube has one middle cube, and each of those has exactly two red faces. 8 corners have 3, 6 face centres have 1, and the 1 core cube has 0. Check: 8 + 12 + 6 + 1 = 27.", s:"steps"},
+ {q:"How many times do the hour hand and the minute hand of a clock point in exactly the same direction in 12 hours (from just after 12:00 to just before the next 12:00, counting 12:00 once)?", a:["11","eleven"],
+  h:["It is not 12. Think about the overlap between 11:00 and 1:00.","The minute hand gains one full lap on the hour hand every 12/11 hours.","12 hours ÷ 12/11 hours = 11."],
+  x:"The minute hand laps the hour hand once every 12/11 hours (about 1 h 5 min 27 s). In 12 hours that happens 11 times. There is no separate overlap between 11 and 12: it happens exactly at 12:00.", s:"check"},
+ {q:"You have 25 horses and one track that races 5 horses at a time. You have no stopwatch; a race only tells you the order. What is the smallest number of races to find the 3 fastest horses?", a:["7","seven"],
+  h:["First, race all 25 in 5 groups. That is 5 races.","Race the 5 group winners. The winner of that race is the fastest horse overall.","Which horses can still be 2nd or 3rd overall? List them; there are only 5."],
+  x:"5 group races, then 1 race of winners (A1 > B1 > C1 > D1 > E1). Groups D and E are out, and so is everything below 3rd place. Candidates for 2nd and 3rd: A2, A3, B1, B2, C1. One last race of these 5 gives 2nd and 3rd. Total 7.", s:"info"},
+ {q:"You have 2 identical eggs and a 100-floor building. You want to find the highest floor from which an egg survives a drop. What is the smallest number of drops that always finds it?", a:["14","fourteen"],
+  h:["If the first egg breaks, the second egg must test floors one by one from the last safe floor.","Make the worst case equal at every step: drop the first egg at floor n, then n + (n−1), then n + (n−1) + (n−2)…","Find the smallest n with n + (n−1) + … + 1 ≥ 100."],
+  x:"Drop the first egg at floors 14, 27, 39, 50, 60, 69, 77, 84, 90, 95, 99, 100. Each jump is one smaller, so the total drops stay at most 14. 14 × 15 ÷ 2 = 105 ≥ 100, but 13 × 14 ÷ 2 = 91 < 100.", s:"extreme"},
+ {q:"You have a 7-minute hourglass and an 11-minute hourglass. How do you measure exactly 15 minutes?", a:["flip the 7","turn the 7"],
+  h:["Start both at the same time.","When the 7 runs out, what do you do with it?","At 11 minutes, the 7-minute glass has 4 minutes of sand in its bottom."],
+  x:"Start both. At 7 minutes, flip the 7. At 11 minutes (the 11 runs out), the 7 has run 4 minutes since its flip: flip it again. It now runs 4 more minutes. 11 + 4 = 15.", s:"steps"},
+ {q:"\"I am twice as old as you were when I was as old as you are now. Our ages add up to 63.\" How old am I?", a:["36"],
+  h:["Let me = M and you = Y. The age gap is M − Y.","'When I was as old as you are now' was M − Y years ago. Then you were Y − (M − Y) = 2Y − M.","So M = 2(2Y − M), and M + Y = 63."],
+  x:"M = 2(2Y − M) gives 3M = 4Y. With M + Y = 63: Y = 27, M = 36. Check: 9 years ago I was 27 and you were 18; 36 = 2 × 18.", s:"steps"},
+ {q:"You drive to a city at 60 km/h and come back on the same road at 40 km/h. What is your average speed for the whole trip?", a:["48","48 km/h"],
+  h:["It is not 50. You spend more time at the slower speed.","Pick a distance, for example 120 km each way.","Average speed = total distance ÷ total time."],
+  x:"Take 120 km each way. Going takes 2 hours, returning takes 3 hours. 240 km ÷ 5 hours = 48 km/h. The fast answer, 50, ignores that you spend longer at 40 km/h.", s:"check"},
+ {q:"Four cards show A, K, 4 and 7. Each card has a letter on one side and a number on the other. Rule: \"If a card has a vowel on one side, it has an even number on the other.\" Which cards must you turn over to test the rule?", o:["A only","A and 4","A and 7","A, 4 and 7"], c:2,
+  h:["Which cards could break the rule?","The 4 cannot break it: the rule says nothing about what is behind an even number.","A vowel behind the 7 would break the rule."],
+  x:"Turn A (it needs an even number behind it) and 7 (a vowel behind it breaks the rule). K and 4 cannot break the rule. Most people choose 4, which tests confirmation instead of trying to disprove.", s:"assume"},
+ {q:"What is the next term? 1, 11, 21, 1211, 111221, …", a:["312211"],
+  h:["Read each term out loud.","'1' is 'one 1'. '11' is 'two 1s'.","Read 111221 as: three 1s, two 2s, one 1."],
+  x:"Each term describes the previous one. 111221 = three 1s, two 2s, one 1 → 312211.", s:"pattern"},
+ {q:"100 doors are closed. Person 1 toggles every door, person 2 toggles every 2nd door, person 3 every 3rd door, up to person 100. How many doors are open at the end?", a:["10","ten"],
+  h:["Door n is toggled once for each divisor of n.","A door ends open if it is toggled an odd number of times.","Which numbers have an odd number of divisors?"],
+  x:"Divisors come in pairs (2 × 18 = 36), except when a number is a perfect square (6 × 6). Only squares have an odd number of divisors: 1, 4, 9, … 100. That is 10 doors.", s:"pattern"},
+ {q:"A census taker asks a woman the ages of her three children. \"Their ages multiply to 36,\" she says, \"and add up to the house number next door.\" He looks next door and says, \"That is not enough.\" She adds, \"My oldest loves chocolate.\" What are the ages?", a:["9 2 2","9,2,2","2 2 9","2,2,9"],
+  h:["List every set of three ages with product 36, and add each set up.","Why could the house number not settle it? Only one sum appears twice.","The sum 13 fits both 9,2,2 and 6,6,1. One of them has no single oldest child."],
+  x:"Only sum 13 is ambiguous: 9 + 2 + 2 and 6 + 6 + 1. 'My oldest' means there is one oldest child, so the ages are 9, 2 and 2.", s:"info"},
+ {q:"Three people sit in a line, all facing forward. C sees A and B. B sees only A. A sees no one. Their hats come from 3 white and 2 red hats. C says: \"I don't know my colour.\" B says: \"I don't know either.\" A says: \"I know mine.\" What colour is A's hat?", o:["White","Red","It cannot be known"], c:0,
+  h:["When would C know his colour at once?","C would know only if A and B both wore red. So A and B are not both red.","B knows that too. If A were red, what would B conclude?"],
+  x:"C doesn't know, so A and B are not both red. B knows this. If A wore red, B would know he wears white. B doesn't know, so A is not red. A's hat is white.", s:"info"},
+ {q:"100 prisoners stand in a line, each wearing a red or black hat. Each sees all hats in front of them, not their own. Starting from the back, each says one word: 'red' or 'black'. They can agree a plan beforehand. How many can be saved for certain?", a:["99"],
+  h:["The person at the back cannot be sure of their own hat. Can their word help everyone else?","The back person says 'red' if they see an even number of red hats.","Each next person counts the red hats they see and hears the answers behind them. Parity tells them their own colour."],
+  x:"The last person announces the parity of red hats they see (a 50% guess for themselves). Every other person can then work out their own colour from that parity, the hats they see and the answers already given. 99 are certain.", s:"info"},
+ {q:"You have 10 stacks of 10 coins. One whole stack is fake: fake coins weigh 11 g, real ones 10 g. You have a digital scale. What is the fewest weighings needed to find the fake stack?", a:["1","one"],
+  h:["You can take different numbers of coins from different stacks.","Take 1 coin from stack 1, 2 from stack 2, …, 10 from stack 10.","Compare the weight with 550 g."],
+  x:"Take 1, 2, 3 … 10 coins from stacks 1 to 10: 55 coins. If all were real, they would weigh 550 g. The extra grams equal the number of the fake stack. One weighing.", s:"info"},
+ {q:"A drawer holds 10 pairs of black gloves and 10 pairs of white gloves, all mixed. In the dark, how many single gloves must you take to be sure of one matching pair (same colour, one left and one right)?", a:["21"],
+  h:["Imagine the worst luck possible.","You could pick only left gloves for a long time.","There are 20 left gloves in total."],
+  x:"In the worst case you take all 20 left gloves (10 black, 10 white). The 21st glove is a right glove, and it matches one of the left gloves in colour. So 21.", s:"extreme"},
+ {q:"A farmer must cross a river with a wolf, a goat and a cabbage. The boat carries the farmer and one item. Left alone, the wolf eats the goat, and the goat eats the cabbage. What is the smallest number of crossings (one way = one crossing)?", a:["7","seven"],
+  h:["The goat is the problem: it conflicts with both others.","Take the goat first.","You may bring something back across the river."],
+  x:"1 goat over. 2 return. 3 wolf over. 4 bring the goat back. 5 cabbage over. 6 return. 7 goat over. Seven crossings.", s:"back"},
+ {q:"Two doors: one leads to freedom, one to a trap. One guard always lies and one always tells the truth; you do not know which is which. You may ask one guard one question. What do you ask?", o:["\"Which door leads to freedom?\"","\"Are you the liar?\"","\"Which door would the other guard say leads to freedom?\" Then take the other door.","\"Is the left door safe?\""], c:2,
+  h:["You need a question where both guards give the same answer.","Route the answer through both guards: one lie plus one truth.","Whatever they point to is the trap."],
+  x:"Ask either guard what the other guard would say. The answer passes through exactly one liar, so it always points to the trap. Take the other door.", s:"assume"},
+ {q:"Blindfolded, you face 100 coins on a table. Exactly 10 show heads. You may move and flip coins but cannot feel which side is up. How do you make two groups with the same number of heads?", o:["Make two groups of 50","Take any 10 coins as a group and flip all 10","Flip every coin","It is impossible"], c:1,
+  h:["The two groups do not need to be the same size.","Suppose your group of 10 contains h heads. How many heads stay in the big group?","Flipping your group turns its h heads into 10 − h heads."],
+  x:"Take any 10 coins. If they contain h heads, the other 90 contain 10 − h heads. Flip the 10: they now show 10 − h heads. Both groups match.", s:"assume"},
+ {q:"Three ants sit at the corners of a triangle. Each picks a random direction along the edges and walks. What is the chance that no two ants collide?", a:["1/4","25%","0.25"],
+  h:["Each ant has 2 choices, so there are 8 equal outcomes.","Ants avoid each other only if they all go the same way around.","How many of the 8 outcomes are 'all clockwise' or 'all anticlockwise'?"],
+  x:"2 × 2 × 2 = 8 outcomes. Only 'all clockwise' and 'all anticlockwise' avoid collisions: 2 of 8 = 1/4.", s:"steps"},
+ {q:"There are three caskets: gold, silver and lead. Gold says: \"The portrait is in this casket.\" Silver says: \"The portrait is not in this casket.\" Lead says: \"The portrait is not in the gold casket.\" At most one statement is true. Where is the portrait?", o:["Gold","Silver","Lead"], c:1,
+  h:["Test each casket as the answer. Count how many statements become true.","If it is in gold: gold is true and silver is true. That is two.","Only one choice keeps the number of true statements at one or zero."],
+  x:"Gold: gold and silver are true (two) — no. Lead: silver and lead are true (two) — no. Silver: only lead is true (one) — yes. The portrait is in the silver casket.", s:"steps"},
+ {q:"With a two-pan balance you may put weights on either pan. Which four weights let you weigh every whole kilogram from 1 to 40?", a:["1 3 9 27","1,3,9,27","1, 3, 9, 27"],
+  h:["Placing a weight on the item's pan subtracts it.","Each weight can be on the left pan, on the right pan or off: 3 options.","Try powers of 3."],
+  x:"1, 3, 9 and 27 kg. Each can add, subtract or sit out, like a digit in balanced base 3. Their sum is 40, and every value from 1 to 40 is reachable, for example 2 = 3 − 1 and 5 = 9 − 3 − 1.", s:"pattern"},
+ {q:"You have 50 red and 50 blue marbles and two jars. You may split them however you like. Then someone picks a jar at random and a marble at random from it. How do you maximise the chance that the marble is red?", o:["25 red + 25 blue in each jar","All red in one jar, all blue in the other","1 red in one jar; everything else in the other","It makes no difference"], c:2,
+  h:["The jar is chosen 50:50 whatever is inside it.","Can you make one jar a sure win?","A jar with a single red marble is 100% red."],
+  x:"Put 1 red marble alone in jar 1 (100% red). Jar 2 holds 49 red and 50 blue (49/99). The chance is ½ × 1 + ½ × 49/99 ≈ 74.7%. An even split gives only 50%.", s:"extreme"}
+];
+
 const STICKS = [{"kind":"num","start":"70","goal":"lt","target":70,"moves":1,"best":"-10","count":2},{"kind":"num","start":"946","goal":"gt","target":946,"moves":1,"best":"996","count":5},{"kind":"num","start":"508","goal":"gt","target":508,"moves":1,"best":"909","count":12},{"kind":"num","start":"381","goal":"lt","target":381,"moves":1,"best":"-391","count":6},{"kind":"num","start":"19","goal":"gt","target":19,"moves":1,"best":"79","count":3},{"kind":"num","start":"225","goal":"gt","target":225,"moves":1,"best":"325","count":3},{"kind":"num","start":"74","goal":"lt","target":74,"moves":1,"best":"-14","count":2},{"kind":"num","start":"10","goal":"gt","target":10,"moves":1,"best":"19","count":2},{"kind":"num","start":"58","goal":"lt","target":58,"moves":1,"best":"-59","count":4},{"kind":"num","start":"963","goal":"lt","target":963,"moves":1,"best":"-963","count":13},{"kind":"num","start":"39","goal":"gt","target":39,"moves":1,"best":"99","count":4},{"kind":"num","start":"612","goal":"gt","target":612,"moves":1,"best":"912","count":2},{"kind":"num","start":"41","goal":"gt","target":41,"moves":1,"best":"71","count":1},{"kind":"num","start":"800","goal":"lt","target":800,"moves":1,"best":"-900","count":4},{"kind":"num","start":"17","goal":"lt","target":17,"moves":1,"best":"-11","count":1},{"kind":"num","start":"356","goal":"gt","target":356,"moves":1,"best":"956","count":7},{"kind":"eq","start":"1+1=6","moves":1,"best":"7-1=6","count":1},{"kind":"eq","start":"7-9=4","moves":1,"best":"7-3=4","count":1},{"kind":"eq","start":"5+2=8","moves":1,"best":"5+3=8","count":1},{"kind":"eq","start":"5-2=7","moves":1,"best":"9-2=7","count":1},{"kind":"eq","start":"6+3=0","moves":1,"best":"5+3=8","count":2},{"kind":"eq","start":"6+1=5","moves":1,"best":"5+1=6","count":1},{"kind":"eq","start":"3-3=2","moves":1,"best":"5-3=2","count":1},{"kind":"eq","start":"9+1=5","moves":1,"best":"5+1=6","count":1},{"kind":"eq","start":"2+8=6","moves":1,"best":"2+6=8","count":1},{"kind":"eq","start":"2+3=3","moves":1,"best":"2+3=5","count":1},{"kind":"eq","start":"3-8=3","moves":1,"best":"9-6=3","count":2},{"kind":"eq","start":"4-5=1","moves":1,"best":"4-3=1","count":1},{"kind":"eq","start":"2+6=9","moves":1,"best":"3+6=9","count":1},{"kind":"eq","start":"5+9=9","moves":1,"best":"6+3=9","count":2},{"kind":"eq","start":"7+5=7","moves":1,"best":"1+6=7","count":1},{"kind":"eq","start":"5-5=6","moves":1,"best":"5-5=0","count":1},{"kind":"eq","start":"9+0=3","moves":1,"best":"9+0=9","count":2},{"kind":"eq","start":"1+6=5","moves":1,"best":"1+5=6","count":1},{"kind":"eq","start":"5-9=8","moves":1,"best":"5+3=8","count":2},{"kind":"eq","start":"7+1=5","moves":1,"best":"7-1=6","count":1},{"kind":"eq","start":"0-6=8","moves":1,"best":"0+6=6","count":1},{"kind":"eq","start":"1+5=0","moves":1,"best":"1+5=6","count":1},{"kind":"eq","start":"7-9=7","moves":1,"best":"7-0=7","count":1},{"kind":"eq","start":"7-4=9","moves":1,"best":"7-4=3","count":1}];
 /* ---------- Think tab ---------- */
 const TH = () => (S.think ||= {solved:{}, off:{}});
@@ -2217,7 +2268,7 @@ function seeded(n){ let x = (n * 2654435761) % 4294967296; return () => (x = (x 
 function shuffled(arr, seed){ const r = seeded(seed + 7), a = arr.map((v, i) => [v, i]); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const offFor = cat => (((TH().off[todayKey()] || {})[cat]) || 0);
 function bump(cat){ const t = TH(), k = todayKey(); t.off[k] = t.off[k] || {}; t.off[k][cat] = (t.off[k][cat] || 0) + 1; save(); }
-const DONE_KEYS = {t:["t","tx","s"], f:["f","fx"], d:["d"]};
+const DONE_KEYS = {t:["t","tx","s"], p:["p","px"], d:["d"]};
 const doneToday = cat => Object.entries(TH().solved).some(([k, v]) => v === todayKey() && DONE_KEYS[cat].includes(k.split(":")[0]));
 function markSolved(cat, id){ const t = TH(); if (!t.solved[cat + ":" + id]){ t.solved[cat + ":" + id] = todayKey(); save(); } renderThinkTop(); }
 const solvedCount = cat => Object.keys(TH().solved).filter(k => k.startsWith(cat + ":")).length;
@@ -2228,16 +2279,17 @@ function todaysTeaser(){
   if (((n % 7) + 7) % 7 === 3) return {type: "stick", i: ((n * 11) % STICKS.length + STICKS.length) % STICKS.length};
   return {type: "teaser", i: ((n * 37) % TEASERS.length + TEASERS.length) % TEASERS.length};
 }
+const todaysDeep = () => { const n = dayIndex() + offFor("p"); return ((n * 13) % DEEP.length + DEEP.length) % DEEP.length; };
 const todaysFlaw  = () => { const n = dayIndex() + offFor("f"); return ((n * 23) % FLAWS.length + FLAWS.length) % FLAWS.length; };
 const todaysDrill = () => { const n = dayIndex() + offFor("d"); return ((n * 17) % DRILLS.length + DRILLS.length) % DRILLS.length; };
 
 function renderThinkTop(){
-  const parts = [["t","Brain teaser"],["f","Spot the flaw"],["d","Answer drill"]];
+  const parts = [["t","Quick teaser"],["p","Deep puzzle"],["d","Answer drill"]];
   const html = parts.map(([c, l]) => `<span class="tchk ${doneToday(c) ? "on" : ""}"><i></i>${l}${doneToday(c) ? " · done" : ""}</span>`).join("");
   ["thinkToday","thinkTodayTab"].forEach(id => { const el = $(id); if (el) el.innerHTML = html; });
   const pl = (n, one, many) => n + " " + (n === 1 ? one : many);
-  const tot = $("thinkTotals"); if (tot) tot.textContent = pl(solvedCount("t") + solvedCount("s"), "teaser", "teasers") + " solved · " + pl(solvedCount("f"), "flaw", "flaws") + " spotted · " + pl(solvedCount("d"), "drill", "drills") + " answered";
-  const card = $("thinkCard"); if (card){ const n = ["t","f","d"].filter(doneToday).length; $("thinkCardNote").textContent = n === 3 ? "All three done today. Well thought." : n + " of 3 done today · about 10 minutes"; }
+  const tot = $("thinkTotals"); if (tot) tot.textContent = pl(solvedCount("t") + solvedCount("s"), "teaser", "teasers") + " solved · " + pl(solvedCount("p"), "deep puzzle", "deep puzzles") + " cracked · " + pl(solvedCount("d"), "drill", "drills") + " answered";
+  const card = $("thinkCard"); if (card){ const n = ["t","p","d"].filter(doneToday).length; $("thinkCardNote").textContent = n === 3 ? "All three done today. Well thought." : n + " of 3 done today · about 10 minutes"; }
 }
 
 /* answer check for typed answers */
@@ -2252,7 +2304,7 @@ function matches(input, accepted){
 
 function renderThink(){
   renderThinkTop();
-  renderTeaser(); renderFlaw(); renderDrill();
+  renderTeaser(); renderDeep(); renderDrill();
 }
 
 /* ---- brain teaser ---- */
@@ -2370,6 +2422,48 @@ function renderFlaw(){
   });
 }
 
+/* ---- deep puzzle ---- */
+let deepTimer = null, deepStart = 0;
+function renderDeep(){
+  clearInterval(deepTimer);
+  const i = todaysDeep(), d = DEEP[i], sk = SKILLS[d.s], solved = TH().solved["p:" + i];
+  let shown = 0;
+  $("deepBody").innerHTML = `
+    <div class="skill"><span class="hl">${esc(sk[0])}</span><span class="note" id="dpClock">0:00</span></div>
+    <h3 class="tq">${esc(d.q)}</h3>
+    <p class="note">Work it out on paper first. Use the hints one at a time, only when you are stuck.</p>
+    ${d.o ? `<div class="opts" id="dpOpts">${shuffled(d.o, i + 3).map(([o, k]) => `<button class="opt" data-dpo="${k}"><span>${esc(o)}</span></button>`).join("")}</div>`
+          : `<div class="row"><input type="text" id="dpAns" placeholder="Your answer" autocomplete="off" style="flex:1;min-width:0"><button class="btn primary" id="dpCheck">Check</button></div>`}
+    <p class="note" id="dpFb" aria-live="polite"></p>
+    <div id="dpHints"></div>
+    <div class="row"><button class="btn" id="dpHint">Hint 1 of ${d.h.length}</button><button class="btn" id="dpReveal">Show the solution</button><button class="btn" id="dpAI" hidden>Ask the tutor to judge</button></div>
+    <div class="ruled" id="dpExplain" hidden></div>
+    <p class="note skilltip">Skill: ${esc(sk[1])}</p>`;
+  const stop = () => clearInterval(deepTimer);
+  const explain = () => { $("dpExplain").hidden = false; $("dpExplain").innerHTML = `<p><mark class="hl">Answer: ${esc(d.o ? d.o[d.c] : d.a[0])}</mark></p><p>${esc(d.x)}</p>`; };
+  const time = () => { const s = Math.floor((Date.now() - deepStart) / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  const win = (el) => { stop(); $("dpFb").innerHTML = `<span class='hl hl-g'>Cracked in ${time()}${shown ? " with " + shown + (shown === 1 ? " hint" : " hints") : " with no hints"}.</span> Read the solution to compare methods.`; explain(); markSolved("p", i); if (el) cheer(el); };
+  if (solved){ $("dpFb").textContent = "Solved today. Tap 'Another one' for more."; explain(); $("dpClock").textContent = ""; }
+  else { deepStart = Date.now(); deepTimer = setInterval(() => { const c = $("dpClock"); if (c) c.textContent = time(); else stop(); }, 1000); }
+  ACT.dpHint = () => { if (shown >= d.h.length) return; shown++; $("dpHints").insertAdjacentHTML("beforeend", `<p class="hint">Hint ${shown}: ${esc(d.h[shown - 1])}</p>`);
+    $("dpHint").textContent = shown < d.h.length ? `Hint ${shown + 1} of ${d.h.length}` : "No more hints"; $("dpHint").disabled = shown >= d.h.length; };
+  ACT.dpReveal = () => { stop(); explain(); markSolved("px", i); };
+  ACT.dpCheck = () => { const v = $("dpAns").value; if (!v.trim()) return;
+    if (matches(v, d.a)) win($("dpCheck"));
+    else { $("dpFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> Check each step on paper, or take the next hint."; $("dpAI").hidden = !sample; } };
+  ACT.dpAI = async () => { const v = $("dpAns").value; $("dpFb").textContent = "Asking the tutor…";
+    try { const r = await sample.json(`${STYLE}\n\nA puzzle, its correct answer, and Prem's answer. Decide if Prem's answer is correct in meaning, even if worded differently.\nPuzzle: ${d.q}\nCorrect answer: ${d.o ? d.o[d.c] : d.a[0]}. Solution: ${d.x}\nPrem's answer: ${v}\nReturn JSON only: {"correct": true or false, "feedback": "one or two short sentences, without giving away the answer if wrong"}`);
+      if (r.correct) win(); else $("dpFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> " + esc(r.feedback || ""); }
+    catch(e) { $("dpFb").textContent = e.message || "The tutor could not answer."; } };
+  if (d.o) $("dpOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const k = +b.dataset.dpo, right = k === d.c;
+    $("dpOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const j = +x.dataset.dpo;
+      if (j === d.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${j === k ? "Correct · your answer" : "Correct answer"}</span>`); }
+      else if (j === k){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Your answer</span>`); } });
+    if (right) win(b); else { stop(); $("dpFb").innerHTML = "<span class='hl hl-p'>Not this time.</span> Read the solution and find the step you missed."; explain(); markSolved("px", i); }
+  });
+}
+
 /* ---- answer drill ---- */
 function renderDrill(){
   const i = todaysDrill(), d = DRILLS[i], draft = (TH().drafts || {})[i] || "";
@@ -2398,7 +2492,7 @@ function renderDrill(){
 
 function cheer(el){ try { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2); } catch(e) {} }
 ACT.tNext = () => { bump("t"); renderTeaser(); renderThinkTop(); };
-ACT.fNext = () => { bump("f"); renderFlaw(); };
+ACT.pNext = () => { bump("p"); renderDeep(); renderThinkTop(); };
 ACT.dNext = () => { bump("d"); renderDrill(); };
 ACT.thinkGo = () => show("think");
 
@@ -2591,7 +2685,10 @@ function renderMentorCard(){
 INP.woopO = () => { M().woopO = $("woopO").value; save(); };
 INP.woopP = () => { M().woopP = $("woopP").value; save(); };
 ACT.projGo = () => { backTo = null; show("projects"); };
-ACT.projBack = () => show("mentor");
+ACT.planBack = () => show("learn");
+ACT.planGo = () => { viewDay = null; backTo = null; show("plan"); };
+function renderMake(){ renderLife(); renderLifeMentor(); }
+ACT.projBack = () => show("plan");
 ACT.teachDone = () => { (S.teach ||= {})[viewDay || current()] = todayKey(); save(); toast("Taught it back", "That is the habit that makes it stick."); };
 ACT.teachCheck = async () => {
   const d = viewDay || current(), x = DAYS[d - 1], a = $("teachTxt").value.trim(), out = $("teachOut"); out.hidden = false;
@@ -2675,7 +2772,7 @@ ACT.mkSave = () => { const l = LF(), tk = todayKey(), now = new Date(), t = $("m
   save(); renderLife(); renderMorning(); toast(now.getHours() < 10 ? "Made before 10 AM" : "Made today", "Your brain starts the day as a maker, not a reader."); };
 ACT.frBtn = () => { LF().friction[todayKey()] = true; save(); renderLife(); toast("Friction done", "Small effort, full attention. That is the point."); };
 ACT.exBtn = () => { const ex = activeExp(); if (!ex) return; (ex.checks ||= {})[todayKey()] = true; save(); renderLife(); toast("Experiment logged", "You acted against the label. Notice what actually happened."); };
-ACT.exGo = () => { show("mentor"); setTimeout(() => $("expCard").scrollIntoView({behavior: "smooth", block: "start"}), 50); };
+ACT.exGo = () => { setTimeout(() => $("expCard").scrollIntoView({behavior: "smooth", block: "start"}), 50); };
 
 /* Mentor tab parts */
 function renderLifeMentor(){
@@ -2718,6 +2815,127 @@ function lifeSummary(w){ const l = LF(), [ws, we] = weekRange(w), inW = k => { c
   const made = Object.entries(l.make).filter(([k]) => inW(k)), early = made.filter(([, v]) => v.before10).length, ex = activeExp() || l.exps[l.exps.length - 1];
   const mins = l.hobby.logs.filter(g => inW(g.date)).reduce((a, g) => a + g.min, 0);
   return `Made something on ${made.length} days (${early} before 10 AM). Friction tasks: ${Object.keys(l.friction).filter(inW).length}. Beginner's hours (${l.hobby.name || "no hobby chosen"}): ${Math.round(mins / 6) / 10} of 3. Experiment: ${ex ? ex.act + " (" + Object.keys(ex.checks || {}).length + " days acted)" : "none"}. Dropped scoreboards: ${l.phantoms.filter(p => p.drop).map(p => p.text).join("; ") || "none"}.`; }
+
+
+/* ===== Market ===== */
+/* ---------- Market: a news analyst that searches the web and tells you how to prepare ---------- */
+const MK_TOPICS = [
+  "AI in BPM and IT services (Accenture, Genpact, TCS, Infosys, Wipro, WNS, EXL, Cognizant)",
+  "Client moves: captive centres (GCCs) in India, vendor consolidation, insourcing, cost programmes",
+  "AI pricing: outcome-based deals, FTE and headcount deflation in services contracts",
+  "Hiring and skills in demand for AI consultant and GenAI roles in India",
+  "New AI models, agents and tools that enterprises are adopting",
+  "AI regulation and governance (India, EU, US)"
+];
+const MKT = () => { const m = (S.market ||= {}); m.briefs ||= {}; m.qa ||= []; if (!m.topics) m.topics = MK_TOPICS.map(t => ({t, on: true})); return m; };
+const MK_CONTEXT = `Prem works in business planning (revenue forecasting, client delivery) at a BPM company in India. He has an MBA, does AI consulting and builds AI apps. His goal in the next 3 months: earn an internal AI leadership role, starting with a 'Ramp-down Radar' that predicts which client accounts will ramp down. Longer term: be an AI consultant. He studies AI one hour a day.`;
+
+/* one grounded call: Gemini + Google Search. Falls back to an ungrounded answer and says so. */
+async function gemSearch(prompt){
+  if (!G.key) throw gErr("not_granted", "Add your Gemini key in Settings.");
+  const contents = toContents(prompt);
+  try {
+    const j = await (await gFetch("generateContent", {contents, tools: [{google_search: {}}], generationConfig: {temperature: 0.4}})).json();
+    const cand = (j.candidates || [])[0] || {}, meta = cand.groundingMetadata || {};
+    const sources = (meta.groundingChunks || []).map(c => c.web).filter(Boolean).map(w => ({title: w.title || w.uri, uri: w.uri}));
+    return {text: textOf(j), sources, live: true};
+  } catch(e) {
+    if (e.code === "not_granted" || e.code === "network" || e.code === "rate_limited" || e.code === "busy") throw e;
+    const j = await (await gFetch("generateContent", {contents, generationConfig: {temperature: 0.4}})).json();
+    return {text: textOf(j), sources: [], live: false};
+  }
+}
+const plainLine = s => String(s || "").replace(/[#*_`>]/g, "").replace(/\[(.*?)\]\(.*?\)/g, "$1").trim();
+
+function renderMarketCard(){
+  const m = MKT(), tk = todayKey(), b = m.briefs[tk];
+  $("mkcDate").textContent = b ? "Today · " + b.at : "";
+  if (b){ const first = b.text.split("\n").map(plainLine).find(l => l.length > 30) || "Today's brief is ready.";
+    $("mkcText").textContent = first.length > 180 ? first.slice(0, 177) + "…" : first; $("marketGo").textContent = "Read today's brief"; }
+  else { $("mkcText").textContent = "Your analyst reads the news on AI in BPM, hiring and client moves, and tells you how to prepare."; $("marketGo").textContent = "Get today's brief"; }
+}
+ACT.marketGo = () => show("market");
+
+function renderMarket(){
+  const m = MKT(), tk = todayKey(), b = m.briefs[tk];
+  const past = Object.keys(m.briefs).filter(k => k !== tk).sort().reverse().slice(0, 10);
+  $("marketRoot").innerHTML = `
+    <div class="thinkhead">
+      <h2>Market</h2>
+      <p class="muted">Your analyst searches recent news, then tells you what is happening, why it matters to you, and how to prepare. About 2 minutes to read.</p>
+    </div>
+    <div class="card upnext">
+      <div class="secthead"><div class="eyebrow">Today's brief${b ? " · " + esc(b.at) : ""}</div>${b ? `<span class="note">${b.live ? "Live web search" : "Not live: general knowledge only"}</span>` : ""}</div>
+      <div class="md ruled" id="mkBrief"${b ? "" : " hidden"}>${b ? md(b.text) : ""}</div>
+      <div id="mkSources">${b ? sourcesHtml(b.sources) : ""}</div>
+      <div class="row"><button class="btn ${b ? "" : "primary"}" id="mkGet">${b ? "Refresh the brief" : "Get today's brief"}</button></div>
+      <p class="note" id="mkStatus">${sample ? "Uses Google Search through your Gemini key. The free tier has a daily limit, so one brief a day is enough." : "The analyst uses Gemini. Add your free key in Settings."}</p>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Ask the analyst</div>
+      <div class="row"><input type="text" id="mkQ" placeholder="Example: Which BPM firms announced AI-led pricing this quarter?" style="flex:1;min-width:0"><button class="btn" id="mkAsk">Ask</button></div>
+      <div class="md ruled" id="mkAns" hidden></div><div id="mkAnsSrc"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">What your analyst watches</div>
+      <p class="note">Tap a topic to switch it off or on. Add your own, for example a client's name or your company's competitors.</p>
+      <div class="chips" id="mkTopics">${m.topics.map((t, i) => `<button class="chip" data-mkt="${i}" aria-pressed="${t.on}">${esc(t.t.split(" (")[0])}</button>`).join("")}</div>
+      <div class="mform"><input type="text" id="mkNewTopic" placeholder="Add a topic to watch"><button class="btn" id="mkAddTopic">Add</button></div>
+    </div>
+    ${past.length ? `<div class="card"><div class="eyebrow">Earlier briefs</div>${past.map(k => `<details><summary class="note">${new Date(k + "T00:00").toLocaleDateString("en-IN", {weekday: "short", day: "numeric", month: "short"})}</summary><div class="md ruled">${md(m.briefs[k].text)}</div>${sourcesHtml(m.briefs[k].sources)}</details>`).join("")}</div>` : ""}`;
+}
+function sourcesHtml(src){
+  if (!src || !src.length) return "";
+  const seen = new Set(), list = src.filter(s => !seen.has(s.title) && seen.add(s.title)).slice(0, 8);
+  return `<p class="note">Sources: ${list.map(s => `<a href="${esc(s.uri)}" target="_blank" rel="noopener">${esc(s.title)}</a>`).join(" · ")}</p>`;
+}
+docOn("click", e => { const c = e.target.closest && e.target.closest("[data-mkt]"); if (c){ const t = MKT().topics[+c.dataset.mkt]; t.on = !t.on; save(); c.setAttribute("aria-pressed", String(t.on)); } });
+ACT.mkAddTopic = () => { const v = $("mkNewTopic").value.trim(); if (!v) return; MKT().topics.push({t: v, on: true}); save(); renderMarket(); };
+ACT.mkGet = async () => {
+  if (!sample){ $("mkStatus").textContent = "Add your free Gemini key in Settings first."; return; }
+  const m = MKT(), topics = m.topics.filter(t => t.on).map(t => "- " + t.t).join("\n");
+  const today = new Date().toLocaleDateString("en-IN", {weekday: "long", day: "numeric", month: "long", year: "numeric"});
+  const prev = Object.keys(m.briefs).sort().reverse()[0];
+  $("mkGet").disabled = true; $("mkStatus").textContent = "Your analyst is searching the news. This takes about 20 seconds…";
+  const prompt = `${STYLE}
+
+You are a sharp market analyst and career strategist for one person. ${MK_CONTEXT}
+Today is ${today}. Use Google Search. Focus on news from the last 7 days; use up to 30 days only for important items. Topics to watch:
+${topics}
+${prev && m.briefs[prev] ? "Avoid repeating these items from the previous brief: " + plainLine(m.briefs[prev].text).slice(0, 600) : ""}
+
+Write the brief in this exact structure, under 450 words:
+#### The big picture
+(2 sentences: the one shift that matters most this week)
+#### What happened
+(3–5 bullets. Each: **the news** (company or source, date) — why it matters to Prem specifically)
+#### Signals for the Ramp-down Radar
+(1–3 bullets: client-side moves such as captive centres, vendor consolidation, cost programmes, leadership changes, that could predict account ramp-downs)
+#### How to prepare this week
+(3 numbered actions, each under 20 minutes, concrete. Link to a skill or lesson topic when it fits)
+#### Talking point
+(One sentence Prem can say to a senior leader this week, backed by the news)
+Rules: report only real news you found through search. If you are not sure something is real or recent, leave it out. No hype. If there is little news on a topic, say so in one line.`;
+  try {
+    const r = await gemSearch(prompt);
+    if (!r.text.trim()) throw gErr("upstream_error", "The analyst returned an empty brief. Try again.");
+    m.briefs[todayKey()] = {text: r.text, sources: r.sources, live: r.live, at: new Date().toLocaleTimeString("en-IN", {hour: "numeric", minute: "2-digit"})};
+    const keys = Object.keys(m.briefs).sort(); while (keys.length > 14) delete m.briefs[keys.shift()];
+    save(); renderMarket(); renderMarketCard();
+    toast("Brief ready", r.live ? "Built from live web search." : "Web search was not available; this uses general knowledge.");
+  } catch(e) { $("mkStatus").textContent = e.message || "The analyst could not finish. Try again in a minute."; $("mkGet").disabled = false; }
+};
+ACT.mkAsk = async () => {
+  const q = $("mkQ").value.trim(), out = $("mkAns"); if (!q) return; out.hidden = false;
+  if (!sample){ out.innerHTML = "<p class='muted'>Add your free Gemini key in Settings first.</p>"; return; }
+  out.innerHTML = "<p class='muted'>Searching…</p>"; $("mkAnsSrc").innerHTML = "";
+  try {
+    const r = await gemSearch(`${STYLE}\n\nYou are a market analyst for Prem. ${MK_CONTEXT}\nToday is ${new Date().toDateString()}. Use Google Search for recent, real facts. Answer his question in under 200 words: the answer first, then 2–4 supporting points with source names and dates, then one line: "What this means for you".\nQuestion: ${q}`);
+    out.innerHTML = md(r.text) + (r.live ? "" : "<p class='note'>Web search was not available; this answer uses general knowledge only.</p>");
+    $("mkAnsSrc").innerHTML = sourcesHtml(r.sources);
+    MKT().qa.unshift({q, a: r.text, at: todayKey()}); MKT().qa.length = Math.min(MKT().qa.length, 20); save();
+  } catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "No answer this time.") + "</p>"; }
+};
 
 const PRINCIPLES = [
  ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm AI consultant you are becoming."],
@@ -2828,17 +3046,10 @@ function renderMorning(){
   $("intentLine").hidden = !m.intent; $("intentLine").textContent = m.intent ? "Today: " + m.intent : "";
   $("ifThenLine").hidden = !(m.woopO && m.woopP); $("ifThenLine").textContent = m.woopO && m.woopP ? "If " + m.woopO.replace(/^if\s+/i, "") + ", then I " + m.woopP.replace(/^(then\s+)?(i\s+(will\s+)?)?/i, "") : "";
   setVal("woopO", m.woopO || ""); setVal("woopP", m.woopP || "");
-  renderMentorCard();
-  renderLife();
+  renderMarketCard();
   // up next
   const rc = ritualCount(m);
-  if (new Date().getHours() < 10 && !LF().make[todayKey()]){
-    $("upEyebrow").textContent = "Up next · before 10 AM";
-    $("upTitle").textContent = "Make one thing first";
-    $("upWhy").textContent = "Before any feed, news or message: write 200 words, sketch, code or record a voice note. Then the calm routine.";
-    $("upBtn").textContent = "Make it now";
-    ACT.upBtn = () => { $("lifeCard").scrollIntoView({behavior: "smooth", block: "start"}); setTimeout(() => $("mkText").focus(), 400); };
-  } else if (rc < 4){
+  if (rc < 4){
     $("upEyebrow").textContent = "Up next · " + rc + " of 4 calm steps done";
     $("upTitle").textContent = "Morning calm";
     $("upWhy").textContent = "Ten quiet minutes: breathe, picture the goal, read your note, log one win.";
@@ -2851,16 +3062,10 @@ function renderMorning(){
     $("upBtn").textContent = "Start today's hour";
     ACT.upBtn = () => { viewDay=null; backTo=null; show("learn"); };
   } else {
-    if (new Date().getDay() === 0 && !(MN().reviews[curWeek()] || {}).date && mentorWeek() >= 1){
-      $("upEyebrow").textContent = "Up next · Sunday · 10 minutes";
-      $("upTitle").textContent = "Weekly review with your mentor";
-      $("upWhy").textContent = "Look at your five numbers, name one change, and get honest feedback.";
-      $("upBtn").textContent = "Open the review";
-      ACT.upBtn = () => { show("mentor"); setTimeout(() => $("rvCard").scrollIntoView({behavior: "smooth", block: "start"}), 50); };
-    } else if (["t","f","d"].some(c => !doneToday(c))){
+    if (["t","p","d"].some(c => !doneToday(c))){
       $("upEyebrow").textContent = "Up next · 10 minutes";
       $("upTitle").textContent = "Think: today's puzzles";
-      $("upWhy").textContent = "One brain teaser, one flaw to spot, one answer drill.";
+      $("upWhy").textContent = "One quick teaser, one deep puzzle, one answer drill.";
       $("upBtn").textContent = "Open Think";
       ACT.upBtn = () => show("think");
     } else {
@@ -3091,17 +3296,18 @@ function renderProjects(){
 
 /* ---------- navigation ---------- */
 function show(v){
+  if(v!=="think") clearInterval(deepTimer);
   if(v!=="learn") VL.stop();
   document.querySelectorAll("section.view").forEach(s=>s.hidden = s.id!=="v-"+v);
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current", b.dataset.v===v?"page":"false"));
-  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="mentor") renderMentor(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
+  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="make") renderMake(); if(v==="market") renderMarket(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
   window.scrollTo(0,0);
   try{ sessionStorage.setItem("p100v",v); }catch(e){}
 }
 function renderRemote(){
   renderTop(); renderMorning();
   const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v;
-  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop(); if (v==="mentor") renderMentor();
+  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop(); if (v==="make") renderMake(); if (v==="market") renderMarket();
   if (v==="learn"){ const d=viewDay||current(); $("doneBtn").textContent = S.done[d] ? "Day complete · undo" : "Mark this day complete"; $("doneBtn").className = S.done[d] ? "btn" : "btn primary"; }
 }
 function renderAll(){ renderTop(); renderMorning(); const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v; if(v!=="morning") show(v); }
@@ -3353,7 +3559,7 @@ if (G.key){ sample = gemini; wireClaude(); }
 try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e) {}
 if ("serviceWorker" in navigator && location.protocol === "https:") { navigator.serviceWorker.register("sw.js").catch(() => {}); }
 
-window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS };
+window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS, DEEP, todaysDeep };
 window.__p100cleanup = () => {
   AC.abort();
   try { clearInterval(breathTimer); } catch(e) {}
