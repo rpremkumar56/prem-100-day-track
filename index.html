@@ -307,6 +307,21 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
 .tchk{display:inline-flex;align-items:center;gap:6px;font:700 .85rem var(--ui);color:var(--muted)}
 .tchk i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line)}
 .tchk.on{color:var(--ink)} .tchk.on i{background:var(--good);border-color:var(--good)}
+.dzws{display:flex;flex-direction:column;gap:8px}
+.dzw{background:var(--surface-2);border-radius:12px;padding:10px 14px}
+.dzw p{margin:0}
+.dzw ul{margin:4px 0 0}
+pre.dzg{font-size:12px}
+.dzlib{border-top:1px dashed var(--line);padding:6px 0}
+.dzlib summary{font:700 .98rem var(--ui);cursor:pointer;min-height:36px;display:flex;align-items:center}
+.dzlib[open]{display:flex;flex-direction:column;gap:10px}
+.dzarea{margin-top:6px}
+#designRoot .chip{text-align:left;line-height:1.3;height:auto}
+#drBody{display:flex;flex-direction:column;gap:14px}
+#drBody > p,#drBody > h3{margin:0}
+.drstep{border-left:3px solid var(--line);padding-left:12px;display:flex;flex-direction:column;gap:6px}
+.drstep p{margin:0}
+.drstep.now{border-left-color:var(--accent)}
 .secthead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .board{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;overflow-x:auto}
 .board svg{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
@@ -680,7 +695,12 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   </div>
 </section>
 
-<!-- MARKET -->
+<!-- DESIGN -->
+<section class="view" id="v-design" hidden>
+  <div class="wrap" style="padding:0" id="designRoot"></div>
+</section>
+
+<!-- MARKET (kept, not in the nav) -->
 <section class="view" id="v-market" hidden>
   <div class="wrap" style="padding:0" id="marketRoot"></div>
 </section>
@@ -696,7 +716,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   <button data-v="morning" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v3M4.9 8.9l2 2M19.1 8.9l-2 2"/></svg>Today</button>
   <button data-v="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>Learn</button>
   <button data-v="think"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Think</button>
-  <button data-v="market"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Market</button>
+  <button data-v="design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="6" rx="1.5"/><rect x="14" y="15" width="7" height="6" rx="1.5"/><rect x="14" y="3" width="7" height="6" rx="1.5"/><path d="M6.5 9v5a2 2 0 0 0 2 2H14M10 6h4"/></svg>Design</button>
 </div></nav>
 
 <div id="sheetHost"></div>
@@ -3194,6 +3214,511 @@ function renderIdentity(){
   $("presets").innerHTML = IDENTITY_PRESETS.map((p, i) => `<button class="chip ${S.self.includes(p) ? "on" : ""}" data-preset="${i}" ${S.self.includes(p) ? "disabled" : ""}>${S.self.includes(p) ? "Added · " : "+ "}${esc(p.split(/[:.]/)[0])}</button>`).join("");
 }
 
+/* ---------- Design: architecture decisions ---------- */
+/* Card fields: id, a (area), t (the decision), d (the default), w ([option, [when it wins]]), r (red flags),
+   s (soundbite), g (diagram), q (self-test: s scenario, o options, c correct, x why), ob/bs (obvious answer vs blind spot) */
+const DECISIONS = [
+// ---------------- Agentic AI ----------------
+{id:"wf-agent", a:"Agentic AI", t:"Workflow or agent?",
+ d:"Start with a fixed workflow. Use an agent only when the steps cannot be known in advance.",
+ w:[["Workflow (fixed steps)",["The steps are known and repeatable, such as extract → validate → post","You need predictable cost, latency and audit","Most BPM processes: claims intake, invoice handling, email triage"]],
+    ["Agent (the model chooses the next step)",["The path depends on what it finds, such as research or troubleshooting","Many possible tools and no fixed order","A wrong step is cheap and easy to undo"]]],
+ r:["'We need an agent' before anyone has mapped the process","No step limit, no budget limit and no stop condition","An agent for a task a rule or a single prompt can do"],
+ s:"I use a workflow when I know the steps and an agent when the path depends on what it discovers. Most enterprise value today comes from workflows with one or two smart steps.",
+ g:"Workflow:  input → [LLM: extract] → [rule: validate] → [LLM: draft] → output\nAgent:     goal → ( think → act with a tool → observe ) loop → answer",
+ q:{s:"A client wants to process 30,000 standard purchase-order emails a month: read, extract fields, match to SAP, flag exceptions.",o:["An autonomous agent with SAP tools","A fixed workflow with an LLM extraction step and rules","A multi-agent system with a manager agent"],c:1,x:"The steps are known and repeat every time. A workflow is cheaper, faster and easier to audit. Add an agent only for the exception path, if at all."},
+ ob:"Agents are the modern approach, so use an agent.", bs:"Agents add cost, latency and unpredictability. In regulated, high-volume work, auditability usually matters more than flexibility."},
+
+{id:"single-multi", a:"Agentic AI", t:"Single agent or multi-agent?",
+ d:"One agent with good tools. Split into several agents only when contexts or skills truly conflict.",
+ w:[["Single agent",["One goal, one context, under about 10–15 well-described tools","Easier to test, trace and debug","Lower token cost: no agents talking to each other"]],
+    ["Multi-agent",["Clearly separate skills with separate context, such as research vs writing vs review","Work that can run in parallel","Different teams own different agents, or agents come from different vendors"]]],
+ r:["Agents with job titles ('CEO agent', 'manager agent') and no clear reason","Agents passing the same context back and forth","Nobody can explain which agent made a decision"],
+ s:"Multi-agent is a scaling pattern, not a starting point. I split agents when their contexts conflict or work can run in parallel, and not because it looks like an org chart.",
+ g:"Single:  user → [agent + tools A,B,C] → answer\nMulti:   user → [orchestrator] → [research agent] + [writer agent] → [reviewer] → answer",
+ q:{s:"An internal HR assistant answers policy questions and raises leave requests. It has 6 tools.",o:["A single agent with the 6 tools","Three agents: policy, leave and router","A swarm of agents that vote"],c:0,x:"One goal, a small tool set and one context. Multiple agents would add cost and failure points without a benefit."},
+ ob:"Multi-agent systems are more powerful.", bs:"Each hand-off loses context and adds tokens and latency. Errors compound across agents, and tracing who decided what becomes hard."},
+
+{id:"lc-lg", a:"Agentic AI", t:"LangChain or LangGraph?",
+ d:"Since the 1.0 releases (October 2025), they are layers, not rivals: LangChain's create_agent runs on the LangGraph runtime. Start with LangChain; drop down to LangGraph when you need control.",
+ w:[["LangChain (high level)",["Standard agents, RAG pipelines, chatbots and prototypes","You want model and tool integrations quickly","The agent loop itself is not special"]],
+    ["LangGraph (low level)",["Custom control flow: branches, loops, explicit states","Long-running work that must survive restarts: checkpoints and persistence","Human-in-the-loop pauses and approvals, multi-step or multi-agent orchestration"]]],
+ r:["Choosing LangGraph for a simple chatbot","Choosing LangChain, then fighting it to add approvals and resumable state","Picking a framework before the workflow is drawn"],
+ s:"LangChain gets an agent running fast. LangGraph is the runtime under it, and I use it directly when I need explicit state, checkpoints and human approval steps.",
+ g:"LangChain create_agent  ──runs on──▶  LangGraph runtime\n                                       (state graph, checkpoints,\n                                        interrupts for human review)",
+ q:{s:"A claims workflow must pause for an adjuster's approval, sometimes for two days, then continue where it stopped.",o:["LangChain's default agent","LangGraph with checkpoints and an interrupt for approval","A cron job that reruns everything"],c:1,x:"Pausing for days and resuming needs persisted state and explicit interrupts. That is what LangGraph's runtime provides."},
+ ob:"LangGraph is the newer, better version of LangChain.", bs:"They solve different layers. The cost of LangGraph is more code and more design decisions; it pays off only when you need the control."},
+
+{id:"fw-sdk", a:"Agentic AI", t:"An agent framework or the plain model SDK?",
+ d:"For one model and a few tools, the plain SDK is often enough. Use a framework when you need its runtime features.",
+ w:[["Plain model SDK",["One provider, a few tools, a simple loop","You want full visibility and few dependencies","The team is small and the logic is custom"]],
+    ["Framework (LangGraph, Microsoft Agent Framework, OpenAI Agents SDK, Google ADK…)",["You need persistence, retries, tracing, human-in-the-loop out of the box","Several models or providers","Many agents or long-running workflows"]]],
+ r:["A framework added 'because everyone uses it' and the team cannot debug it","Upgrading the framework breaks the product every month","Framework abstractions hide the actual prompts"],
+ s:"A framework is worth it when I need its runtime: state, retries, tracing, approvals. For a small loop with one model, the SDK keeps things simple and debuggable.",
+ g:"App ──▶ model SDK ──▶ model          (simple: you own the loop)\nApp ──▶ framework runtime ──▶ models + tools + state store + traces",
+ q:{s:"A 2-person team builds a single-tool summariser that calls one model.",o:["The plain model SDK","LangGraph with a state graph","A multi-agent framework"],c:0,x:"No state, no branches, one tool. A framework would add dependencies without solving a problem the team has."},
+ ob:"Always use a framework for production.", bs:"Frameworks move fast and add a layer to debug. The real question is which runtime feature you need and whether the framework gives it better than 50 lines of your own code."},
+
+{id:"fw-pick", a:"Agentic AI", t:"Which agent framework?",
+ d:"Pick by your stack and your control needs, not by popularity.",
+ w:[["LangGraph",["Model-agnostic, explicit graph control, strong human-in-the-loop","Python or JavaScript teams, any cloud"]],
+    ["Microsoft Agent Framework",["Microsoft and Azure shops, .NET or Python","Successor to AutoGen and Semantic Kernel for production"]],
+    ["OpenAI Agents SDK / Google ADK",["You are committed to that provider's models and cloud runtime","You want the lightest path on that stack"]]],
+ r:["Choosing a framework tied to one model provider when the client wants model choice","Mixing three frameworks in one product","No exit plan if the framework changes"],
+ s:"I match the framework to the client's cloud and model strategy, then check three things: state and persistence, human-in-the-loop, and tracing.",
+ g:"Client stack?\n  Azure / .NET ──▶ Microsoft Agent Framework\n  Model-agnostic, explicit control ──▶ LangGraph\n  All-in on one provider ──▶ that provider's SDK",
+ q:{s:"A bank runs everything on Azure, its developers write C#, and it needs approval steps.",o:["Google ADK","Microsoft Agent Framework","A Python-only research framework"],c:1,x:"It fits the cloud and the language, and it supports workflows with human steps. Fit with the team's skills often matters more than features."},
+ ob:"Use the most popular framework.", bs:"The long-term cost is skills, hosting and lock-in. A framework the client's team cannot maintain becomes your permanent support contract."},
+
+{id:"mcp-fc", a:"Agentic AI", t:"MCP or direct function calling?",
+ d:"Direct function calling for a few tools inside one app. MCP when tools are shared across many AI apps or teams.",
+ w:[["Direct function calling",["One application, a handful of tools you own","Lowest latency and fewest moving parts"]],
+    ["MCP (Model Context Protocol)",["Many AI apps need the same tools or data, such as CRM or ticketing","Tool owners and app owners are different teams","You want one place for permissions and logging per tool"]]],
+ r:["An MCP server for a single tool used by one app","MCP servers with broad credentials and no per-user permission","No inventory of which agents can reach which MCP servers"],
+ s:"Function calling is the wire; MCP is the standard socket. I move to MCP when several AI apps need the same tools, because one integration then serves all of them.",
+ g:"Function calling:  app ──▶ model ──▶ app runs tool()\nMCP:               app A ┐\n                   app B ┼──MCP──▶ [CRM server] [Ticket server] [DB server]\n                   app C ┘",
+ q:{s:"Five internal assistants all need read access to the same ticketing system.",o:["Write the integration five times","One MCP server for ticketing, shared by all five","Give each assistant the database password"],c:1,x:"One integration with one permission model serves every assistant. That is MCP's main value."},
+ ob:"MCP is the new standard, so always use it.", bs:"MCP moves the security question to the server: who can call which tool on whose behalf. Without per-user authorisation, it becomes a shared back door."},
+
+{id:"mcp-a2a", a:"Agentic AI", t:"MCP or A2A?",
+ d:"They solve different problems. MCP connects an AI app to tools and data. A2A connects independent agents to each other.",
+ w:[["MCP",["Your agent needs to use tools or read data","You control the agent; the tool is passive"]],
+    ["A2A (Agent2Agent)",["Agents from different vendors or teams must delegate tasks to each other","Each agent keeps its own logic and only exchanges tasks and results"]]],
+ r:["Using agent-to-agent messaging for what is really a tool call","Treating protocol choice as a strategy, without a use case"],
+ s:"MCP is agent-to-tool; A2A is agent-to-agent. Both now sit under the Linux Foundation's Agentic AI Foundation, so they complement each other rather than compete.",
+ g:"[Agent] ──MCP──▶ tools & data\n[Agent A] ◀──A2A──▶ [Agent B from another vendor]",
+ q:{s:"Your claims agent must ask a partner's fraud-scoring agent for a risk opinion.",o:["MCP","A2A","Email"],c:1,x:"Two independent agents exchange a task and a result. That is the A2A case."},
+ ob:"Pick one protocol for everything.", bs:"Most real systems need both. The harder problems are identity, permissions and audit across organisations, not the protocol."},
+
+{id:"rag-ft", a:"Agentic AI", t:"RAG, fine-tuning or long context?",
+ d:"Prompting first, RAG for changing or private facts, fine-tuning for behaviour, long context for one-off large documents.",
+ w:[["RAG",["Facts change, are private or need citations","Large knowledge base"]],
+    ["Fine-tuning",["You need a consistent style, format or narrow skill","High volume, where a smaller tuned model saves cost"]],
+    ["Long context",["One large document per task, such as a contract review","Low volume, so the token cost is acceptable"]]],
+ r:["Fine-tuning to 'teach the model our policies'","Putting the whole knowledge base into every prompt","No eval set to compare the options"],
+ s:"RAG changes what the model knows; fine-tuning changes how it behaves. I decide with an eval set, not by preference.",
+ g:"Need new facts? ──▶ RAG\nNeed behaviour/format? ──▶ prompt, then fine-tune\nOne big document? ──▶ long context",
+ q:{s:"A client's 400 HR policies change every quarter, and answers must cite the policy.",o:["Fine-tune a model each quarter","RAG over the policies with citations","Paste all policies into every prompt"],c:1,x:"Changing facts plus citations is the RAG case. Fine-tuning goes stale; full context is costly and slow."},
+ ob:"Fine-tuning gives the best accuracy.", bs:"Fine-tuning bakes in facts that will change and hides the source. The ongoing cost is retraining and re-evaluating every time content changes."},
+
+{id:"vector", a:"Agentic AI", t:"A separate vector database or pgvector?",
+ d:"If you already run PostgreSQL and have up to a few million vectors, start with pgvector. Move to a dedicated vector database when scale or features demand it.",
+ w:[["pgvector (vectors inside Postgres)",["You already run Postgres; one system to secure and back up","Joins between vectors and business data","Up to millions of vectors with moderate query load"]],
+    ["Dedicated vector database",["Hundreds of millions of vectors or very high query rates","Advanced features: hybrid search, multi-tenancy at scale, managed scaling"]]],
+ r:["A new database product before the first 10,000 documents exist","No plan for re-embedding when the embedding model changes"],
+ s:"I start where the data already lives. A new database is a new security review, a new backup and a new skill; it must earn its place.",
+ g:"App ──▶ Postgres (tables + pgvector)     ← simple\nApp ──▶ Postgres + [vector DB]           ← scale",
+ q:{s:"An internal assistant over 50,000 documents; the client already runs managed Postgres.",o:["pgvector","A new dedicated vector database","A spreadsheet"],c:0,x:"The scale is modest and Postgres already exists. pgvector avoids a new system to secure and run."},
+ ob:"Use a specialised vector database for RAG.", bs:"The hidden cost is operations and data sync between two stores. Retrieval quality usually depends more on chunking and hybrid search than on the database."},
+
+{id:"memory", a:"Agentic AI", t:"Which kind of agent memory?",
+ d:"Keep short-term memory in the conversation, summarise when it grows, and store long-term facts explicitly with user control.",
+ w:[["Short-term (the conversation)",["Within one task or session","Simple: resend recent messages"]],
+    ["Summaries",["Long sessions that exceed the context window","You accept some loss of detail"]],
+    ["Long-term store (profile or vector store)",["Facts that matter across sessions, such as preferences or past cases","Users can see and delete what is stored"]]],
+ r:["Storing everything forever 'in case'","Personal data in memory without consent or deletion","Memory that silently changes answers and nobody can inspect it"],
+ s:"Memory is a product and privacy decision, not just a technical one. I store the minimum, make it visible, and let users delete it.",
+ g:"[current chat] ──▶ (too long) ──▶ [summary]\n[important facts] ──▶ [long-term store] ──▶ retrieved when relevant",
+ q:{s:"A client-service agent should remember a customer's preferred language across calls.",o:["Resend all past calls every time","Store the preference as a long-term fact the customer can change","Fine-tune the model on each customer"],c:1,x:"A small, explicit fact with user control. Resending everything is costly; fine-tuning per customer is absurd."},
+ ob:"More memory makes the agent smarter.", bs:"Old or wrong memories cause confident errors, and stored personal data creates legal risk. Memory needs expiry, inspection and deletion."},
+
+{id:"hitl", a:"Agentic AI", t:"Where does a human step in?",
+ d:"Approve before any action that is costly, irreversible or customer-facing. Sample-check the rest.",
+ w:[["Approve before action",["Payments, emails to customers, data deletion, legal or medical decisions","Low volume or high value"]],
+    ["Review after action",["Reversible actions, internal drafts","Speed matters more than perfection"]],
+    ["Sample audit plus confidence threshold",["High volume, low risk per item","Clear confidence scores route doubtful items to people"]]],
+ r:["Human approval on everything, so people click 'approve' without reading","No human anywhere on irreversible actions","No record of who approved what"],
+ s:"I place human review by risk, not by habit. Irreversible or customer-facing actions get approval; the rest gets confidence thresholds and sampling.",
+ g:"item ──▶ AI ──▶ confidence high & low risk? ──yes──▶ auto ──▶ 5% sample audit\n                         │no\n                         ▼\n                   human approval ──▶ action",
+ q:{s:"An agent drafts refunds up to ₹50,000 for a retail client.",o:["Fully automatic","Human approval before each refund is paid","Monthly review of all refunds"],c:1,x:"Money leaves the company and cannot easily come back. Approval before action is the right control here."},
+ ob:"Put a human in the loop everywhere to be safe.", bs:"Too many approvals cause rubber-stamping, which is worse than no control because it looks safe. Design the review so the human actually adds judgement."},
+
+{id:"evals", a:"Agentic AI", t:"How do you evaluate an agent?",
+ d:"Offline evals on a golden set before release, online monitoring after release. Judge the whole trajectory, not only the final answer.",
+ w:[["Offline evals (golden set)",["Before every prompt, model or tool change","Repeatable regression testing"]],
+    ["Online monitoring",["Real traffic: success rate, cost, latency, escalations, user feedback","Catches drift and new kinds of input"]],
+    ["LLM-as-judge plus human review",["Open-ended outputs where exact match fails","Humans calibrate the judge regularly"]]],
+ r:["Only demo examples, no golden set","Judging only the final answer while the agent took 40 steps and wrong tool calls","LLM judge never checked against human ratings"],
+ s:"For agents I test the path, not just the result: did it pick the right tools, in a reasonable number of steps, at an acceptable cost.",
+ g:"change ──▶ [offline golden set] ──pass──▶ release ──▶ [online monitoring] ──▶ new failures ──▶ added to golden set",
+ q:{s:"An agent's answers look right, but costs doubled after a model upgrade.",o:["Ignore it; the answers are right","Check traces for extra steps and tool calls, and add cost per task to the evals","Switch back without investigating"],c:1,x:"Trajectory metrics such as steps and cost per task catch problems that answer accuracy misses."},
+ ob:"Measure accuracy on a test set.", bs:"Agents fail in the middle: loops, wrong tools, wasted tokens. Without trajectory and cost metrics, a 'correct' agent can be too slow or expensive to run."},
+
+{id:"model-size", a:"Agentic AI", t:"A large model, a small model, or routing?",
+ d:"Route: a small, fast model for simple steps, a large or reasoning model only for the hard ones.",
+ w:[["Small model",["Classification, extraction, routing, short answers","High volume, tight latency"]],
+    ["Large or reasoning model",["Planning, complex analysis, ambiguous cases","Low volume, high value per call"]],
+    ["Router",["Mixed traffic; most requests are simple","You can measure quality per route"]]],
+ r:["The biggest model for every step 'to be safe'","A router with no eval to prove the small model is good enough"],
+ s:"I pick the smallest model that passes the eval for each step. Model choice is a per-step decision, not a per-product one.",
+ g:"request ──▶ [router] ──simple──▶ small model\n                     └─hard───▶ large / reasoning model",
+ q:{s:"A support bot gets 100,000 messages a day; 85% are simple status questions.",o:["One large reasoning model for all","A router: small model for status questions, larger model for the rest","No model; rules only"],c:1,x:"Most traffic is simple. Routing cuts cost sharply while keeping quality on the hard cases."},
+ ob:"Use the best model available.", bs:"Cost and latency grow with volume. The best model for a demo is often the wrong model for 3 million calls a month."},
+
+{id:"sync-async", a:"Agentic AI", t:"Synchronous call or async job queue?",
+ d:"Synchronous for answers a user waits for in seconds. A queue for anything long, bulky or rate-limited.",
+ w:[["Synchronous request",["Chat replies and lookups under about 10 seconds","The user waits on screen"]],
+    ["Async job queue",["Long agent runs, batch documents, many API calls","Need retries, rate-limit control and progress tracking"]]],
+ r:["A 3-minute agent run inside an HTTP request that times out","No idempotency, so retries create duplicate actions"],
+ s:"If a user would not wait for it, it goes on a queue. Queues give me retries, back-pressure and a clean way to respect model rate limits.",
+ g:"user ──▶ API ──▶ [queue] ──▶ workers ──▶ model / tools\n             ◀── status / webhook when done",
+ q:{s:"Process 200,000 scanned invoices overnight with an LLM.",o:["One synchronous loop in a web request","A queue with workers, retries and rate limiting","Ask users to upload one at a time"],c:1,x:"Bulk, long and rate-limited work is the classic queue case."},
+ ob:"Just call the model in the API handler.", bs:"Model APIs throttle and fail. Without a queue, one spike or outage turns into lost work and duplicate actions."},
+
+// ---------------- Apps and infrastructure ----------------
+{id:"site-app", a:"Apps and infra", t:"Static site, server web app or single-page app?",
+ d:"Static site if content rarely changes. Server-rendered web app for most business apps. A single-page app for rich, app-like interaction.",
+ w:[["Static site",["Marketing pages, docs, small tools with no server data","Cheapest and fastest; host on a CDN"]],
+    ["Server-rendered web app",["Forms, dashboards, logins, business data","Good for SEO and simple to secure"]],
+    ["Single-page app (SPA)",["Very interactive screens: editors, live boards","A team comfortable with front-end frameworks"]]],
+ r:["An SPA plus microservices for a 5-page internal form","A static site that secretly needs logins and a database"],
+ s:"I choose the simplest rendering model that meets the interaction need. Most internal business apps are a server web app with a database, not a complex SPA.",
+ g:"Static:   browser ──▶ CDN files\nWeb app:  browser ──▶ server ──▶ database\nSPA:      browser (app) ──▶ API ──▶ database",
+ q:{s:"A 30-person team needs an internal tracker with login, a table and a few forms.",o:["A static site","A server-rendered web app with a managed database","A microservice SPA on Kubernetes"],c:1,x:"Logins and shared data need a server, but nothing here needs SPA complexity or Kubernetes."},
+ ob:"Use React and an API for everything.", bs:"Every extra layer is more code to secure and maintain. The cost shows up in year two, when a small team has to keep it running."},
+
+{id:"k8s", a:"Apps and infra", t:"Serverless, managed containers or Kubernetes?",
+ d:"Serverless or a managed container service first. Kubernetes when you run many services and have a platform team.",
+ w:[["Serverless functions",["Event-driven or spiky traffic, small units of work","Pay per use, no servers to manage"]],
+    ["Managed containers (Cloud Run, Azure Container Apps, ECS)",["A few long-running services or APIs","Containers without running a cluster"]],
+    ["Kubernetes",["Dozens of services, custom networking, portability across clouds","A team that can operate it: upgrades, security, monitoring"]]],
+ r:["Kubernetes for one or two services","No one on the team has run a cluster in production","GPU model serving on Kubernetes without anyone who knows GPU scheduling"],
+ s:"Kubernetes is an operating cost, not just a deployment target. I recommend it when the number of services and the platform team justify it; otherwise managed containers do the job.",
+ g:"few services ──▶ serverless / managed containers\nmany services + platform team ──▶ Kubernetes",
+ q:{s:"A client wants to deploy one RAG API and one background worker.",o:["A Kubernetes cluster","Managed containers or serverless","Bare-metal servers"],c:1,x:"Two services do not justify running a cluster. Managed containers give scaling without the operations load."},
+ ob:"Kubernetes is the enterprise standard.", bs:"The cluster needs patching, security, monitoring and skilled people. For a few services, that overhead exceeds the benefit."},
+
+{id:"mono-micro", a:"Apps and infra", t:"Monolith or microservices?",
+ d:"A well-structured (modular) monolith first. Split out services when a part needs separate scaling, release or ownership.",
+ w:[["Modular monolith",["One team, one product, early stage","Faster to build, test and deploy"]],
+    ["Microservices",["Several teams that must release independently","Parts with very different load, such as a model-serving service"]]],
+ r:["Microservices before the domain is understood","Services that all share one database","Every change needs five services deployed together"],
+ s:"Microservices solve an organisational scaling problem. I split when teams or load demand it, not on day one.",
+ g:"Monolith:      [UI | logic | data access] ──▶ DB\nMicroservices: [svc A]──▶DB_A   [svc B]──▶DB_B   (talk via APIs/events)",
+ q:{s:"A 4-person team starts a new claims portal.",o:["12 microservices","A modular monolith","One service per database table"],c:1,x:"One small team gains nothing from independent deployments yet. A modular monolith can be split later."},
+ ob:"Microservices are more scalable.", bs:"They add network calls, distributed failures and a lot of monitoring. A small team spends its time on plumbing instead of features."},
+
+{id:"api-style", a:"Apps and infra", t:"REST, GraphQL or gRPC?",
+ d:"REST by default. GraphQL when many clients need different data shapes. gRPC for fast service-to-service calls.",
+ w:[["REST",["Public or partner APIs, simple resources","Easy caching and tooling"]],
+    ["GraphQL",["Many front ends needing different fields","Avoiding many round trips for one screen"]],
+    ["gRPC",["Internal, high-throughput service-to-service traffic","Strict contracts and streaming"]]],
+ r:["GraphQL for a single client with simple screens","gRPC for a public partner API"],
+ s:"REST is the default contract. I add GraphQL for flexible front ends and gRPC for fast internal service calls.",
+ g:"partners ──REST──▶ API\nweb + mobile ──GraphQL──▶ gateway\nservice A ──gRPC──▶ service B",
+ q:{s:"Expose claim status to 40 broker partners.",o:["REST","gRPC","Direct database access"],c:0,x:"Partners need a simple, well-documented, cacheable API. REST fits best."},
+ ob:"GraphQL is more modern.", bs:"GraphQL moves complexity to the server: query cost limits, caching and authorisation per field."},
+
+{id:"queue-stream", a:"Apps and infra", t:"A message queue or an event stream?",
+ d:"A queue (SQS, RabbitMQ, Service Bus) to hand out tasks. A stream (Kafka, Event Hubs) when many consumers read the same events or you need replay.",
+ w:[["Message queue",["Work items processed once by one worker","Retries and dead-letter queues"]],
+    ["Event stream",["Many systems react to the same events","Replay history, high volume, ordered events"]]],
+ r:["Kafka for a few hundred jobs a day","Using a queue when several systems need the same event"],
+ s:"A queue distributes work; a stream distributes facts. I choose Kafka only when several consumers need the same events or replay matters.",
+ g:"Queue:  producer ──▶ [task][task] ──▶ one worker each\nStream: producer ──▶ [e1 e2 e3 …] ──▶ consumer A, consumer B, consumer C (each reads all)",
+ q:{s:"Each uploaded document must be processed once by an extraction worker.",o:["A message queue","An event stream with 10 consumers","A shared folder"],c:0,x:"One task, processed once. A queue with retries is the simple fit."},
+ ob:"Kafka scales, so use Kafka.", bs:"Kafka is powerful but heavy to run and design for. For task distribution, a managed queue is cheaper and simpler."},
+
+{id:"batch-rt", a:"Apps and infra", t:"Batch or real-time?",
+ d:"Batch unless a decision must happen while the user or process waits.",
+ w:[["Batch",["Reports, nightly reconciliation, bulk document processing","Lower cost; LLM batch APIs are cheaper"]],
+    ["Real-time",["Fraud checks before payment, live chat, agent assist during a call","The value disappears if the answer is late"]]],
+ r:["Real-time dashboards that leaders read once a week","Streaming infrastructure for data that changes daily"],
+ s:"I ask how fast the decision must happen. If nobody acts within minutes, batch is cheaper and simpler.",
+ g:"Batch:     collect ──▶ (nightly) process ──▶ report\nReal-time: event ──▶ process in ms–s ──▶ act now",
+ q:{s:"Daily summaries of yesterday's 20,000 customer calls for team leads.",o:["Real-time streaming","A nightly batch job using a batch API","Manual summaries"],c:1,x:"Nobody acts on the summaries until the next morning. Batch processing is cheaper and simpler."},
+ ob:"Real-time is better.", bs:"Real-time systems cost more to build, run and monitor. Pay for speed only where speed changes the outcome."},
+
+{id:"cache", a:"Apps and infra", t:"Where should you cache?",
+ d:"Cache only what is read often and changes slowly, and decide how it expires before you add it.",
+ w:[["CDN",["Static files, public pages, images"]],
+    ["In-memory cache (Redis)",["Frequent database reads, sessions, rate limits","LLM answers to repeated questions"]],
+    ["Prompt caching (provider side)",["Long repeated system prompts or documents","Cuts cost and latency on repeated prefixes"]]],
+ r:["Caching personal or permission-dependent answers for everyone","No expiry rule, so users see stale data"],
+ s:"Caching is easy to add and hard to keep correct. I define the expiry and the permission rules first.",
+ g:"request ──▶ cache? ──hit──▶ answer\n              └miss──▶ source ──▶ store with expiry ──▶ answer",
+ q:{s:"An HR bot gets the same 50 questions all day; answers depend only on the policy version.",o:["Cache answers keyed by question and policy version","Never cache","Cache answers forever"],c:0,x:"Repeated questions with a clear version key are safe to cache. The key makes expiry automatic."},
+ ob:"Add Redis to make it fast.", bs:"A cache that ignores permissions leaks data across users, and one that ignores versions serves outdated answers."},
+
+{id:"push-pull", a:"Apps and infra", t:"Polling, webhooks or WebSockets?",
+ d:"Webhooks for system-to-system events, polling when the other side cannot push, WebSockets for live screens.",
+ w:[["Polling",["Simple, rare checks; the other system offers no events"]],
+    ["Webhooks",["Another system notifies you when something happens","Payment done, document signed, job finished"]],
+    ["WebSockets / server-sent events",["Live updates on a screen: chat streaming, live dashboards"]]],
+ r:["Polling every second for an event that happens daily","Webhooks without signature checks or retries"],
+ s:"I let the system that knows about the event push it. Polling is the fallback when it cannot.",
+ g:"Polling:   you ──'any news?'──▶ them (repeat)\nWebhook:   them ──'it happened'──▶ you\nWebSocket: server ⇄ browser (open line)",
+ q:{s:"Your app must know when a long document-processing job finishes on a vendor's platform that supports callbacks.",o:["Poll every second","Register a webhook","Ask the user to refresh"],c:1,x:"The vendor knows when the job ends and can push the event. A webhook is the efficient choice."},
+ ob:"Poll the API regularly.", bs:"Polling wastes calls and hits rate limits, and it still reacts late. Webhooks need security: verify signatures and handle duplicates."},
+
+{id:"sql-nosql", a:"Apps and infra", t:"SQL or NoSQL?",
+ d:"A relational database (SQL) by default for business data. NoSQL for specific shapes or scale.",
+ w:[["SQL (Postgres, SQL Server)",["Transactions, reporting, relationships between records","Most business systems"]],
+    ["NoSQL (document, key-value)",["Flexible or nested documents, very high write scale","Session data, logs, catalogues"]]],
+ r:["NoSQL chosen to avoid designing a schema","SQL tables storing huge unstructured blobs"],
+ s:"I start relational because business data has relationships and needs consistent transactions. I add NoSQL for a specific need.",
+ g:"orders ──< order_lines >── products   (SQL: relations, transactions)\n{ doc: {...nested...} }                (NoSQL: flexible documents)",
+ q:{s:"A billing system with invoices, payments and customers.",o:["A relational database","A key-value store","Spreadsheets"],c:0,x:"Money needs transactions and consistency across related records. This is the classic relational case."},
+ ob:"NoSQL scales better.", bs:"You pay later in consistency bugs and hard reporting. Most business systems never reach the scale where SQL is the bottleneck."},
+
+{id:"region", a:"Apps and infra", t:"Single region or multi-region?",
+ d:"Single region with backups and zone redundancy, unless law, latency or a strict uptime target requires more.",
+ w:[["Single region (multiple zones)",["Most internal and regional apps","Lower cost and complexity"]],
+    ["Multi-region",["Data must stay in different countries","Users far apart need low latency","An uptime target that one region cannot meet"]]],
+ r:["Multi-region active-active for an internal tool","No tested recovery plan, even in one region"],
+ s:"Multi-region is driven by data residency, latency or uptime targets. Otherwise I invest in tested backups and zone redundancy.",
+ g:"Region A: [zone 1][zone 2][zone 3]   ← usually enough\nRegion A ⇄ Region B                 ← law, latency, extreme uptime",
+ q:{s:"An EU client requires that EU customer data never leaves the EU, but the app also serves India.",o:["One region in India","Separate EU and India deployments with data kept in each region","One global database"],c:1,x:"Data residency forces a regional split. This is a legal requirement, not a performance choice."},
+ ob:"Deploy everywhere for resilience.", bs:"Multi-region doubles the hard problems: data sync, consistency and costs. Without tested failover, it gives a false sense of safety."},
+
+// ---------------- Enterprise ----------------
+{id:"build-buy", a:"Enterprise", t:"Build, buy or partner?",
+ d:"Buy when a product already solves it well. Build when it is your advantage or needs deep integration. Partner when skills are missing.",
+ w:[["Buy",["Common problems: meeting notes, ticket summaries, document OCR","Speed to value matters most"]],
+    ["Build",["Core differentiator or unique process and data","Deep integration with internal systems"]],
+    ["Partner",["You want control but lack skills now","Plan a knowledge transfer"]]],
+ r:["Building a generic chatbot platform from scratch","Buying a tool that cannot reach the client's data"],
+ s:"I build where the client wins on its own data and process, and buy where the problem is common. The decision is about total cost of ownership and control.",
+ g:"common problem ──▶ buy\nunique & core ──▶ build\nmissing skills ──▶ partner (+ knowledge transfer)",
+ q:{s:"A client wants AI meeting summaries for 2,000 staff on Microsoft 365.",o:["Build a custom summariser","Use the summarisation built into their existing suite, after a pilot","Hire a research team"],c:1,x:"It is a common need already met inside their stack. Building would cost more and add no advantage."},
+ ob:"Building gives more control.", bs:"Built systems need a team forever: updates, security and new models. Count three years of running cost, not only the build."},
+
+{id:"api-selfhost", a:"Enterprise", t:"A model API or a self-hosted open-weight model?",
+ d:"Start with a managed API. Self-host when data rules, cost at very high volume, or customisation require it.",
+ w:[["Managed model API",["Fast start, best frontier models","Variable or moderate volume"]],
+    ["Self-hosted open-weight model",["Data must never leave your environment","Very high, steady volume where GPUs pay off","You need deep customisation"]]],
+ r:["Self-hosting without GPU and MLOps skills","Assuming self-hosting is cheaper without counting GPU idle time and staff"],
+ s:"Self-hosting trades a token bill for a GPU and operations bill. I recommend it when data rules or steady high volume make that trade worth it.",
+ g:"API:          app ──▶ provider model (pay per token)\nSelf-hosted:  app ──▶ your GPUs + open-weight model (pay for capacity + people)",
+ q:{s:"A defence client's data may not leave its private network.",o:["A public model API","A self-hosted open-weight model inside its network","No AI"],c:1,x:"The data rule decides. Self-hosting is the way to use AI inside the boundary."},
+ ob:"Open-weight models are free.", bs:"The model is free; the GPUs, scaling, security patching and evaluation are not. Utilisation decides if it is cheaper."},
+
+{id:"direct-cloud", a:"Enterprise", t:"Direct provider API or your cloud's AI platform?",
+ d:"For enterprises, use the models through their cloud platform (Azure AI Foundry, Amazon Bedrock, Vertex AI) unless a needed model or feature is only available directly.",
+ w:[["Cloud AI platform",["Existing cloud contract, private networking, regional hosting","Security and procurement already approved"]],
+    ["Direct provider API",["You need the newest model or feature first","Small teams without enterprise cloud requirements"]]],
+ r:["A new vendor contract and security review for what the cloud already offers","Assuming the same model and features are available in every cloud region"],
+ s:"I route models through the client's cloud for networking, data controls and procurement, and check region and feature availability early.",
+ g:"app ──private network──▶ cloud AI platform ──▶ model\napp ──internet──▶ provider API ──▶ model",
+ q:{s:"A bank on Azure with strict network rules wants GenAI quickly.",o:["Direct public API keys on developer laptops","The models through Azure AI Foundry inside its network setup","Wait two years"],c:1,x:"It reuses the bank's existing security, networking and contracts. That is usually the fastest approved path."},
+ ob:"Use the provider directly for the latest models.", bs:"In enterprises, approval time is the real delay. A slightly older model that is approved today beats a newer one blocked for six months."},
+
+{id:"gateway", a:"Enterprise", t:"An LLM gateway: yes or no?",
+ d:"Yes, once more than one team or app calls models.",
+ w:[["No gateway",["One app, one team, early pilot"]],
+    ["LLM gateway",["Many apps or teams; you need central keys, quotas, logging and cost per team","Model routing and fallback across providers"]]],
+ r:["API keys copied into many apps","No one can say what AI costs per department"],
+ s:"An LLM gateway is to models what an API gateway is to services: one place for keys, quotas, logging, routing and cost control.",
+ g:"app A ┐\napp B ┼──▶ [LLM gateway: keys, quotas, logs, routing, cache] ──▶ model 1 / model 2\napp C ┘",
+ q:{s:"Six teams now use three model providers, and finance asks for cost by team.",o:["Ask each team for a spreadsheet","Put an LLM gateway in front of all model calls","Ban AI"],c:1,x:"Central routing gives cost per team, quotas and logging in one place."},
+ ob:"Each team manages its own keys.", bs:"Without a gateway, you cannot enforce limits, rotate keys or switch providers quickly when one fails or raises prices."},
+
+{id:"rpa-agent", a:"Enterprise", t:"RPA, API integration or an AI agent?",
+ d:"Use an API when one exists, RPA when only a screen exists, and AI where the input is unstructured or needs judgement.",
+ w:[["API integration",["Systems offer APIs; you need reliability at volume"]],
+    ["RPA (UI automation)",["Legacy screens with no API","Stable, rule-based clicks"]],
+    ["AI (LLM step or agent)",["Unstructured input: emails, documents, free text","Classification and judgement within clear limits"]]],
+ r:["An AI agent clicking through screens that have an API","RPA bots that break with every UI change, with no owner"],
+ s:"I combine them: AI reads and decides on unstructured input, APIs or RPA do the actions, and rules check the result.",
+ g:"email/document ──▶ [AI: understand] ──▶ [rules: check] ──▶ [API or RPA: act] ──▶ system",
+ q:{s:"Read free-text customer emails and update an old system that has no API.",o:["RPA alone","AI to read the email plus RPA to update the screen","Retype by hand"],c:1,x:"AI handles the unstructured part; RPA handles the screen without an API. Each tool does what it is good at."},
+ ob:"AI agents replace RPA.", bs:"Agents operating screens are slower, costlier and less predictable than APIs or RPA. Use AI for judgement, not for clicking."}
+];
+
+/* Scenario drills: a case, then choices in order. Each step: q, o (options), c (best), f (feedback per option) */
+const DRILLS_ARCH = [
+ {id:"claims", t:"Claims-processing system for 50,000 claims a month", s:"A mid-size insurer receives claims as emails with PDFs. It wants faster processing with humans approving payouts. It runs on Azure.",
+  steps:[
+   {q:"What overall shape?",o:["An autonomous agent that handles each claim end to end","A workflow with LLM steps, plus an agent only for unusual claims","A chatbot for claimants"],c:1,f:["Too unpredictable and hard to audit for a regulated payout process.","Right: known steps get a workflow; only the messy cases need agent flexibility.","Useful later, but it does not process claims."]},
+   {q:"How do documents get processed?",o:["Synchronously, when the email arrives","A queue with workers and retries","A person forwards each PDF to a model"],c:1,f:["Spikes and model rate limits will break it.","Right: bulk, long-running and rate-limited work belongs on a queue.","Does not scale and adds no value."]},
+   {q:"Where do humans step in?",o:["Approve every field the AI extracts","Approve payouts and review low-confidence claims","Nowhere; it is all automated"],c:1,f:["Rubber-stamping risk and no speed gain.","Right: approval on money, confidence threshold for doubtful items.","Payouts are irreversible; this is not acceptable."]},
+   {q:"How do you pause for an approval that can take two days?",o:["Keep a server process waiting","Persist state with checkpoints and resume after approval (for example LangGraph or Microsoft Agent Framework workflows)","Restart the claim from scratch after approval"],c:1,f:["Fragile and wasteful; it fails on any restart.","Right: durable state and interrupts are exactly what these runtimes give.","Wastes cost and may give a different result."]},
+   {q:"Which model setup?",o:["The largest reasoning model for every step","A small model for extraction and classification, a stronger model for complex claims, through Azure","A self-hosted model on new GPUs"],c:1,f:["Expensive at 50,000 claims; most steps are simple.","Right: route by difficulty, and use the client's cloud for security and contracts.","Possible, but slower to approve and run unless data rules demand it."]},
+   {q:"How do you know it works?",o:["A demo with five clean claims","A golden set of past claims, trajectory and cost metrics, plus weekly sampling of live claims","Customer complaints"],c:1,f:["Clean demos hide the hard cases.","Right: offline evals before release, monitoring after.","Too late and too noisy."]}],
+  ref:"email/PDF ──▶ [queue] ──▶ workers: [small model: extract + classify] ──▶ [rules: policy checks]\n        ──▶ confidence & amount? ──low/high value──▶ [human review / approval] (durable pause)\n        ──▶ [stronger model or agent for complex claims]\n        ──▶ [API/RPA: update claims system] ──▶ traces, evals, cost per claim"},
+ {id:"policy", t:"Policy assistant for 20,000 employees", s:"Employees ask HR, IT and finance policy questions. Answers must respect document permissions and cite sources.",
+  steps:[
+   {q:"How does the assistant know the policies?",o:["Fine-tune a model on all policies","RAG over the policy documents","Paste all policies into every prompt"],c:1,f:["Goes stale every time a policy changes and gives no citations.","Right: current facts, citations, and no retraining.","Too costly and slow at this scale."]},
+   {q:"Where do the vectors live? The company already runs Postgres.",o:["pgvector in the existing Postgres","A new vector database cluster","In the browser"],c:0,f:["Right: modest scale and an existing system to secure and back up.","Possible later, but it adds a new system to run now.","Not secure or shareable."]},
+   {q:"How do you handle document permissions?",o:["Everyone can see every answer","Filter retrieval by the user's access rights, synced from the source systems","Ask users to promise not to look"],c:1,f:["A data leak waiting to happen.","Right: the assistant must never retrieve what the user cannot open.","Not a control."]},
+   {q:"How is it deployed?",o:["A Kubernetes cluster for one API","A server web app or managed containers behind single sign-on","A static site with the API key inside"],c:1,f:["Overkill for one API and a small team.","Right: simple to run, with company login in front.","Exposes the key; never do this."]},
+   {q:"Many teams will soon build similar assistants. What do you add?",o:["Nothing","An LLM gateway for keys, quotas, logging and cost per team","Separate keys per developer"],c:1,f:["Costs and keys will sprawl.","Right: one control point for all model traffic.","Impossible to govern."]}],
+  ref:"employee ──SSO──▶ [web app] ──▶ [retrieval with permission filter: Postgres + pgvector]\n        ──▶ [LLM gateway] ──▶ model ──▶ answer + citations\n        ──▶ logs, evals, feedback"},
+ {id:"triage", t:"Email triage for a BPM client's shared inbox", s:"8,000 emails a day arrive in one inbox for billing, claims and general queries. The client wants routing and draft replies.",
+  steps:[
+   {q:"What is the core pattern?",o:["A router: classify each email, then send it to the right handler","One general agent that does everything","Multi-agent debate on every email"],c:0,f:["Right: routing is simple, cheap and easy to measure.","Harder to test and more expensive.","Far too costly for 8,000 emails a day."]},
+   {q:"Which model for classification?",o:["A small, fast model, checked against a labelled set","The biggest reasoning model","Keyword rules only"],c:0,f:["Right: classification is a simple step at high volume.","Expensive and slow for a simple step.","Brittle with real customer language; use as a fallback only."]},
+   {q:"Should replies go out automatically?",o:["Yes, all of them","Drafts for agents to approve; auto-send only for safe, simple types after a trial","Never draft"],c:1,f:["Customer-facing errors damage trust.","Right: approve customer-facing output until data proves a type is safe.","Loses most of the value."]},
+   {q:"Batch or real-time?",o:["Real-time streaming platform","Process as emails arrive through a simple queue; no streaming platform","Once a week"],c:1,f:["Kafka-style streaming is not needed for 8,000 emails a day.","Right: near real-time with a queue is simple and enough.","Too slow for customer service."]}],
+  ref:"inbox ──▶ [queue] ──▶ [small model: classify + extract] ──▶ route: billing | claims | general\n        ──▶ [model: draft reply] ──▶ [agent approves] ──▶ send ──▶ accuracy & edit-rate metrics"},
+ {id:"invoice", t:"Invoice to ERP automation", s:"A client receives 100,000 supplier invoices a month (PDFs) and posts them to SAP. Many suppliers use different layouts.",
+  steps:[
+   {q:"How do you extract fields?",o:["Classic OCR templates per supplier","A document AI or multimodal model with validation rules","Manual typing"],c:1,f:["Breaks with many different layouts.","Right: handles varied layouts; rules catch errors.","The cost the client wants to remove."]},
+   {q:"How do you post to SAP?",o:["An AI agent clicking through SAP screens","SAP APIs or standard integration; RPA only where no API exists","Email the finance team"],c:1,f:["Slow, costly and unpredictable.","Right: reliable actions through APIs; AI only for understanding.","No automation."]},
+   {q:"What decides if a person reviews an invoice?",o:["Every invoice is reviewed","Confidence score plus rules: PO match, amount limits, new suppliers","Random choice"],c:1,f:["No savings.","Right: route by risk and confidence.","No control logic."]},
+   {q:"What is the main business metric?",o:["Model accuracy only","Straight-through rate and cost per invoice, including human review","Number of invoices processed"],c:1,f:["Accuracy matters, but it is not the business outcome.","Right: total cost and the share of invoices that need no touch.","Volume says nothing about value."]}],
+  ref:"PDF ──▶ [queue] ──▶ [document model: extract] ──▶ [rules: PO match, limits]\n        ──high confidence──▶ [SAP API post]\n        ──low confidence──▶ [review queue] ──▶ post ──▶ straight-through rate, cost per invoice"},
+ {id:"research", t:"Account research agent for sales", s:"Sales teams want a one-page brief on a prospect before meetings, using public web sources and the CRM.",
+  steps:[
+   {q:"Workflow or agent?",o:["A fixed workflow","An agent, because the searches depend on what it finds","A static template"],c:1,f:["Research paths vary by company; a fixed path misses things.","Right: open-ended research is a good agent use case, with limits.","Not useful."]},
+   {q:"Single or multi-agent?",o:["One agent with search and CRM tools","Five agents: CEO, analyst, writer, reviewer, manager","No agent"],c:0,f:["Right: one goal and a few tools. Add a reviewer step only if evals show a need.","Adds cost and hand-off errors without a clear reason.","Loses the value."]},
+   {q:"How does it reach the CRM?",o:["Copy CRM exports into prompts","Through an MCP server or API with the user's own permissions","Share an admin password"],c:1,f:["Stale and leaks data.","Right: live data, per-user permissions and one reusable integration.","A serious security risk."]},
+   {q:"What limits do you set?",o:["None","A step limit, a cost budget per brief and a time-out","Only a word limit"],c:1,f:["Agents can loop and burn money.","Right: hard limits make agent cost predictable.","Does not control cost or loops."]}],
+  ref:"user ──▶ [agent: plan → search web → read CRM (MCP, user permissions) → write]\n        limits: max steps, cost budget, time-out ──▶ brief with sources ──▶ feedback"},
+ {id:"tracker", t:"Internal tracker for a 40-person team", s:"A team lead wants a simple app to track client requests: login, a table, filters and status updates. One developer will maintain it.",
+  steps:[
+   {q:"What kind of app?",o:["A server web app or low-code tool with a managed database","A single-page app with five microservices","A static page"],c:0,f:["Right: simple to build and maintain for one developer.","Far too complex for one maintainer.","Cannot handle logins and shared data."]},
+   {q:"Where does it run?",o:["Kubernetes","Managed hosting: app service, managed containers or serverless","A laptop under a desk"],c:1,f:["The cluster would need more care than the app.","Right: no servers to patch, scales enough.","No reliability or security."]},
+   {q:"Which database?",o:["A managed relational database","A distributed NoSQL cluster","Spreadsheets in email"],c:0,f:["Right: structured records with relationships and simple reports.","Unnecessary scale and complexity.","No control or history."]},
+   {q:"The lead asks for 'AI features'. What do you add first?",o:["An autonomous agent","One small feature with clear value, such as summarising a request thread, behind a button","A custom fine-tuned model"],c:1,f:["No clear task; it adds risk.","Right: a small, measurable AI step where it helps users.","Costly with no proven need."]}],
+  ref:"users ──SSO──▶ [web app on managed hosting] ──▶ [managed SQL database]\n        └─ optional: [summarise thread] button ──▶ model API"}
+];
+
+/* Pattern library */
+const PATTERNS = [
+ {t:"Prompt chain", w:"A task splits into fixed steps, each easier for the model.", g:"input ──▶ [LLM step 1] ──▶ [check] ──▶ [LLM step 2] ──▶ output", r:"Errors carry forward; add checks between steps."},
+ {t:"Router", w:"Inputs fall into clear categories that need different handling or models.", g:"input ──▶ [classifier] ──▶ handler A | handler B | handler C", r:"Measure misroutes; keep a fallback route."},
+ {t:"Parallel calls", w:"Independent sub-tasks, or several opinions to compare or vote on.", g:"input ──▶ [LLM a] [LLM b] [LLM c] ──▶ [merge / vote] ──▶ output", r:"Cost multiplies; use only when it changes quality."},
+ {t:"Orchestrator and workers", w:"The sub-tasks are not known in advance; a lead model plans and delegates.", g:"goal ──▶ [orchestrator] ──▶ worker 1, worker 2, … ──▶ [orchestrator merges] ──▶ result", r:"Hard to predict cost; set limits."},
+ {t:"Evaluator and optimiser", w:"Clear quality criteria and a measurable gain from revising.", g:"[generator] ──draft──▶ [evaluator] ──feedback──▶ [generator] … ──pass──▶ output", r:"Can loop; cap the number of rounds."},
+ {t:"Autonomous agent loop", w:"Open-ended tasks where the path depends on results.", g:"goal ──▶ (think ──▶ act with tool ──▶ observe) ×N ──▶ answer", r:"Needs step limits, budgets, tracing and guardrails."},
+ {t:"Retrieval-augmented agent", w:"Answers must use private or current knowledge with citations.", g:"question ──▶ [retrieve with permissions] ──▶ [LLM] ──▶ answer + sources", r:"Most failures are retrieval failures, not model failures."},
+ {t:"Human approval gate", w:"Actions are costly, irreversible or customer-facing.", g:"[agent proposes] ──▶ (pause, state saved) ──▶ [human approves] ──▶ [action]", r:"Avoid rubber-stamping: show the reason and the evidence."},
+ {t:"Queue and workers", w:"Bulk, slow or rate-limited work.", g:"producer ──▶ [queue] ──▶ worker pool ──▶ results store ──▶ notify", r:"Make tasks idempotent so retries are safe."}
+];
+
+
+/* ---------- Design tab: decision of the day, defend it out loud, scenario drill, pattern library ---------- */
+const DZ = () => { const z = (S.design ||= {}); z.seen ||= {}; z.test ||= {}; z.drills ||= {}; z.off ||= {}; z.asked ||= []; return z; };
+const FRAME_DEFEND = "Speak out loud for 60 seconds, as in a design review: (1) Your decision in 1 sentence → (2) Two alternatives you rejected, and why → (3) What would make you change your mind.";
+const dzOff = k => ((DZ().off[todayKey()] || {})[k] || 0);
+function dzBump(k){ const z = DZ(), t = todayKey(); z.off = {[t]: Object.assign({}, z.off[t], {[k]: dzOff(k) + 1})}; save(); }
+function todaysDecision(){
+  const z = DZ();
+  if (z.pick && z.pick.date === todayKey()){ const i = DECISIONS.findIndex(c => c.id === z.pick.id); if (i >= 0) return i; }
+  const n = dayIndex() + dzOff("c"); return ((n * 11) % DECISIONS.length + DECISIONS.length) % DECISIONS.length;
+}
+const todaysArchDrill = () => { const n = Math.floor(dayIndex() / 2) + dzOff("s"); return ((n * 5) % DRILLS_ARCH.length + DRILLS_ARCH.length) % DRILLS_ARCH.length; };
+function dzSeen(id){ const z = DZ(); if (!z.seen[id]){ z.seen[id] = todayKey(); save(); } const p = $("dzProgress"); if (p) p.textContent = dzProgressText(); }
+function dzProgressText(){
+  const z = DZ(), c = Object.keys(z.seen).filter(id => DECISIONS.some(d => d.id === id)).length, s = Object.values(z.drills).filter(d => d.done).length;
+  return `${c} of ${DECISIONS.length} decisions practised · ${s} of ${DRILLS_ARCH.length} scenarios worked through`;
+}
+const ulist = a => `<ul>${(a || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+function decisionBody(c){
+  return `<h3 class="tq">${esc(c.t)}</h3>
+    <p><mark class="hl"><b>Default:</b></mark> ${esc(c.d)}</p>
+    <div class="dzws">${(c.w || []).map(([n, ws]) => `<div class="dzw md"><p><mark class="hl hl-b">${esc(n)}</mark> wins when:</p>${ulist(ws)}</div>`).join("")}</div>
+    ${c.g ? `<pre class="dzg">${esc(c.g)}</pre>` : ""}
+    <div class="md"><p><mark class="hl hl-p">Red flags in a design review</mark></p>${ulist(c.r)}</div>
+    ${c.s ? `<div><p class="eyebrow">Say it in one breath</p><p class="claim">${esc(c.s)}</p></div>` : ""}`;
+}
+function renderDesign(){
+  const z = DZ(), ci = todaysDecision(), c = DECISIONS[ci], si = todaysArchDrill(), sc = DRILLS_ARCH[si], pick = z.test[c.id];
+  const areas = [...new Set(DECISIONS.map(d => d.a))];
+  $("designRoot").innerHTML = `
+    <div class="thinkhead">
+      <h2>Design</h2>
+      <p class="muted">Train architecture judgement: when to choose what, and why. Agentic AI first, plus the app and infrastructure calls that come up in every design discussion. About 15 minutes.</p>
+      <p class="note" id="dzProgress">${dzProgressText()}</p>
+    </div>
+
+    <div class="card upnext" id="dzCard">
+      <div class="secthead"><div class="eyebrow">1 · Decision of the day · ${esc(c.a)}</div><button class="linkbtn" id="dzNext">Another decision ›</button></div>
+      ${decisionBody(c)}
+      <div class="ruled">
+        <p class="eyebrow">Quick check</p>
+        <p>${esc(c.q.s)}</p>
+        <div class="opts" id="dzOpts">${shuffled(c.q.o, ci + dayIndex()).map(([o, k]) => `<button class="opt" data-dzo="${k}"><span>${esc(o)}</span></button>`).join("")}</div>
+        <div id="dzWhy" hidden></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">2 · Defend it out loud</div>
+      ${rehearsalHTML("dz:" + c.id, "A senior architect asks you: “" + c.t + "” Give your recommendation for this case: " + c.q.s, FRAME_DEFEND)}
+    </div>
+
+    <div class="card" id="dzDrill">
+      <div class="secthead"><div class="eyebrow">3 · Scenario drill</div><button class="linkbtn" id="drNext">Another scenario ›</button></div>
+      <div id="drBody"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Ask the architect</div>
+      <p class="note">Type any “X or Y?” question from an interview or a meeting. You get a decision card in the same format. Do not type client names or company data.</p>
+      <div class="row"><input type="text" id="dzQ" placeholder="Example: When is Kubernetes worth it for an AI product?" style="flex:1;min-width:0"><button class="btn" id="dzAsk">Ask</button></div>
+      <div id="dzAns"></div>
+      ${z.asked.length ? `<details><summary class="note">Earlier questions</summary>${z.asked.map(a => `<details class="dzlib"><summary>${esc(a.c.t || a.q)}</summary>${decisionBody(a.c)}</details>`).join("")}</details>` : ""}
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Pattern library</div>
+      <p class="note">Reference shapes for agent systems. Review two before a design discussion.</p>
+      ${PATTERNS.map(p => `<details class="dzlib"><summary>${esc(p.t)}</summary><p><mark class="hl hl-g">Use when:</mark> ${esc(p.w)}</p><pre class="dzg">${esc(p.g)}</pre><p><mark class="hl hl-p">Watch for:</mark> ${esc(p.r)}</p></details>`).join("")}
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">All decisions</div>
+      <p class="note">Tap one to study it today. A tick means you practised it.</p>
+      ${areas.map(a => `<p class="eyebrow dzarea">${esc(a)}</p><div class="chips">${DECISIONS.filter(d => d.a === a).map(d => `<button class="chip" data-dzpick="${esc(d.id)}" aria-pressed="${d.id === c.id}">${z.seen[d.id] ? "✓ " : ""}${esc(d.t)}</button>`).join("")}</div>`).join("")}
+    </div>`;
+
+  REH["dz:" + c.id] = {
+    blind: () => ({ob: c.ob, bs: c.bs}),
+    model: () => c.s,
+    onCompare: () => dzSeen(c.id),
+    feedbackPrompt: notes => `${STYLE}\n\nPrem rehearsed defending an architecture decision out loud, as in a design review.\nDecision: ${c.t}\nCase: ${c.q.s}\nReference default: ${c.d}\nReference answer: ${c.q.o[c.q.c]}. Why: ${c.q.x}\nHis notes: ${notes}\nJudge him as a principal architect would. Check three things: did he state one clear decision, did he reject two alternatives with reasons, and did he say what would change his mind. ${FEEDBACK_JSON}`
+  };
+  if (pick != null) dzShowTest(c, pick);
+  renderArchDrill(sc);
+}
+function dzShowTest(c, pickI){
+  $("dzOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const i = +x.dataset.dzo;
+    if (i === c.q.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${i === pickI ? "On target · your answer" : "On target"}</span>`); }
+    else if (i === pickI){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Course correction</span>`); } });
+  const w = $("dzWhy"); w.hidden = false;
+  w.innerHTML = `<p>${pickI === c.q.c ? "<mark class='hl hl-g'>On target.</mark>" : "<mark class='hl hl-p'>Course correction.</mark>"} ${esc(c.q.x)}</p>`;
+}
+function renderArchDrill(sc){
+  const st = (DZ().drills[sc.id] ||= {picks: []}), k = st.picks.length;
+  let h = `<h3 class="tq">${esc(sc.t)}</h3><p>${esc(sc.s)}</p>`;
+  h += sc.steps.slice(0, k).map((p, i) => { const ok = st.picks[i] === p.c;
+    return `<div class="drstep"><p class="note">Step ${i + 1} · ${esc(p.q)}</p><p><b>${esc(p.o[st.picks[i]])}</b> · ${ok ? "<mark class='hl hl-g'>On target</mark>" : "<mark class='hl hl-p'>Course correction</mark>"}</p><p class="note">${esc(p.f[st.picks[i]])}${ok ? "" : " <b>Better:</b> " + esc(p.o[p.c]) + ". " + esc(p.f[p.c].replace(/^Right:\s*(.)/, (m, ch) => ch.toUpperCase()))}</p></div>`; }).join("");
+  if (k < sc.steps.length){
+    const p = sc.steps[k];
+    h += `<div class="drstep now"><p class="eyebrow">Step ${k + 1} of ${sc.steps.length}</p><p><b>${esc(p.q)}</b></p><div class="opts">${shuffled(p.o, k + sc.id.length).map(([o, i]) => `<button class="opt" data-dro="${i}"><span>${esc(o)}</span></button>`).join("")}</div></div>`;
+  } else {
+    h += `<div class="ruled"><p class="eyebrow">Reference design</p><pre class="dzg">${esc(sc.ref)}</pre>
+      <p class="note">Now draw it once on paper from memory, then explain it out loud in 60 seconds: the flow, one trade-off, and what breaks at scale.</p>
+      <div class="row"><button class="btn" id="drRestart">Try this scenario again</button></div></div>`;
+  }
+  $("drBody").innerHTML = h;
+}
+docOn("click", e => {
+  const b = e.target.closest && e.target.closest("button"); if (!b || !$("designRoot") || !$("designRoot").contains(b)) return;
+  const d = b.dataset;
+  if (d.dzo != null){ const c = DECISIONS[todaysDecision()], pickI = +d.dzo; DZ().test[c.id] = pickI; save(); dzShowTest(c, pickI); dzSeen(c.id); if (pickI === c.q.c) cheer(b); }
+  else if (d.dro != null){ const sc = DRILLS_ARCH[todaysArchDrill()], st = DZ().drills[sc.id]; st.picks.push(+d.dro); if (st.picks.length === sc.steps.length) st.done = todayKey(); save(); renderArchDrill(sc); const p = $("dzProgress"); if (p) p.textContent = dzProgressText(); }
+  else if (d.dzpick){ DZ().pick = {date: todayKey(), id: d.dzpick}; save(); renderDesign(); $("dzCard").scrollIntoView({behavior: "smooth", block: "start"}); }
+});
+ACT.dzNext = () => { const z = DZ(); if (z.pick) delete z.pick; dzBump("c"); renderDesign(); };
+ACT.drNext = () => { dzBump("s"); renderDesign(); $("dzDrill").scrollIntoView({block: "start"}); };
+ACT.drRestart = () => { const sc = DRILLS_ARCH[todaysArchDrill()]; DZ().drills[sc.id] = {picks: [], done: DZ().drills[sc.id].done}; save(); renderArchDrill(sc); };
+INP.dzQ = () => {};
+ACT.dzAsk = async () => {
+  const q = $("dzQ").value.trim(), out = $("dzAns"); if (!q) return;
+  if (!sample){ out.innerHTML = "<p class='muted'>This uses Gemini. Add your free key in Settings.</p>"; return; }
+  out.innerHTML = "<p class='muted'>Thinking like an architect…</p>"; $("dzAsk").disabled = true;
+  try {
+    const r = await sample.json(`${STYLE}\n\nYou are a principal solutions architect coaching Prem for design discussions and interviews. Today is ${new Date().toDateString()}. If the question involves fast-moving tools or frameworks, say which facts may have changed recently.\nQuestion: ${q}\nReturn JSON only: {"t": "the decision as a short question", "d": "the default recommendation, 1-2 sentences", "w": [["option name", ["2-3 conditions when it wins"]], ["option name", ["2-3 conditions"]]], "r": ["2-3 red flags in a design review"], "s": "a 1-2 sentence answer he can say in a meeting", "g": "a small ASCII diagram, max 5 lines, max 60 characters wide", "ob": "the obvious answer most people give", "bs": "the expert blind spot: the hidden cost, failure mode or second-order effect"}`);
+    const c = {t: r.t || q, d: r.d || "", w: Array.isArray(r.w) ? r.w.filter(x => Array.isArray(x) && x.length === 2) : [], r: r.r || [], s: r.s || "", g: r.g || ""};
+    out.innerHTML = `<div class="ruled">${decisionBody(c)}${r.ob ? blindHTML({ob: r.ob, bs: r.bs || ""}) : ""}</div>`;
+    const z = DZ(); z.asked.unshift({q, c, at: todayKey()}); z.asked.length = Math.min(z.asked.length, 12); save();
+  } catch(err) { out.innerHTML = "<p class='muted'>" + esc(err.message || "No answer this time. Try again in a minute.") + "</p>"; }
+  $("dzAsk").disabled = false;
+};
+
 const PRINCIPLES = [
  ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm, senior consultant you are growing into."],
  ["Rehearse in your imagination","Your nervous system responds to a vivid imagined scene much like a real one. Each morning rehearsal makes the real meeting or interview feel familiar."],
@@ -3573,17 +4098,17 @@ function show(v){
   if(v!=="learn") VL.stop();
   document.querySelectorAll("section.view").forEach(s=>s.hidden = s.id!=="v-"+v);
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current", b.dataset.v===v?"page":"false"));
-  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="make") renderMake(); if(v==="market") renderMarket(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
+  if(v==="learn") renderLearn(); if(v==="think") renderThink(); if(v==="make") renderMake(); if(v==="market") renderMarket(); if(v==="design") renderDesign(); if(v==="plan") renderPlan(); if(v==="projects") renderProjects(); if(v==="morning") renderMorning();
   window.scrollTo(0,0);
   try{ sessionStorage.setItem("p100v",v); }catch(e){}
 }
 function renderRemote(){
   renderTop(); renderMorning();
-  const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v;
-  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop(); if (v==="make") renderMake(); if (v==="market") renderMarket();
+  const cur=document.querySelector("nav.tabs button[aria-current=page]"); if (!cur) return; const v=cur.dataset.v;
+  if (v==="plan") renderPlan(); if (v==="projects") renderProjects(); if (v==="think") renderThinkTop(); if (v==="make") renderMake(); if (v==="market") renderMarket(); if (v==="design") renderDesign();
   if (v==="learn"){ const d=viewDay||current(); $("doneBtn").textContent = S.done[d] ? "Day complete · undo" : "Mark this day complete"; $("doneBtn").className = S.done[d] ? "btn" : "btn primary"; }
 }
-function renderAll(){ renderTop(); renderMorning(); const v=document.querySelector("nav.tabs button[aria-current=page]").dataset.v; if(v!=="morning") show(v); }
+function renderAll(){ renderTop(); renderMorning(); const cur=document.querySelector("nav.tabs button[aria-current=page]"); const v=cur ? cur.dataset.v : "morning"; if(v!=="morning") show(v); }
 
 docOn("click", e=>{
   const t=e.target.closest("button"); if(!t) return;
@@ -3646,7 +4171,7 @@ function burst(x,y){
 applyPref();
 VL.init();
 renderTop(); renderMorning();
-try{ const v=sessionStorage.getItem("p100v"); if(v && v!=="morning") show(v); }catch(e){}
+try{ let v=sessionStorage.getItem("p100v"); if(v==="market") v="design"; if(v && v!=="morning") show(v); }catch(e){}
 
 /* ---------- Gemini: the tutor, grading, scenes and mock interviews ---------- */
 /* The key stays in this browser only (localStorage). It is never in the site's code. */
@@ -3832,7 +4357,7 @@ if (G.key){ sample = gemini; wireClaude(); }
 try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e) {}
 if ("serviceWorker" in navigator && location.protocol === "https:") { navigator.serviceWorker.register("sw.js").catch(() => {}); }
 
-window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS, DEEP, todaysDeep };
+window.__p100 = { VIS, VL, M, renderMorning, renderLearn, md, setView: d => { viewDay = d; }, STK, STICKS, TEASERS, todaysTeaser, todaysFlaw, todaysDrill, FLAWS, DEEP, todaysDeep, DECISIONS, DRILLS_ARCH, PATTERNS, renderDesign, todaysDecision, todaysArchDrill };
 window.__p100cleanup = () => {
   AC.abort();
   try { clearInterval(breathTimer); } catch(e) {}
