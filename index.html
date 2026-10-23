@@ -91,7 +91,7 @@ pre{font:13px/1.45 var(--mono);background:var(--surface-2);border-radius:10px;pa
 
 /* tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
-nav.tabs .in{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:640px;width:100%}
+nav.tabs .in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:640px;width:100%}
 nav.tabs button{border:0;background:none;border-radius:12px;min-height:52px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 .74rem var(--ui);color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--surface-2)}
@@ -245,6 +245,25 @@ svg .hd text{font:700 12.5px var(--read)}
 .sheet{max-height:88vh;overflow-y:auto}
 input[type=password]{width:100%;font-size:1rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;font-family:var(--mono)}
 body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+/* oct23b: rehearsal, lens, linkedin, identity */
+.reh{display:flex;flex-direction:column;gap:12px}
+.rstep{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.rstep .rn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:700 .8rem var(--ui);color:var(--muted)}
+.rbody{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pacer{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.pacer s{display:block;height:100%;width:0;background:var(--parta);border-radius:99px;opacity:.6}
+.audit{display:flex;flex-direction:column;gap:6px}
+.notes summary{cursor:pointer;min-height:32px}
+.notes textarea{margin-top:6px}
+#lensBody{gap:14px}
+.lipost{display:flex;flex-direction:column;gap:8px}
+.lpre{font:1rem/1.9rem var(--read)}
+.servo{margin-bottom:10px}
+.servo p{margin:0}
+#presets .chip.on{background:var(--hl-green);border-color:var(--good)}
+.dd{display:flex;flex-direction:column;gap:4px}
+.quiet{box-shadow:none;background:transparent}
+.bridge{border-top:1px dashed var(--line);padding-top:10px;margin-top:6px}
 /* market */
 #marketRoot a,.card a{color:var(--parta);text-underline-offset:2px}
 #marketRoot details{border-top:1px solid var(--line);padding-block:8px}
@@ -354,6 +373,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
         <div class="body">
           <h3>Theatre of the mind</h3>
           <p class="muted">Close your eyes for 3 minutes. See the scene in detail: sounds, colours, how calm your body feels.</p>
+          <div class="ruled servo" id="servo"></div>
           <div class="ruled" id="script"></div>
           <div class="woop">
             <div class="note">Then name the obstacle. Picturing success alone can lower effort; planning for the obstacle raises it.</div>
@@ -371,6 +391,8 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
         <div class="body">
           <h3>Read your sticky note out loud</h3>
           <div class="sticky" id="selfShow"></div>
+          <div class="note">Identity anchors: tap to add one to your note.</div>
+          <div class="chips" id="presets"></div>
           <details><summary class="note">Edit my sticky note</summary>
             <textarea id="selfEdit" aria-label="Self-image statement"></textarea>
             <div class="row" style="margin-top:8px"><button class="btn" id="selfSave">Save note</button></div>
@@ -401,7 +423,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <div class="row"><button class="btn primary" id="upBtn">Start</button></div>
     </div>
 
-    <div class="card">
+    <div class="card quiet">
       <div class="eyebrow">Today</div>
       <div class="stats">
         <svg class="rings" viewBox="0 0 120 120" role="img" aria-labelledby="ringsLabel" id="rings"><title id="ringsLabel">Today's progress rings</title></svg>
@@ -413,20 +435,20 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="paceCard" hidden>
       <div class="pace">
         <div><span class="eyebrow">Role goal</span><b id="goalDays">92</b><span class="note">days to 9 Jan 2027</span></div>
         <div><span class="eyebrow">Pace</span><b id="paceNum">0 of 100</b><span class="note" id="paceNote">lessons done</span></div>
       </div>
     </div>
 
-    <div class="card" id="thinkCard">
+    <div class="card" id="thinkCard" hidden>
       <div class="secthead"><div class="eyebrow">Think</div><span class="note" id="thinkCardNote">0 of 3 done today</span></div>
       <div class="tchks" id="thinkToday"></div>
       <div class="row"><button class="btn" id="thinkGo">Open today's puzzles</button></div>
     </div>
 
-    <div class="card" id="marketCard">
+    <div class="card" id="marketCard" hidden>
       <div class="secthead"><div class="eyebrow">Market brief</div><span class="note" id="mkcDate"></span></div>
       <p id="mkcText" class="note">Your analyst reads the news on AI in BPM, hiring and client moves, and tells you how to prepare.</p>
       <div class="row"><button class="btn" id="marketGo">Open Market</button></div>
@@ -469,6 +491,7 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
         <div><b>15m</b>Quiz and interview answer</div>
       </div>
       <div class="ladder" aria-label="Explain ladder"><span>1 Read</span><span>2 Diagram</span><span>3 Visual</span><span>4 Narrated</span></div>
+      <div class="dd"><button class="btn primary" id="ddBtn">Generate today's deep dive and LinkedIn draft (1 API call)</button><p class="note" id="ddStatus"></p></div>
     </div>
     <div class="card">
       <div class="eyebrow">Level 1 · Read</div>
@@ -493,10 +516,15 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       </div>
       <p class="note" id="vNote" hidden></p>
     </div>
+    <div class="card" id="lensCard">
+      <div class="eyebrow">Systems and second-order lens</div>
+      <div id="lensBody" class="plain" style="padding:0"></div>
+    </div>
     <div class="card" id="tutorCard">
       <div class="eyebrow">Tutor</div>
       <p class="muted" id="tutorIntro">Your tutor explains today's topic in simple English, with a business example from BPM work.</p>
       <div class="row"><button class="btn primary" id="teachBtn">Teach me today's lesson</button></div>
+      <p class="note" id="tutorCache"></p>
       <div class="md ruled" id="tutorOut" hidden></div>
       <div class="row" id="askRow" hidden><input type="text" id="askIn" placeholder="Ask a doubt about today's topic" style="flex:1;min-width:0"><button class="btn" id="askBtn">Ask</button></div>
     </div>
@@ -512,19 +540,17 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       <p class="note" id="qFb"></p>
     </div>
     <div class="card">
-      <div class="eyebrow">Interview question</div>
-      <h3 id="iqText"></h3>
-      <textarea id="iqAns" placeholder="Type your answer. Then say it out loud once."></textarea>
-      <div class="row"><button class="btn primary" id="gradeBtn">Grade my answer</button><button class="btn" id="modelBtn">Show model answer</button></div>
-      <div class="md ruled" id="gradeOut" hidden></div>
-      <div class="ruled" id="modelAns" hidden></div>
+      <div class="eyebrow">Interview question · rehearse out loud</div>
+      <div id="iqReh"></div>
     </div>
     <div class="card">
-      <div class="eyebrow">Teach it back · 2 minutes</div>
-      <p>Explain today's idea out loud to someone, or record a voice note. Teaching it is the fastest way to learn it, and it trains your interview voice.</p>
-      <textarea id="teachTxt" placeholder="Optional: type your 3-sentence explanation for a non-technical CEO."></textarea>
-      <div class="row"><button class="btn primary" id="teachDone">I explained it out loud</button><button class="btn" id="teachCheck">Would a CEO understand?</button></div>
-      <div class="md ruled" id="teachOut" hidden></div>
+      <div class="eyebrow">Teach it back · 60 seconds</div>
+      <div id="teachReh"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Proof of work · LinkedIn draft</div>
+      <p class="note">Turn today's lesson into a high-signal post. Edit one line in your own words before you post.</p>
+      <div id="liBody" class="plain" style="padding:0"></div>
     </div>
     <div class="row"><button class="btn primary" id="doneBtn">Mark this day complete</button><span class="note" id="doneNote"></span></div>
   </div>
@@ -548,12 +574,29 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   </div>
 </section>
 
-<!-- MOCK -->
-<section class="view" id="v-mock" hidden>
+
+<!-- THINK -->
+<section class="view" id="v-think" hidden>
   <div class="wrap" style="padding:0">
+    <div class="thinkhead">
+      <h2>Think</h2>
+      <p class="hint">Pen first: work on paper before you look at hints. A little friction makes it stick.</p>
+      <p class="muted">Two exercises a day: one deep puzzle, then one answer you rehearse out loud. A mock scenario is there when you want it.</p>
+      <div class="tchks" id="thinkTodayTab"></div>
+      <p class="note" id="thinkTotals"></p>
+    </div>
     <div class="card">
-      <h2>Mock interview</h2>
-      <p class="muted">The interviewer asks one question at a time. After each answer, you get a score and one way to improve.</p>
+      <div class="secthead"><div class="eyebrow" id="heroLabel">1 · Deep puzzle · 3–5 minutes</div><button class="linkbtn" id="pNext">Another one ›</button></div>
+      <div id="deepBody" class="plain" style="padding:0"></div>
+    </div>
+    <div class="card">
+      <div class="secthead"><div class="eyebrow">2 · Answer drill · rehearse out loud</div><button class="linkbtn" id="dNext">Another one ›</button></div>
+      <div id="drillBody" class="plain" style="padding:0"></div>
+    </div>
+    <div class="card" id="mockCard">
+      <details id="mockDetails"><summary class="eyebrow">3 · Mock scenario (optional) ›</summary>
+      <div class="plain" style="padding:10px 0 0">
+      <p class="muted">The interviewer asks one question at a time. After each answer you get one on-target point and one course correction.</p>
       <label class="note" for="mockMode">Round type</label>
       <select id="mockMode">
         <option value="concepts">Concepts from what I studied so far</option>
@@ -566,33 +609,14 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
       </select>
       <div class="row"><button class="btn primary" id="mockStart">Start the round</button><button class="btn" id="mockEnd" hidden>End and get feedback</button></div>
       <p class="note" id="mockNote"></p>
+      <div class="chat" id="chat"></div>
+      <div class="row" id="mockInRow" hidden><textarea id="mockIn" placeholder="Your answer" style="flex:1;min-width:0;min-height:70px"></textarea><button class="btn primary" id="mockSend">Send</button></div>
+      </div></details>
     </div>
-    <div class="chat" id="chat"></div>
-    <div class="row" id="mockInRow" hidden><textarea id="mockIn" placeholder="Your answer" style="flex:1;min-width:0;min-height:70px"></textarea><button class="btn primary" id="mockSend">Send</button></div>
-  </div>
-</section>
-
-<!-- THINK -->
-<section class="view" id="v-think" hidden>
-  <div class="wrap" style="padding:0">
-    <div class="thinkhead">
-      <h2>Think</h2>
-      <p class="hint">Pen first: solve the teaser on paper before you type. A little friction makes it stick.</p>
-      <p class="muted">Three short exercises a day. Try first, then check. The point is how you think, so read the explanation even when you are right.</p>
-      <div class="tchks" id="thinkTodayTab"></div>
-      <p class="note" id="thinkTotals"></p>
-    </div>
-    <div class="card">
-      <div class="secthead"><div class="eyebrow">1 · Brain teaser</div><button class="linkbtn" id="tNext">Another one ›</button></div>
+    <div class="row"><button class="linkbtn" id="warmGo">Warmup (optional): a quick teaser ›</button></div>
+    <div class="card" id="warmCard" hidden>
+      <div class="secthead"><div class="eyebrow">Warmup · quick teaser</div><button class="linkbtn" id="tNext">Another one ›</button></div>
       <div id="teaserBody" class="plain" style="padding:0"></div>
-    </div>
-    <div class="card">
-      <div class="secthead"><div class="eyebrow">2 · Deep puzzle · 3–5 minutes</div><button class="linkbtn" id="pNext">Another one ›</button></div>
-      <div id="deepBody" class="plain" style="padding:0"></div>
-    </div>
-    <div class="card">
-      <div class="secthead"><div class="eyebrow">3 · Smart answers · Answer drill</div><button class="linkbtn" id="dNext">Another one ›</button></div>
-      <div id="drillBody" class="plain" style="padding:0"></div>
     </div>
   </div>
 </section>
@@ -672,8 +696,6 @@ body{margin:0;padding-top:env(safe-area-inset-top,0px)}
   <button data-v="morning" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v3M4.9 8.9l2 2M19.1 8.9l-2 2"/></svg>Today</button>
   <button data-v="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>Learn</button>
   <button data-v="think"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Think</button>
-  <button data-v="make"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Make</button>
-  <button data-v="mock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v10H9l-5 4z"/></svg>Mock</button>
   <button data-v="market"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Market</button>
 </div></nav>
 
@@ -2268,7 +2290,7 @@ function seeded(n){ let x = (n * 2654435761) % 4294967296; return () => (x = (x 
 function shuffled(arr, seed){ const r = seeded(seed + 7), a = arr.map((v, i) => [v, i]); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const offFor = cat => (((TH().off[todayKey()] || {})[cat]) || 0);
 function bump(cat){ const t = TH(), k = todayKey(); t.off[k] = t.off[k] || {}; t.off[k][cat] = (t.off[k][cat] || 0) + 1; save(); }
-const DONE_KEYS = {t:["t","tx","s"], p:["p","px"], d:["d"]};
+const DONE_KEYS = {t:["t","tx"], p:["p","px","s","sx"], d:["d"]};
 const doneToday = cat => Object.entries(TH().solved).some(([k, v]) => v === todayKey() && DONE_KEYS[cat].includes(k.split(":")[0]));
 function markSolved(cat, id){ const t = TH(); if (!t.solved[cat + ":" + id]){ t.solved[cat + ":" + id] = todayKey(); save(); } renderThinkTop(); }
 const solvedCount = cat => Object.keys(TH().solved).filter(k => k.startsWith(cat + ":")).length;
@@ -2276,20 +2298,19 @@ const solvedCount = cat => Object.keys(TH().solved).filter(k => k.startsWith(cat
 /* today's teaser: a stick puzzle on one day in seven, a brain teaser on the others */
 function todaysTeaser(){
   const n = dayIndex() + offFor("t");
-  if (((n % 7) + 7) % 7 === 3) return {type: "stick", i: ((n * 11) % STICKS.length + STICKS.length) % STICKS.length};
-  return {type: "teaser", i: ((n * 37) % TEASERS.length + TEASERS.length) % TEASERS.length};
+    return {type: "teaser", i: ((n * 37) % TEASERS.length + TEASERS.length) % TEASERS.length};
 }
 const todaysDeep = () => { const n = dayIndex() + offFor("p"); return ((n * 13) % DEEP.length + DEEP.length) % DEEP.length; };
 const todaysFlaw  = () => { const n = dayIndex() + offFor("f"); return ((n * 23) % FLAWS.length + FLAWS.length) % FLAWS.length; };
 const todaysDrill = () => { const n = dayIndex() + offFor("d"); return ((n * 17) % DRILLS.length + DRILLS.length) % DRILLS.length; };
 
 function renderThinkTop(){
-  const parts = [["t","Quick teaser"],["p","Deep puzzle"],["d","Answer drill"]];
+  const parts = [["p","Deep puzzle"],["d","Answer drill"]];
   const html = parts.map(([c, l]) => `<span class="tchk ${doneToday(c) ? "on" : ""}"><i></i>${l}${doneToday(c) ? " · done" : ""}</span>`).join("");
   ["thinkToday","thinkTodayTab"].forEach(id => { const el = $(id); if (el) el.innerHTML = html; });
   const pl = (n, one, many) => n + " " + (n === 1 ? one : many);
-  const tot = $("thinkTotals"); if (tot) tot.textContent = pl(solvedCount("t") + solvedCount("s"), "teaser", "teasers") + " solved · " + pl(solvedCount("p"), "deep puzzle", "deep puzzles") + " cracked · " + pl(solvedCount("d"), "drill", "drills") + " answered";
-  const card = $("thinkCard"); if (card){ const n = ["t","p","d"].filter(doneToday).length; $("thinkCardNote").textContent = n === 3 ? "All three done today. Well thought." : n + " of 3 done today · about 10 minutes"; }
+  const tot = $("thinkTotals"); if (tot) tot.textContent = pl(solvedCount("p") + solvedCount("s"), "deep puzzle", "deep puzzles") + " cracked · " + pl(solvedCount("t"), "warmup", "warmups") + " · " + pl(solvedCount("d"), "drill", "drills") + " answered";
+  const card = $("thinkCard"); if (card){ const n = ["p","d"].filter(doneToday).length; $("thinkCardNote").textContent = n === 3 ? "All three done today. Well thought." : n + " of 3 done today · about 10 minutes"; }
 }
 
 /* answer check for typed answers */
@@ -2304,7 +2325,7 @@ function matches(input, accepted){
 
 function renderThink(){
   renderThinkTop();
-  renderTeaser(); renderDeep(); renderDrill();
+  renderHero(); renderDrill(); if (!$("warmCard").hidden) renderTeaser();
 }
 
 /* ---- brain teaser ---- */
@@ -2329,8 +2350,8 @@ function renderTeaser(){
   ACT.tReveal = () => { explain({t: "Answer: " + (t.o ? t.o[t.c] : t.a[0]), cls: ""}); markSolved("tx", pk.i); };
   ACT.tCheck = () => {
     const v = $("tAns").value; if (!v.trim()) return;
-    if (matches(v, t.a)){ $("tFb").innerHTML = "<span class='hl hl-g'>Correct.</span> Read why below, then say the thinking skill out loud."; explain(); markSolved("t", pk.i); cheer($("tCheck")); }
-    else { tAttempts++; $("tFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> " + (tAttempts === 1 ? "Slow down and try once more. A hint is there if you want it." : "Try the hint, or ask the tutor if your wording is just different.");
+    if (matches(v, t.a)){ $("tFb").innerHTML = "<span class='hl hl-g'>On target.</span> Read why below, then say the thinking skill out loud."; explain(); markSolved("t", pk.i); cheer($("tCheck")); }
+    else { tAttempts++; $("tFb").innerHTML = "<span class='hl hl-p'>Course correction.</span> " + (tAttempts === 1 ? "Slow down and try once more. A hint is there if you want it." : "Try the hint, or ask the tutor if your wording is just different.");
       $("tAI").hidden = !sample; }
   };
   INP.tAns = () => {};
@@ -2338,16 +2359,16 @@ function renderTeaser(){
     const v = $("tAns").value; $("tFb").textContent = "Asking the tutor…";
     try {
       const r = await sample.json(`${STYLE}\n\nA puzzle, its correct answer, and Prem's answer. Decide if Prem's answer is correct in meaning, even if worded differently.\nPuzzle: ${t.q}\nCorrect answer: ${t.o ? t.o[t.c] : t.a[0]}. Why: ${t.x}\nPrem's answer: ${v}\nReturn JSON only: {"correct": true or false, "feedback": "one or two short sentences"}`);
-      if (r.correct){ $("tFb").innerHTML = "<span class='hl hl-g'>Correct.</span> " + esc(r.feedback || ""); explain(); markSolved("t", pk.i); }
-      else $("tFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> " + esc(r.feedback || "");
+      if (r.correct){ $("tFb").innerHTML = "<span class='hl hl-g'>On target.</span> " + esc(r.feedback || ""); explain(); markSolved("t", pk.i); }
+      else $("tFb").innerHTML = "<span class='hl hl-p'>Course correction.</span> " + esc(r.feedback || "");
     } catch(e) { $("tFb").textContent = e.message || "The tutor could not answer."; }
   };
   if (t.o) $("tOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
     const pickI = +b.dataset.to, right = pickI === t.c;
     $("tOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const i = +x.dataset.to;
-      if (i === t.c) { x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${i === pickI ? "Correct · your answer" : "Correct answer"}</span>`); }
-      else if (i === pickI) { x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Your answer</span>`); } });
-    $("tFb").innerHTML = right ? "<span class='hl hl-g'>Correct.</span>" : "<span class='hl hl-p'>Not this time.</span> A miss is a steering signal. Read why below.";
+      if (i === t.c) { x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${i === pickI ? "On target · your answer" : "On target"}</span>`); }
+      else if (i === pickI) { x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Course correction</span>`); } });
+    $("tFb").innerHTML = right ? "<span class='hl hl-g'>On target.</span>" : "<span class='hl hl-p'>Course correction.</span> A miss is a steering signal. Read why below.";
     explain(); if (right){ markSolved("t", pk.i); cheer(b); } else markSolved("tx", pk.i);
   });
 }
@@ -2355,7 +2376,7 @@ function renderTeaser(){
 /* ---- stick puzzle board ---- */
 const SEGXY = { a:[8,4,38,4], b:[42,8,42,38], c:[42,44,42,74], d:[8,78,38,78], e:[4,44,4,74], f:[4,8,4,38], g:[8,41,38,41], h:[5,41,29,41], v:[17,29,17,53] };
 function renderStick(p, idx){
-  const box = $("teaserBody");
+  const box = $("deepBody");
   const goalText = p.kind === "eq" ? "Move 1 stick to make the equation true." : `Move 1 stick to make a number ${p.goal === "gt" ? "larger" : "smaller"} than ${p.target}.`;
   stickState = {p, idx, cells: STK.build(p.start, p.kind), lifted: null, used: 0, history: []};
   box.innerHTML = `
@@ -2363,15 +2384,15 @@ function renderStick(p, idx){
     <h3 class="tq">${esc(goalText)}</h3>
     <div class="board" id="board"></div>
     <p class="hint" id="sHelp">Tap a stick to pick it up. Then tap an empty place.</p>
-    <p class="note" id="tFb" aria-live="polite"></p>
-    <div class="row"><button class="btn" id="sReset">Start again</button><button class="btn" id="sHint">Hint</button><button class="btn" id="tReveal">Show the best answer</button></div>
-    <div class="ruled" id="tExplain" hidden></div>`;
+    <p class="note" id="sFb" aria-live="polite"></p>
+    <div class="row"><button class="btn" id="sReset">Start again</button><button class="btn" id="sHint">Hint</button><button class="btn" id="sReveal">Show the best answer</button></div>
+    <div class="ruled" id="sExplain" hidden></div>`;
   drawBoard();
   ACT.sReset = () => renderStick(p, idx);
   ACT.sHint = () => { const best = STK.solve(p.start, p.kind, 1, p.goal, p.target)[0]; const [[fi], [ti]] = best.path[0]; const pos = c => c === 0 && p.kind === "num" ? "in front of the number" : "in symbol " + (p.kind === "num" ? c : c + 1);
-    $("tFb").innerHTML = "<span class='hint'>The best answer takes a stick from symbol " + (p.kind === "num" ? fi : fi + 1) + " and places it " + pos(ti) + ".</span>"; };
-  ACT.tReveal = () => { const all = STK.solve(p.start, p.kind, 1, p.goal, p.target); $("tExplain").hidden = false; markSolved("tx", "s" + idx);
-    $("tExplain").innerHTML = `<p><mark class="hl">Best answer: ${esc(all[0].text)}</mark></p><p>${all.length > 1 ? "Other answers that work: " + esc(all.slice(1, 6).map(a => a.text).join(", ")) + "." : "This is the only answer."} ${p.kind === "num" ? "Look for moves that change the meaning, like a minus sign, not only the size of one digit." : "Try changing the sign as well as the digits."}</p>`; };
+    $("sFb").innerHTML = "<span class='hint'>The best answer takes a stick from symbol " + (p.kind === "num" ? fi : fi + 1) + " and places it " + pos(ti) + ".</span>"; };
+  ACT.sReveal = () => { const all = STK.solve(p.start, p.kind, 1, p.goal, p.target); $("sExplain").hidden = false; markSolved("sx", idx);
+    $("sExplain").innerHTML = `<p><mark class="hl">Best answer: ${esc(all[0].text)}</mark></p><div class="bridge"><p class="eyebrow">Systems thinking bridge</p><p><mark class="hl hl-b">Mental model: ${esc(STICK_BRIDGE[0])}</mark></p><p>${esc(STICK_BRIDGE[1])}</p></div><p>${all.length > 1 ? "Other answers that work: " + esc(all.slice(1, 6).map(a => a.text).join(", ")) + "." : "This is the only answer."} ${p.kind === "num" ? "Look for moves that change the meaning, like a minus sign, not only the size of one digit." : "Try changing the sign as well as the digits."}</p>`; };
 }
 function drawBoard(){
   const st = stickState, cells = st.cells, xs = []; let x = 6;
@@ -2399,9 +2420,9 @@ function tapStick(ci, sg, filled){
   const r = STK.check(st.cells, st.p);
   if (r.ok){
     const best = STK.solve(st.p.start, st.p.kind, 1, st.p.goal, st.p.target)[0];
-    $("tFb").innerHTML = `<span class='hl hl-g'>Correct: ${esc(r.text)}.</span> ` + (st.p.kind === "num" && best.text !== r.text ? `Good. The best possible is ${esc(best.text)}. Can you see how?` : "That is the best answer.");
+    $("sFb").innerHTML = `<span class='hl hl-g'>On target: ${esc(r.text)}.</span> ` + (st.p.kind === "num" && best.text !== r.text ? `Good. The best possible is ${esc(best.text)}. Can you see how?` : "That is the best answer.");
     markSolved("s", st.idx); $("sHelp").textContent = ""; cheer($("board"));
-  } else { $("tFb").innerHTML = `<span class='hl hl-p'>Not yet.</span> ${esc(r.why || "")} Tap Start again to try another move.`; $("sHelp").textContent = ""; }
+  } else { $("sFb").innerHTML = `<span class='hl hl-p'>Course correction.</span> ${esc(r.why || "")} Tap Start again to try another move.`; $("sHelp").textContent = ""; }
 }
 
 /* ---- spot the flaw ---- */
@@ -2415,13 +2436,19 @@ function renderFlaw(){
   $("fOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
     const p = +b.dataset.fo, right = p === f.c;
     $("fOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const k = +x.dataset.fo;
-      if (k === f.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${k === p ? "Correct · your answer" : "Correct answer"}</span>`); }
-      else if (k === p){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Your answer</span>`); } });
+      if (k === f.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${k === p ? "On target · your answer" : "On target"}</span>`); }
+      else if (k === p){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Course correction</span>`); } });
     $("fExplain").hidden = false; $("fExplain").innerHTML = `<p>${esc(f.x)}</p><p class="note">In an interview, name the error, then say what evidence would settle it.</p>`;
     markSolved(right ? "f" : "fx", i); if (right) cheer(b);
   });
 }
 
+/* ---- hero: deep puzzle, or a matchstick puzzle one day in seven ---- */
+function renderHero(){
+  const n = dayIndex() + offFor("p");
+  if (((n % 7) + 7) % 7 === 3){ $("heroLabel").textContent = "1 · Matchstick logic"; const k = ((n * 11) % STICKS.length + STICKS.length) % STICKS.length; return renderStick(STICKS[k], k); }
+  $("heroLabel").textContent = "1 · Deep puzzle · 3–5 minutes"; renderDeep();
+}
 /* ---- deep puzzle ---- */
 let deepTimer = null, deepStart = 0;
 function renderDeep(){
@@ -2440,7 +2467,8 @@ function renderDeep(){
     <div class="ruled" id="dpExplain" hidden></div>
     <p class="note skilltip">Skill: ${esc(sk[1])}</p>`;
   const stop = () => clearInterval(deepTimer);
-  const explain = () => { $("dpExplain").hidden = false; $("dpExplain").innerHTML = `<p><mark class="hl">Answer: ${esc(d.o ? d.o[d.c] : d.a[0])}</mark></p><p>${esc(d.x)}</p>`; };
+  const br = DEEP_BRIDGE[i] || ["", ""];
+  const explain = () => { $("dpExplain").hidden = false; $("dpExplain").innerHTML = `<p><mark class="hl">Core mechanism · answer: ${esc(d.o ? d.o[d.c] : d.a[0])}</mark></p><p>${esc(d.x)}</p><div class="bridge"><p class="eyebrow">Systems thinking bridge</p><p><mark class="hl hl-b">Mental model: ${esc(br[0])}</mark></p><p>${esc(br[1])}</p></div>`; };
   const time = () => { const s = Math.floor((Date.now() - deepStart) / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
   const win = (el) => { stop(); $("dpFb").innerHTML = `<span class='hl hl-g'>Cracked in ${time()}${shown ? " with " + shown + (shown === 1 ? " hint" : " hints") : " with no hints"}.</span> Read the solution to compare methods.`; explain(); markSolved("p", i); if (el) cheer(el); };
   if (solved){ $("dpFb").textContent = "Solved today. Tap 'Another one' for more."; explain(); $("dpClock").textContent = ""; }
@@ -2450,49 +2478,34 @@ function renderDeep(){
   ACT.dpReveal = () => { stop(); explain(); markSolved("px", i); };
   ACT.dpCheck = () => { const v = $("dpAns").value; if (!v.trim()) return;
     if (matches(v, d.a)) win($("dpCheck"));
-    else { $("dpFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> Check each step on paper, or take the next hint."; $("dpAI").hidden = !sample; } };
+    else { $("dpFb").innerHTML = "<span class='hl hl-p'>Course correction.</span> Check each step on paper, or take the next hint."; $("dpAI").hidden = !sample; } };
   ACT.dpAI = async () => { const v = $("dpAns").value; $("dpFb").textContent = "Asking the tutor…";
     try { const r = await sample.json(`${STYLE}\n\nA puzzle, its correct answer, and Prem's answer. Decide if Prem's answer is correct in meaning, even if worded differently.\nPuzzle: ${d.q}\nCorrect answer: ${d.o ? d.o[d.c] : d.a[0]}. Solution: ${d.x}\nPrem's answer: ${v}\nReturn JSON only: {"correct": true or false, "feedback": "one or two short sentences, without giving away the answer if wrong"}`);
-      if (r.correct) win(); else $("dpFb").innerHTML = "<span class='hl hl-p'>Not yet.</span> " + esc(r.feedback || ""); }
+      if (r.correct) win(); else $("dpFb").innerHTML = "<span class='hl hl-p'>Course correction.</span> " + esc(r.feedback || ""); }
     catch(e) { $("dpFb").textContent = e.message || "The tutor could not answer."; } };
   if (d.o) $("dpOpts").querySelectorAll("button").forEach(b => b.onclick = () => {
     const k = +b.dataset.dpo, right = k === d.c;
     $("dpOpts").querySelectorAll("button").forEach(x => { x.disabled = true; const j = +x.dataset.dpo;
-      if (j === d.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${j === k ? "Correct · your answer" : "Correct answer"}</span>`); }
-      else if (j === k){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Your answer</span>`); } });
-    if (right) win(b); else { stop(); $("dpFb").innerHTML = "<span class='hl hl-p'>Not this time.</span> Read the solution and find the step you missed."; explain(); markSolved("px", i); }
+      if (j === d.c){ x.classList.add("right"); x.insertAdjacentHTML("beforeend", `<span class="tag">${j === k ? "On target · your answer" : "On target"}</span>`); }
+      else if (j === k){ x.classList.add("wrong"); x.insertAdjacentHTML("beforeend", `<span class="tag">Course correction</span>`); } });
+    if (right) win(b); else { stop(); $("dpFb").innerHTML = "<span class='hl hl-p'>Course correction.</span> Read the solution and find the step you missed."; explain(); markSolved("px", i); }
   });
 }
 
 /* ---- answer drill ---- */
 function renderDrill(){
-  const i = todaysDrill(), d = DRILLS[i], draft = (TH().drafts || {})[i] || "";
-  $("drillBody").innerHTML = `
-    <div class="skill"><span class="hl hl-b">${esc(d.k)}</span></div>
-    <h3 class="tq">${esc(d.q)}</h3>
-    <div class="frame"><div class="note">Use this frame</div><ol>${d.f.map(s => `<li>${esc(s)}</li>`).join("")}</ol></div>
-    <textarea id="dAns" placeholder="Say it out loud first, then type the short version here.">${esc(draft)}</textarea>
-    <div class="row"><button class="btn primary" id="dGrade">Grade my answer</button><button class="btn" id="dModel">Show a strong answer</button></div>
-    <div class="md ruled" id="dOut" hidden></div>
-    <div class="ruled" id="dModelBox" hidden><p>${esc(d.m)}</p></div>`;
-  INP.dAns = () => { const t = TH(); (t.drafts ||= {})[i] = $("dAns").value; save(); };
-  ACT.dModel = () => { $("dModelBox").hidden = !$("dModelBox").hidden; };
-  ACT.dGrade = async () => {
-    const a = $("dAns").value.trim(), out = $("dOut"); out.hidden = false;
-    if (!a){ out.innerHTML = "<p class='muted'>Type your answer first. Short is fine.</p>"; return; }
-    if (!sample){ out.innerHTML = "<p class='muted'>Grading uses Gemini. Add your key in Settings. For now, compare with the strong answer.</p>"; $("dModelBox").hidden = false; markSolved("d", i); return; }
-    out.innerHTML = "<p class='muted'>Grading…</p>";
-    try {
-      const r = await sample.json(`${STYLE}\n\nYou coach Prem to answer interview questions for an AI Consultant role smartly: structured, clear, with stated assumptions and a clear conclusion.\nDrill type: ${d.k}\nQuestion: ${d.q}\nExpected frame: ${d.f.join(" | ")}\nOne strong answer: ${d.m}\nPrem's answer: ${a}\nGrade fairly. A different but sound answer can score high. Return JSON only: {"score": integer 1-10, "structure": "one sentence on his structure", "good": [up to 2 short strings], "improve": [up to 2 short strings], "better": "his answer rewritten to be sharper, 60-100 words, in his voice"}`);
-      out.innerHTML = `<div class="score">${Number(r.score) || "?"}/10</div>` + md("#### Structure\n" + (r.structure || "") + "\n#### What worked\n" + (r.good || []).map(s => "- " + s).join("\n") + "\n#### Sharpen\n" + (r.improve || []).map(s => "- " + s).join("\n") + "\n#### A sharper version\n" + (r.better || ""));
-      markSolved("d", i);
-    } catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "Grading did not work.") + " Compare with the strong answer for now.</p>"; $("dModelBox").hidden = false; }
-  };
+  const i = todaysDrill(), d = DRILLS[i], id = "dr:" + i;
+  REH[id] = { blind: () => DRILL_BLIND[i] ? {ob: DRILL_BLIND[i].ob, bs: DRILL_BLIND[i].bs} : null, model: () => d.m, onCompare: () => markSolved("d", i),
+    feedbackPrompt: notes => `${STYLE}\n\nYou coach Prem for senior conversations. Drill type: ${d.k}\nQuestion: ${d.q}\nMethod: ${d.f.join(" | ")}\nOne strong answer: ${d.m}\nHis notes: ${notes}\n${FEEDBACK_JSON}` };
+  $("drillBody").innerHTML = `<div class="skill"><span class="hl hl-b">${esc(d.k)}</span></div>` + rehearsalHTML(id, d.q, FRAME_INTERVIEW) +
+    `<details class="notes"><summary class="note">Method for this type of question</summary><ol>${d.f.map(s => `<li>${esc(s)}</li>`).join("")}</ol></details>`;
+  if (((S.reh || {})[id] || {}).compared) fillCompare(id);
 }
 
 function cheer(el){ try { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2); } catch(e) {} }
 ACT.tNext = () => { bump("t"); renderTeaser(); renderThinkTop(); };
-ACT.pNext = () => { bump("p"); renderDeep(); renderThinkTop(); };
+ACT.pNext = () => { bump("p"); renderHero(); renderThinkTop(); };
+ACT.warmGo = () => { const w = $("warmCard"); w.hidden = !w.hidden; if (!w.hidden) renderTeaser(); };
 ACT.dNext = () => { bump("d"); renderDrill(); };
 ACT.thinkGo = () => show("think");
 
@@ -2704,8 +2717,8 @@ ACT.teachCheck = async () => {
 /* ---------- Life experiments: make before you take, friction, 14-day experiments, beginner's hours, scoreboards ---------- */
 const LF = () => { const l = (S.life ||= {}); l.make ||= {}; l.friction ||= {}; l.exps ||= []; l.hobby ||= {name: "", logs: []}; l.phantoms ||= []; return l; };
 const MAKE_PROMPTS = [
-  "200 words: why do smooth accounts get ramped down?",
-  "Sketch the ramp-down early-warning idea on paper. Boxes and arrows are enough.",
+  "200 words: where does the bottleneck move when a BPM process gets automated?",
+  "Sketch one client process as a system on paper: people, data, model, exceptions.",
   "Voice note: one wild idea your company could try with AI.",
   "Outline a LinkedIn post about one thing you learned this week.",
   "20 lines of code with Claude Code: any tiny tool you want.",
@@ -2714,7 +2727,7 @@ const MAKE_PROMPTS = [
   "Sketch your positioning line three different ways.",
   "200 words: what does AI do to per-person (FTE) pricing in BPM?",
   "Voice note: explain yesterday's lesson as if to your manager.",
-  "List 10 signals that a client is about to leave. Do not filter.",
+  "List 10 second-order effects of putting an AI agent into a back-office team.",
   "Write the first paragraph of a case study about something you built."
 ];
 const FRICTIONS = [
@@ -2828,7 +2841,7 @@ const MK_TOPICS = [
   "AI regulation and governance (India, EU, US)"
 ];
 const MKT = () => { const m = (S.market ||= {}); m.briefs ||= {}; m.qa ||= []; if (!m.topics) m.topics = MK_TOPICS.map(t => ({t, on: true})); return m; };
-const MK_CONTEXT = `Prem works in business planning (revenue forecasting, client delivery) at a BPM company in India. He has an MBA, does AI consulting and builds AI apps. His goal in the next 3 months: earn an internal AI leadership role, starting with a 'Ramp-down Radar' that predicts which client accounts will ramp down. Longer term: be an AI consultant. He studies AI one hour a day.`;
+const MK_CONTEXT = `Prem is an AI Consultant at a BPM company in India (about 8 months in the role; earlier business planning; MBA). He wants to answer confidently in interviews and internal discussions, stay sharp on AI and architecture, think in systems, and stay calm. He builds AI apps himself.`;
 
 /* one grounded call: Gemini + Google Search. Falls back to an ungrounded answer and says so. */
 async function gemSearch(prompt){
@@ -2855,6 +2868,7 @@ function renderMarketCard(){
   else { $("mkcText").textContent = "Your analyst reads the news on AI in BPM, hiring and client moves, and tells you how to prepare."; $("marketGo").textContent = "Get today's brief"; }
 }
 ACT.marketGo = () => show("market");
+docOn("click", e => { if (e.target.closest && e.target.closest("#tutorRegen")){ const d = viewDay || current(); try { const c = cacheGet(d); delete c.tutor; localStorage.setItem(CK(d), JSON.stringify(c)); } catch(err) {} $("teachBtn").hidden = false; $("tutorCache").textContent = ""; if (ACT.teachBtn) ACT.teachBtn(); } });
 
 function renderMarket(){
   const m = MKT(), tk = todayKey(), b = m.briefs[tk];
@@ -2875,6 +2889,10 @@ function renderMarket(){
       <div class="eyebrow">Ask the analyst</div>
       <div class="row"><input type="text" id="mkQ" placeholder="Example: Which BPM firms announced AI-led pricing this quarter?" style="flex:1;min-width:0"><button class="btn" id="mkAsk">Ask</button></div>
       <div class="md ruled" id="mkAns" hidden></div><div id="mkAnsSrc"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Your LinkedIn drafts · proof of work</div>
+      ${liQuickHTML()}
     </div>
     <div class="card">
       <div class="eyebrow">What your analyst watches</div>
@@ -2909,8 +2927,8 @@ Write the brief in this exact structure, under 450 words:
 (2 sentences: the one shift that matters most this week)
 #### What happened
 (3–5 bullets. Each: **the news** (company or source, date) — why it matters to Prem specifically)
-#### Signals for the Ramp-down Radar
-(1–3 bullets: client-side moves such as captive centres, vendor consolidation, cost programmes, leadership changes, that could predict account ramp-downs)
+#### Client-side signals
+(1–3 bullets: client moves in BPM such as captive centres, vendor consolidation, cost programmes and leadership changes, and what each means for a provider)
 #### How to prepare this week
 (3 numbered actions, each under 20 minutes, concrete. Link to a skill or lesson topic when it fits)
 #### Talking point
@@ -2937,31 +2955,270 @@ ACT.mkAsk = async () => {
   } catch(e) { out.innerHTML = "<p class='muted'>" + esc(e.message || "No answer this time.") + "</p>"; }
 };
 
+
+/* ===== Oct 23b additions ===== */
+/* Systems Thinking Bridge for each deep puzzle (same order as DEEP): [mental model, where it shows up at work] */
+const DEEP_BRIDGE = [
+ ["Bottleneck pairing", "Batch your two slowest, most expensive steps together, for example run the costly LLM reasoning call and the slow human review on the same item, instead of making every item pay both delays."],
+ ["Information theory (binary encoding)", "Pooled testing and feature flags work the same way: combine tests so each result splits the options in half. 10 well-designed checks can isolate 1 failure among 1,000 components."],
+ ["Backward induction", "Negotiate a renewal by starting from the client's walk-away point and working back. Each stakeholder accepts the smallest offer that beats their next-best alternative."],
+ ["Symmetry and abstraction (ignore labels)", "When workflows hand tickets back and forth, track the work, not the worker. Queue maths often gets simple once you stop following who holds each item."],
+ ["Classify by position (structure over counting)", "Map a system by role, not by instance: edges are integrations, corners are the systems with three or more interfaces. Risk sits where interfaces meet."],
+ ["Relative rates (lap counting)", "Two processes with different cycle times line up less often than you expect. Use relative rates to see when batch jobs, releases or billing cycles collide."],
+ ["Prune the search space with each result", "In vendor evaluations, eliminate options early and keep only the few who can still win. Each round should remove candidates, not just rank them."],
+ ["Minimax: balance the worst case", "Size pilots and rollouts so the worst-case cost is equal at every stage. Do not bet everything on the first big step."],
+ ["Using state already in the system", "Reuse partial progress, such as cached embeddings or half-processed queues, instead of starting over. Timing comes from events, not from a clock."],
+ ["Model it with variables before guessing", "In pricing and capacity discussions, write the relationship down as an equation first. Verbal reasoning about 'twice' and 'as much as' fails easily."],
+ ["Weighted averages: time, not distance", "Average handle time or average cost per ticket must be weighted by volume. Simple averages of rates mislead leaders."],
+ ["Falsification over confirmation", "To test 'AI improves quality', look for cases that could prove it wrong, such as low-quality outputs on hard tickets, not more happy examples."],
+ ["Change the representation", "When a dashboard makes no sense, describe what it shows in words. Re-encoding the data often reveals the pattern."],
+ ["Count the causes, not the events (divisor pairs)", "Behind recurring incidents, count the root causes that touch each item. Items hit by an odd number of changes behave differently."],
+ ["What makes information sufficient", "When a client gives a vague answer, ask what would make the decision obvious. The missing fact is usually the one that breaks a tie."],
+ ["Reasoning from others' silence", "When a stakeholder does not object, that is information too. Silence in a steering committee tells you what they already ruled out."],
+ ["Shared protocol and parity checks", "Checksums and reconciliation totals let every downstream step verify itself with one shared number. One agreed rule saves everyone else."],
+ ["Encode identity in quantity", "Design one test, metric or log line so the result itself tells you which component failed, for example error codes that encode the source."],
+ ["Worst-case reasoning (pigeonhole)", "Capacity planning: assume the worst mix of demand arrives first. Guarantee the SLA under that mix, not under the average."],
+ ["Sequencing around conflicts", "Migrations and change programmes: the riskiest dependency often has to move twice. Plan the order around what must never be left alone."],
+ ["Route through both sources (invariance)", "When two data sources disagree, design a check that combines them so the error cancels out, for example reconcile system A against system B's view of A."],
+ ["Make the unknown irrelevant", "You do not need to know every exception to design the process. Design a rule that works whatever the hidden mix is."],
+ ["Count the outcomes", "Before you trust a risk estimate, list every possible outcome and count the good ones. Most risk mistakes come from skipping this step."],
+ ["Test each hypothesis against the constraint", "In root-cause analysis, check each candidate cause against every fact. Keep only the cause that breaks no fact."],
+ ["Efficient basis (balanced base 3)", "Pricing tiers and team structures: a few well-chosen building blocks can combine to cover many cases, if each can add, subtract or sit out."],
+ ["Design the distribution, not the average", "Put one guaranteed win in a protected lane, such as a fast path for simple tickets, and let the rest absorb variation. The average outcome rises."]
+];
+const STICK_BRIDGE = ["Change the frame", "The answer often comes from changing what a piece means, like a stick becoming a minus sign. In consulting, the same move turns a cost problem into a pricing problem."];
+
+/* Blind Spot Breakdown for each answer drill (same order as DRILLS) */
+const DRILL_BLIND = [
+ {ob:"Population × share × cups, then one number.", bs:"Demand is lumpy: office hours, seasons and rain change it a lot. A senior answer gives a range and says which assumption moves the result most."},
+ {ob:"Drivers × trips per driver.", bs:"Supply and demand do not match all day. Peak-hour shortage and surge pricing hide unmet demand, so trips completed understate real demand."},
+ {ob:"Number of doctors × price × adoption.", bs:"Doctors rarely buy software alone; clinics, hospitals and EMR vendors decide. The real market depends on integration and data-privacy approval, not on interest."},
+ {ob:"Users × questions × tokens × price.", bs:"Token cost is often the smallest line. Retrieval infrastructure, evals, monitoring, security reviews and change management can cost more, and usage spikes after launch."},
+ {ob:"Population ÷ people per dentist.", bs:"Registered is not practising. Many dentists work part-time across several clinics, so headcount and capacity are different numbers."},
+ {ob:"Clients × invoices per month × 12.", bs:"Volume is not workload. Exceptions, such as mismatches and disputes, take 10 times the effort of clean invoices and drive staffing."},
+ {ob:"Check the bot's answers and retrain it.", bs:"The drop may come from outside the bot: a product change, a new customer segment or a slower human handover. Segment the drop before you touch the model."},
+ {ob:"List use cases and pick the one with the highest ROI.", bs:"The first use case must also build trust and data access for the next ones. A smaller, visible win with clean data often beats the highest paper ROI."},
+ {ob:"Use AI to automate document review.", bs:"Most of the 15 days is waiting between teams, not working time. AI on the working steps alone may save one day; workflow and approval rules save the rest."},
+ {ob:"More training for the agents.", bs:"Low adoption usually means the tool adds a step or targets punish trying it. Fix the workflow fit and the incentives first."},
+ {ob:"Automate the simple contacts and cut staff.", bs:"The remaining contacts get harder, longer and more emotional. Cost per contact for humans rises, and quality can drop unless staffing and skills change too."},
+ {ob:"Pick the vendor with the better accuracy in the demo.", bs:"Accuracy changes human review cost, so compare total cost per document on your own data. Also check exit terms: switching later is the hidden cost."},
+ {ob:"Handle time improved, so the AI works.", bs:"Repeat calls mean the work moved, not disappeared. Measure cost per resolved issue, not per call."},
+ {ob:"Fix the process for those 3 suppliers.", bs:"Ask why those 3: contract terms, systems or one buyer's habits. Fixing the input can remove the need for AI entirely."},
+ {ob:"The bot is doing well: 70% answered.", bs:"Answered is not resolved. Check if the 5 big topics end the customer's journey or create a follow-up contact."},
+ {ob:"Study harder to raise the scores.", bs:"Pace is the cause, not effort. Speed creates an illusion of progress; slowing down and redoing weak topics is the fix."},
+ {ob:"Show studies where AI saved money.", bs:"Agree that much is hype, then separate tasks: high-volume text work shows real savings; open-ended work often does not. Recommend small, measured bets."},
+ {ob:"Defend the 30% with more detail.", bs:"Offer a conservative case and show the decision still holds. The CFO is testing your judgement under uncertainty, not your arithmetic."},
+ {ob:"List the technical things you have done.", bs:"Reframe the role: the value is connecting technology to business decisions and knowing which questions to ask engineers. Show one example where that judgement changed an outcome."},
+ {ob:"Say the models are better now.", bs:"Find out what failed first: goal, data, integration or adoption. If the cause was not the model, a better model will fail the same way."},
+ {ob:"Tell the story of the analysis you did.", bs:"Senior listeners want the decision and the trade-off: what you changed, what it cost, and what you would do differently."},
+ {ob:"It searches documents and answers from them.", bs:"Mention who owns the documents and keeps them current. Stale or conflicting documents are the most common RAG failure, not the model."},
+ {ob:"Precision, explainability and cost.", bs:"Add the operational view: who handles the exceptions, and what happens to people's skills when they stop doing the task."}
+];
+
+const IDENTITY_PRESETS = [
+ "I see the whole system first: the bottlenecks, the trade-offs and the second-order effects.",
+ "When challenged in meetings or interviews, my nervous system settles, and I answer with calm, structured facts.",
+ "I am a high-value AI Architect and Consultant. My work speaks clearly in the market."
+];
+
+/* ===== Oct 23b: rehearsal, cache, systems lens, LinkedIn studio, identity ===== */
+
+/* ---- cache: one localStorage entry per lesson day ---- */
+const CK = d => "prem_cache_day_" + d;
+function cacheGet(d){ try { return JSON.parse(localStorage.getItem(CK(d)) || "{}"); } catch(e) { return {}; } }
+function cacheSet(d, patch){ try { const c = Object.assign(cacheGet(d), patch); localStorage.setItem(CK(d), JSON.stringify(c)); } catch(e) {} }
+function cachedDays(){ const out = []; try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); const m = k && k.match(/^prem_cache_day_(\d+)$/); if (m) out.push(+m[1]); } } catch(e) {} return out.sort((a, b) => b - a); }
+
+/* ---- out-loud rehearsal card ---- */
+const FRAME_INTERVIEW = "Speak out loud for 60 seconds using this frame: (1) Direct verdict in 1 sentence → (2) Two technical or business trade-offs → (3) What breaks at scale.";
+const FRAME_CEO = "Speak out loud for 60 seconds to a busy CEO: (1) What it is, in 1 sentence → (2) Why it matters to the business → (3) One risk and how you handle it.";
+const AUDIT = ["Direct answer first (no throat-clearing)", "Named the trade-off (cost vs. speed vs. accuracy)", "Spotted the hidden blind spot (see the pink highlight below)", "Grounded in operations (how people and processes react)"];
+let pacerT = null;
+function rehearsalHTML(id, prompt, frame){
+  const r = (S.reh || {})[id] || {};
+  return `<div class="reh" data-reh="${esc(id)}">
+    <div class="rstep"><span class="rn">1</span><div><h3 class="tq">${esc(prompt)}</h3><p class="note">${esc(frame)}</p></div></div>
+    <div class="rstep"><span class="rn">2</span><div class="rbody"><button class="btn" data-pacer="${esc(id)}">Start 60s spoken thought</button><div class="pacer"><s></s></div><p class="note pnote">Speak slowly. Silence is allowed.</p></div></div>
+    <div class="rstep"><span class="rn">3</span><div class="rbody"><button class="btn primary" data-compare="${esc(id)}">Compare my thinking</button>
+      <div class="rcompare" ${r.compared ? "" : "hidden"}>
+        <div class="audit">${AUDIT.map((a, i) => `<label class="check"><input type="checkbox" id="au-${esc(id)}-${i}" data-audit="${esc(id)}" data-i="${i}" ${(r.checks || [])[i] ? "checked" : ""}><span>${esc(a)}</span></label>`).join("")}</div>
+        <div class="blind"></div>
+        <div class="model"></div>
+      </div></div></div>
+    <details class="notes"><summary class="note">Type notes (optional)</summary>
+      <textarea data-notes="${esc(id)}" placeholder="Short notes are fine.">${esc(r.notes || "")}</textarea>
+      <div class="row"><button class="btn" data-feedback="${esc(id)}">Get feedback on my notes</button></div>
+      <div class="md ruled fb" hidden></div>
+    </details>
+  </div>`;
+}
+function blindHTML(b){
+  if (!b) return "";
+  return `<div class="ruled"><p class="eyebrow">Blind spot breakdown</p><p><b>The obvious answer</b> (what most people say): ${esc(b.ob)}</p><p><mark class="hl hl-p"><b>Course correction · the systems blind spot:</b></mark> ${esc(b.bs)}</p></div>`;
+}
+const REH = {};   // id -> {blind: () => {ob,bs}|null, model: () => string, onCompare, onNoBlind, feedbackPrompt: (notes) => string}
+function fillCompare(id){
+  const el = document.querySelector(`[data-reh="${CSS.escape(id)}"]`); if (!el) return; const cfg = REH[id] || {};
+  const b = cfg.blind && cfg.blind();
+  el.querySelector(".blind").innerHTML = b ? blindHTML(b) : (cfg.noBlind ? cfg.noBlind() : "");
+  const m = cfg.model && cfg.model();
+  el.querySelector(".model").innerHTML = m ? `<div class="ruled"><p class="eyebrow">A strong answer</p><p>${esc(m)}</p></div>` : "";
+}
+docOn("click", e => {
+  const t = e.target.closest && e.target.closest("button"); if (!t) return; const d = t.dataset;
+  if (d.pacer){
+    const box = t.parentElement, bar = box.querySelector(".pacer s"), note = box.querySelector(".pnote");
+    clearTimeout(pacerT); bar.style.transition = "none"; bar.style.width = "0%"; void bar.offsetWidth;
+    bar.style.transition = "width 60s linear"; bar.style.width = "100%"; t.textContent = "Speaking… tap to restart"; note.textContent = "Verdict first. Then two trade-offs. Then what breaks at scale.";
+    pacerT = setTimeout(() => { t.textContent = "Start 60s spoken thought"; note.textContent = "Time. Now compare your thinking."; }, 60000);
+  } else if (d.compare){
+    const id = d.compare, r = ((S.reh ||= {})[id] ||= {}); r.compared = todayKey(); save();
+    const el = t.closest(".reh"); el.querySelector(".rcompare").hidden = false; fillCompare(id);
+    const cfg = REH[id]; if (cfg && cfg.onCompare) cfg.onCompare();
+  } else if (d.feedback){
+    const id = d.feedback, el = t.closest(".reh"), out = el.querySelector(".fb"), notes = el.querySelector("textarea").value.trim(), cfg = REH[id] || {};
+    out.hidden = false;
+    if (!notes){ out.innerHTML = "<p class='muted'>Type a few notes first.</p>"; return; }
+    if (!sample){ out.innerHTML = "<p class='muted'>Feedback uses Gemini. Add your key in Settings.</p>"; return; }
+    out.innerHTML = "<p class='muted'>Reading your notes…</p>";
+    sample.json(cfg.feedbackPrompt(notes)).then(r => { out.innerHTML = feedbackHTML(r); }).catch(err => { out.innerHTML = "<p class='muted'>" + esc(err.message || "No feedback this time.") + "</p>"; });
+  }
+});
+docOn("change", e => { const t = e.target; if (t.dataset && t.dataset.audit){ const r = ((S.reh ||= {})[t.dataset.audit] ||= {}); (r.checks ||= [])[+t.dataset.i] = t.checked; save(); } });
+docOn("input", e => { const t = e.target; if (t.dataset && t.dataset.notes){ const r = ((S.reh ||= {})[t.dataset.notes] ||= {}); r.notes = t.value; save(); } });
+const FEEDBACK_JSON = `Return JSON only: {"coreMechanism": "the one idea the answer must contain, 1 sentence", "hits": ["up to 3 points that are on target"], "corrections": ["up to 3 course corrections or blind spots"], "myModel": "1 sentence describing the mental model his notes reveal", "sharper": "his answer rewritten, verdict first, 60-90 words"}`;
+function feedbackHTML(r){
+  const li = a => (a || []).map(s => `<li>${esc(s)}</li>`).join("");
+  return `<p><mark class="hl">Core mechanism:</mark> ${esc(r.coreMechanism || "")}</p>
+    <p><mark class="hl hl-g">On target (hit)</mark></p><ul>${li(r.hits)}</ul>
+    <p><mark class="hl hl-p">Course correction / blind spot</mark></p><ul>${li(r.corrections)}</ul>
+    <p><mark class="hl hl-b">My mental model:</mark> ${esc(r.myModel || "")}</p>
+    <h4>A sharper version</h4><p>${esc(r.sharper || "")}</p>`;
+}
+
+/* ---- the one combined call per lesson ---- */
+function masterPrompt(d){
+  const x = DAYS[d - 1];
+  return `${STYLE}
+
+Topic: "${x.t}" (${d <= CORE ? "day " + d : "bonus day " + (d - CORE)} of Prem's study track). Core note: ${x.n}
+Interview question for today: ${x.iq}
+
+Return JSON only, with exactly these keys:
+{
+ "bpmExample": "3 short sentences applying the topic to one enterprise process workflow in a BPM operation",
+ "systemsLens": {
+   "bottleneck": "2-3 short sentences: if we automate or adopt this, where does the bottleneck move and what breaks downstream",
+   "secondOrderEffect": "2-3 short sentences: how human behaviour, cost or data quality changes after 6 months",
+   "vpPushback": "the exact sceptical question a business VP asks about this topic, 1 sentence",
+   "vpAnswer": "a 2-sentence counter-answer, verdict first"
+ },
+ "blindSpot": {
+   "obviousAnswer": "what most candidates say to today's interview question, 1-2 short sentences",
+   "expertBlindSpot": "the hidden operational trap, data drift, SLA risk or CFO pushback a senior person mentions, 2-3 short sentences"
+ },
+ "linkedinPost": {
+   "tradeOffVersion": "A LinkedIn post. Line 1 hook: 'Most teams get [topic] wrong because they optimise for X instead of Y.' Then 3 numbered lines: 1. what looks good in a PoC. 2. the blind spot that breaks in production (a second-order effect). 3. the simpler architecture rule to follow instead. Close with one sharp question for architects and consultants. 90-150 words.",
+   "consultingVersion": "A LinkedIn post with a BPM and business lens: ROI, process bottlenecks, exception handling, and how operations teams actually use the topic. Hook first, 3 numbered points, one closing question. 90-150 words."
+ }
+}
+LinkedIn rules: simple English, short sentences, no emojis, no hashtags, no buzzwords, never 'Thrilled to share' or 'I'm excited'. Use line breaks between lines. Sound like a practitioner, not a marketer.`;
+}
+async function runMaster(d, force){
+  const c = cacheGet(d);
+  if (c.master && !force) return c.master;
+  if (!sample) throw gErr("not_granted", "Add your free Gemini key in Settings.");
+  const r = await sample.json(masterPrompt(d));
+  if (!r || !r.systemsLens || !r.linkedinPost) throw gErr("upstream_error", "Gemini returned an incomplete answer. Try Regenerate.");
+  r.at = todayKey(); cacheSet(d, {master: r}); return r;
+}
+function renderDeepDive(d){
+  const c = cacheGet(d), m = c.master;
+  $("ddStatus").innerHTML = m ? `Cached on ${new Date(m.at + "T00:00").toLocaleDateString("en-IN", {day: "numeric", month: "short"})} · <button class="linkbtn" id="ddRegen">Regenerate</button>` : (sample ? "One API call fills the systems lens, the blind spot and two LinkedIn drafts." : "Add your free Gemini key in Settings to generate it. The questions below still work offline.");
+  $("ddBtn").hidden = !!m;
+  // systems lens
+  const L = m && m.systemsLens;
+  $("lensBody").innerHTML = `
+    ${m && m.bpmExample ? `<div><p class="eyebrow">BPM example</p><p>${esc(m.bpmExample)}</p></div>` : ""}
+    <div><p class="eyebrow">1 · Where the bottleneck moves</p>${L ? `<p>${esc(L.bottleneck)}</p>` : `<p class="hint">Think first: if we automate this step, what breaks downstream?</p>`}</div>
+    <div><p class="eyebrow">2 · Second-order effect, 6 months later</p>${L ? `<p>${esc(L.secondOrderEffect)}</p>` : `<p class="hint">Think first: how do people, cost or data quality change over time?</p>`}</div>
+    <div><p class="eyebrow">3 · The sceptical VP question</p>${L ? `<p><mark class="hl hl-p">${esc(L.vpPushback)}</mark></p><p><mark class="hl hl-g">Answer:</mark> ${esc(L.vpAnswer)}</p>` : `<p class="hint">Think first: what pushback would a business leader give, and what is your 2-sentence answer?</p>`}</div>`;
+  // LinkedIn
+  renderLinkedIn(d);
+  fillCompare("iq:" + d);
+}
+ACT.ddBtn = async () => { const d = viewDay || current(); $("ddStatus").textContent = "Generating… about 15 seconds."; $("ddBtn").disabled = true;
+  try { await runMaster(d); renderDeepDive(d); toast("Deep dive ready", "Cached. It will not call the API again for this day."); }
+  catch(e) { $("ddStatus").textContent = e.message || "It did not work this time."; }
+  $("ddBtn").disabled = false; };
+docOn("click", e => { const b = e.target.closest && e.target.closest("#ddRegen"); if (b){ const d = viewDay || current(); $("ddStatus").textContent = "Regenerating…";
+  runMaster(d, true).then(() => { renderDeepDive(d); toast("Regenerated", "The new version replaced the cached one."); }).catch(err => { $("ddStatus").textContent = err.message || "It did not work this time."; }); } });
+
+/* ---- LinkedIn studio ---- */
+function liTemplate(d){
+  const x = DAYS[d - 1];
+  return `Most teams get ${x.t.toLowerCase()} wrong because they optimise for the demo, not for operations.\n\n1. In a PoC, it looks simple: ${x.k[0]} works on clean data.\n2. In production, the edge cases arrive, and people change how they work around it.\n3. The rule I follow: design for the exceptions first, then automate the easy path.\n\nWhat breaks first in your experience?`;
+}
+function renderLinkedIn(d){
+  const m = cacheGet(d).master, li = (S.li || {})[d] || {};
+  const posts = m ? [["A · Architecture trade-off", m.linkedinPost.tradeOffVersion], ["B · BPM and business lens", m.linkedinPost.consultingVersion]] : [["Template (offline)", liTemplate(d)]];
+  $("liBody").innerHTML = posts.map(([t, body], i) => `<div class="lipost"><p class="eyebrow">${esc(t)}</p><div class="ruled lpre">${esc(body).replace(/\n/g, "<br>")}</div><div class="row"><button class="btn" data-licopy="${i}">Copy to clipboard</button></div></div>`).join("") +
+    (m ? "" : `<p class="note">Generate today's deep dive above for two drafts written for this topic.</p>`) +
+    `<label class="check"><input type="checkbox" id="liPosted" ${li.posted ? "checked" : ""}><span>Posted, or saved to LinkedIn drafts</span></label>`;
+  $("liBody").dataset.day = d;
+}
+async function copyText(t){ try { await navigator.clipboard.writeText(t); toast("Copied", "Paste it into LinkedIn and edit one line in your own words."); }
+  catch(e) { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); toast("Copied", "Paste it into LinkedIn."); } catch(e2) { toast("Copy did not work", "Select the text and copy it by hand."); } ta.remove(); } }
+docOn("click", e => { const b = e.target.closest && e.target.closest("[data-licopy]"); if (!b) return;
+  const host = b.closest("[data-liday]") || $("liBody"), d = +(host.dataset.liday || host.dataset.day), m = cacheGet(d).master;
+  const txt = m ? [m.linkedinPost.tradeOffVersion, m.linkedinPost.consultingVersion][+b.dataset.licopy] : liTemplate(d); copyText(txt); });
+docOn("change", e => { if (e.target.id !== "liPosted") return; const d = +$("liBody").dataset.day, li = ((S.li ||= {})[d] ||= {});
+  li.posted = e.target.checked ? todayKey() : null;
+  if (e.target.checked){ const m = M(); (m.wins ||= []).push("Shared a proof-of-work post: " + DAYS[d - 1].t); m.log = true; toast("Logged as a win", "It is in today's success log."); }
+  save(); });
+
+/* Market quick view of drafts */
+function liQuickHTML(){
+  const days = cachedDays().filter(d => cacheGet(d).master).slice(0, 5);
+  if (!days.length) return `<p class="note">Drafts appear here after you generate a lesson's deep dive in Learn.</p>`;
+  return days.map(d => { const m = cacheGet(d).master, posted = ((S.li || {})[d] || {}).posted;
+    return `<details data-liday="${d}"><summary class="note">${esc(DAYS[d - 1].t)}${posted ? " · posted" : ""}</summary>
+      <div class="ruled lpre">${esc(m.linkedinPost.tradeOffVersion).replace(/\n/g, "<br>")}</div><div class="row"><button class="btn" data-licopy="0">Copy A</button><button class="btn" data-licopy="1">Copy B</button></div></details>`; }).join("");
+}
+
+/* ---- identity presets and the servo-mechanism target ---- */
+docOn("click", e => { const b = e.target.closest && e.target.closest("[data-preset]"); if (!b) return;
+  const t = IDENTITY_PRESETS[+b.dataset.preset]; if (!S.self.includes(t)){ S.self = (S.self.trim() + " " + t).trim(); selfDraft = null; save(); renderMorning(); toast("Added to your sticky note", "Read it out loud, slowly."); } });
+function renderIdentity(){
+  $("servo").innerHTML = `<p class="eyebrow">Servo-mechanism target</p><p>Close your eyes for 60 seconds. Picture yourself in a calm room explaining <mark class="hl">${esc(DAYS[current() - 1].t)}</mark> to a senior leader or interviewer. Hear your own voice speaking slowly, answer first. Feel the quiet certainty that you already belong at the next level.</p>`;
+  $("presets").innerHTML = IDENTITY_PRESETS.map((p, i) => `<button class="chip ${S.self.includes(p) ? "on" : ""}" data-preset="${i}" ${S.self.includes(p) ? "disabled" : ""}>${S.self.includes(p) ? "Added · " : "+ "}${esc(p.split(/[:.]/)[0])}</button>`).join("");
+}
+
 const PRINCIPLES = [
- ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm AI consultant you are becoming."],
- ["Rehearse in your imagination","Your nervous system responds to a vivid imagined scene much like a real one. Each morning rehearsal makes the real interview feel familiar."],
- ["You have a built-in success mechanism","Maltz compared the mind to a guided missile. Give it a clear target, and it steers toward it, correcting as it goes. Your target is clear: an AI Consultant role."],
- ["Mistakes are steering signals","A guided system uses errors to correct its course. A wrong quiz answer is information, not proof that you cannot do this."],
- ["Borrow confidence from past wins","Recall a time you succeeded: your MBA, a business you built, a client who trusted you. The feeling from that day is still available to you today."],
- ["Question the old beliefs","Maltz said many limits are ideas we accepted without checking, like a hypnosis. 'I am not technical' is one such idea. You are learning the technology now."],
+ ["Your self-image sets your limits","Maltz saw that people act in line with the picture they hold of themselves. Change the picture and your actions follow. Today, act like the calm, senior consultant you are growing into."],
+ ["Rehearse in your imagination","Your nervous system responds to a vivid imagined scene much like a real one. Each morning rehearsal makes the real meeting or interview feel familiar."],
+ ["You have a built-in success mechanism","Maltz compared the mind to a guided missile. Give it a clear target, and it steers towards it, correcting as it goes. Today's target: explain one idea clearly to a senior leader."],
+ ["Mistakes are steering signals","A guided system uses errors to correct its course. A missed answer is a course correction, not proof that you cannot do this."],
+ ["Borrow confidence from past wins","Recall a time you succeeded: your MBA, your move into AI consulting, a client who trusted you. The feeling from that day is still available to you today."],
+ ["Question the old beliefs","Maltz said many limits are ideas we accepted without checking, like a hypnosis. 'I am not technical enough' is one such idea. You build AI systems already."],
  ["Build a quiet room in your mind","Picture a calm room that only you can enter. Go there for one minute when pressure rises. Relaxation lets your success mechanism work."],
  ["Act as if","Do today's work the way your future self would do it: steady, curious and prepared."],
  ["Worry is goal-setting in the wrong direction","When you worry, you rehearse what you do not want. Notice it, then picture the outcome you want instead."],
  ["New habits need about three weeks","Maltz noticed that a new self-image takes at least about 21 days of daily practice to feel natural. Keep the practice gentle and steady. Missing a day is fine; return the next morning."],
  ["Do not over-try","After you prepare, trust yourself. Too much self-checking creates tension. Prepare well, then let the answer come."],
- ["Happiness is a habit of thought","You do not have to wait for the job offer to feel good. Practise calm and satisfaction now, and they become your normal state."]
+ ["Happiness is a habit of thought","You do not have to wait for the next title to feel good. Practise calm and satisfaction now, and they become your normal state."]
 ];
 
 const SCRIPTS = [
- "It is interview day. You sit in a quiet room. The interviewer asks you to design a GenAI assistant. You pick up the pen. You draw the user, the API, retrieval and the model. Your voice is slow and clear. You see the interviewer nod.",
- "Your phone rings in the afternoon. A recruiter says, 'We would like to offer you the AI Consultant role.' Feel the warmth in your chest. You smile and thank them. You tell your family the news.",
+ "You sit in a quiet meeting room. A senior leader asks you to design a GenAI assistant. You pick up the pen. You draw the user, the API, retrieval and the model. Your voice is slow and clear. You see them nod.",
+ "A client's VP pushes back: 'This will never save 30%.' You breathe out. You say, 'Agreed, not in year one. Here is the conservative case, and it still pays back.' The room relaxes. So do you.",
  "You lead a client workshop. Ten people sit around a table. You draw the value and feasibility grid on the whiteboard. People add ideas. You guide the room calmly, and the client says, 'This is very clear.'",
- "Remember a day you succeeded: your MBA results, your first business sale, or a delivery you saved. See the place. Hear the voices. Feel that confidence again. It is still yours.",
+ "Remember a day you succeeded: your MBA results, your first AI client win, or a delivery you saved. See the place. Hear the voices. Feel that confidence again. It is still yours.",
  "Picture your quiet room. Soft light. A comfortable chair. No phone. You sit down, and your shoulders drop. Nothing needs your attention here. Stay for ten slow breaths.",
- "It is your first Monday in the new role. You walk into the office with your laptop. Your new manager shows you the first client project. You already know the words they use: RAG, evals, governance.",
+ "In an internal review, someone asks a hard question about cost at scale. You answer first, then name two trade-offs and what breaks at scale. Your manager writes something down and nods.",
  "An interviewer asks a question you do not know. You pause. You breathe out. You say, 'I have not worked on that directly. Here is how I would find out.' The interviewer smiles. Calm honesty works.",
  "You explain today's topic to a client in two minutes. You use one simple example. The client asks a good question, and you answer it with ease. Feel how natural it is.",
- "It is day 100. You open this app and see one hundred filled squares. You remember day one. You feel proud of the steady hour you gave each day.",
+ "You see the whole system on one page: the people, the process, the data and the model. You point to where the bottleneck will move. The room sees it too.",
  "Before a big call, your heart beats faster. You notice it and say, 'My body is getting ready.' You breathe out slowly. The energy turns into focus."
 ];
 
@@ -3047,6 +3304,7 @@ function renderMorning(){
   $("ifThenLine").hidden = !(m.woopO && m.woopP); $("ifThenLine").textContent = m.woopO && m.woopP ? "If " + m.woopO.replace(/^if\s+/i, "") + ", then I " + m.woopP.replace(/^(then\s+)?(i\s+(will\s+)?)?/i, "") : "";
   setVal("woopO", m.woopO || ""); setVal("woopP", m.woopP || "");
   renderMarketCard();
+  renderIdentity();
   // up next
   const rc = ritualCount(m);
   if (rc < 4){
@@ -3062,10 +3320,10 @@ function renderMorning(){
     $("upBtn").textContent = "Start today's hour";
     ACT.upBtn = () => { viewDay=null; backTo=null; show("learn"); };
   } else {
-    if (["t","p","d"].some(c => !doneToday(c))){
+    if (["p","d"].some(c => !doneToday(c))){
       $("upEyebrow").textContent = "Up next · 10 minutes";
       $("upTitle").textContent = "Think: today's puzzles";
-      $("upWhy").textContent = "One quick teaser, one deep puzzle, one answer drill.";
+      $("upWhy").textContent = "One deep puzzle and one answer you rehearse out loud.";
       $("upBtn").textContent = "Open Think";
       ACT.upBtn = () => show("think");
     } else {
@@ -3081,11 +3339,11 @@ function renderMorning(){
   const tk = todayKey();
   const learnedToday = Object.values(S.done).includes(tk) ? 1 : 0;
   const pd = Object.keys(S.done).find(d=>S.done[d]===tk) || c;
-  const practice = ((S.quiz[pd]!==undefined)?0.5:0) + ((S.ans&&S.ans[pd])?0.5:0);
+  const practice = ((S.quiz[pd]!==undefined)?0.5:0) + (((S.ans&&S.ans[pd]) || ((S.reh||{})["iq:"+pd]||{}).compared)?0.5:0);
   const vals = [learnedToday, practice, rc/4];
   $("rings").innerHTML = ringsSvg(vals);
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll("#rings .fg").forEach(e=>e.setAttribute("stroke-dashoffset", e.dataset.off))));
-  $("rkey").innerHTML = [["--good","Learn",learnedToday?"Done":"Not yet"],["--parta","Practice",practice===1?"Done":practice?"Half":"Not yet"],["--accent","Morning calm",rc+" of 4"]]
+  $("rkey").innerHTML = [["--good","Learn",learnedToday?"Done":"Open"],["--parta","Practice",practice===1?"Done":practice?"In progress":"Open"],["--accent","Morning calm",rc+" of 4"]]
     .map(([col,l,v])=>`<div><i style="background:var(${col})"></i><span>${l}</span><b>${v}</b></div>`).join("");
   // week dots (Mon-Sun)
   const doneDays = new Set(Object.values(S.done));
@@ -3114,10 +3372,10 @@ function renderMorning(){
   $("st-visual").classList.toggle("done", !!m.visual);
   $("st-self").classList.toggle("done", !!m.self);
   $("st-log").classList.toggle("done", !!m.log);
-  const entries = Object.entries(S.morning).filter(([k,v])=>v.log&&(v.win||v.intent)).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+  const entries = Object.entries(S.morning).filter(([k,v])=>v.log&&(v.win||v.intent||(v.wins||[]).length)).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
   if (entries.length) $("logList").innerHTML = entries.map(([k,v])=>{
     const lab = new Date(k+"T00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"});
-    return `<div><b>${lab}</b><span>${v.win?'<span class="hl hl-g">Win</span> '+esc(v.win):""}${v.win&&v.intent?"<br>":""}${v.intent?"<span class='muted'>Intention: "+esc(v.intent)+"</span>":""}</span></div>`;
+    return `<div><b>${lab}</b><span>${v.win?'<span class="hl hl-g">Win</span> '+esc(v.win):""}${(v.wins||[]).map(w=>'<br><span class="hl hl-g">Win</span> '+esc(w)).join("")}${(v.win||(v.wins||[]).length)&&v.intent?"<br>":""}${v.intent?"<span class='muted'>Intention: "+esc(v.intent)+"</span>":""}</span></div>`;
   }).join("");
 }
 let breathTimer=null, breathStart=0, breathPhase="";
@@ -3157,14 +3415,29 @@ function renderLearn(){
   $("qText").textContent = x.q;
   const ans = S.quiz[d];
   $("qOpts").innerHTML = x.o.map((o,i)=>{
-    let cls="opt", tag=""; if (ans!==undefined){ if(i===x.a){ cls+=" right"; tag = i===ans ? "Correct · your answer" : "Correct answer"; } else if(i===ans){ cls+=" wrong"; tag="Your answer"; } }
+    let cls="opt", tag=""; if (ans!==undefined){ if(i===x.a){ cls+=" right"; tag = i===ans ? "On target · your answer" : "On target"; } else if(i===ans){ cls+=" wrong"; tag="Course correction"; } }
     if (i===ans) cls+=" picked";
     return `<button class="${cls}" data-o="${i}" ${ans!==undefined?"disabled":""}><span>${esc(o)}</span>${tag?`<span class="tag">${tag}</span>`:""}</button>`;}).join("");
   $("qHint").hidden = ans!==undefined;
-  $("qFb").textContent = ans===undefined ? "" : (ans===x.a ? "Correct. Well done." : "Not quite. The green answer is correct. A miss is a steering signal; read the note once more.");
-  $("iqText").textContent = x.iq; $("modelAns").textContent = x.ia; $("modelAns").hidden = true;
-  setVal("iqAns", (S.ans && S.ans[d]) || "");
-  $("gradeOut").hidden = true; $("tutorOut").hidden = true; $("askRow").hidden = true; tutorTurns = [];
+  $("qFb").textContent = ans===undefined ? "" : (ans===x.a ? "On target." : "Course correction: the green answer is on target. A miss is a steering signal; read the note once more.");
+  $("tutorOut").hidden = true; $("askRow").hidden = true; tutorTurns = [];
+  const tc = cacheGet(d).tutor;
+  if (tc){ $("tutorOut").hidden = false; $("tutorOut").innerHTML = md(tc.text); $("askRow").hidden = !sample; $("teachBtn").hidden = true;
+    $("tutorCache").innerHTML = `Cached lesson · <button class="linkbtn" id="tutorRegen">Regenerate</button>`; tutorTurns = [{role:"user",content:"Lesson: " + x.t},{role:"assistant",content:tc.text}]; }
+  else { $("teachBtn").hidden = false; $("tutorCache").textContent = ""; }
+  // out-loud rehearsals
+  const iqId = "iq:" + d, tbId = "tb:" + d;
+  REH[iqId] = { blind: () => { const m = cacheGet(d).master; return m && m.blindSpot ? {ob: m.blindSpot.obviousAnswer, bs: m.blindSpot.expertBlindSpot} : null; },
+    noBlind: () => `<p class="note">The blind spot breakdown comes with today's deep dive. ${sample ? "Tap 'Generate today's deep dive' at the top." : "Add your Gemini key in Settings to generate it."}</p>`,
+    model: () => x.ia,
+    feedbackPrompt: notes => `${STYLE}\n\nYou coach Prem for senior AI Architect and Principal Consultant conversations. Question: ${x.iq}\nReference points: ${x.ia}\nHis notes: ${notes}\n${FEEDBACK_JSON}` };
+  REH[tbId] = { model: () => "Say what it is in one sentence, why it matters to the business, and one risk with how you handle it. Use one example from a BPM process.",
+    feedbackPrompt: notes => `${STYLE}\n\nPrem explains "${x.t}" to a busy, non-technical CEO. Core facts: ${x.n}\nHis notes: ${notes}\nJudge if a CEO would understand and act on it. ${FEEDBACK_JSON}` };
+  $("iqReh").innerHTML = rehearsalHTML(iqId, x.iq, FRAME_INTERVIEW);
+  $("teachReh").innerHTML = rehearsalHTML(tbId, "Explain today's idea, " + x.t + ", to a busy CEO.", FRAME_CEO);
+  if (((S.reh||{})[iqId]||{}).compared) fillCompare(iqId);
+  if (((S.reh||{})[tbId]||{}).compared) fillCompare(tbId);
+  renderDeepDive(d);
   $("doneBtn").textContent = S.done[d] ? "Day complete · undo" : "Mark this day complete";
   $("doneBtn").className = S.done[d] ? "btn" : "btn primary";
   $("doneNote").textContent = "";
@@ -3192,8 +3465,8 @@ function md(src){
 
 /* ---------- Claude ---------- */
 let sample = null;
-const STYLE = `Write for Prem. He has an MBA, works in business planning in IT at a BPM company, and does AI consulting. He is not a coder but uses Claude Code and can follow logic. His goal is an AI Consultant role within 3 months.
-Writing rules: simple English in the style of ASD-STE100. One fact or instruction per sentence. Sentences under 20 words. Active voice. Keep "the", "a" and "this". Use the same word for the same thing every time. Start with the answer, then details. Put steps in numbered lists. When you explain a flow with more than 3 steps, add a small ASCII diagram in a code block. Use short markdown: #### headings, bullet lists, **bold**. No tables.`;
+const STYLE = `Write for Prem. He is an AI Consultant at a BPM company in India. He moved into this role about 8 months ago from business planning (revenue forecasting, client delivery). He has an MBA and builds AI apps with Claude Code, but he is not a professional coder. Treat him as a peer preparing for senior AI Architect and Principal Consultant conversations: interviews, leadership discussions and client meetings.
+Rules: Write in clear, simple English (ASD-STE100 standard). Use short sentences (under 18 words). Put the main answer in sentence 1. Use numbered steps. Use active voice. Keep "the", "a" and "this". Use the same word for the same thing every time. Never flatter the user. Always highlight trade-offs, hidden costs, failure modes and second-order effects. When you explain a flow with more than 3 steps, add a small ASCII diagram in a code block. Use short markdown: #### headings, bullet lists, **bold** for the core mechanism. No tables.`;
 async function ask(input, outEl, opts={}){
   outEl.hidden=false; outEl.innerHTML="<p class='muted'>Thinking…</p>";
   try{
@@ -3211,7 +3484,7 @@ function wireClaude(){
     const prompt = `${STYLE}\n\nTeach ${d<=CORE ? "Day "+d+" of a 100-day track" : "bonus day "+(d-CORE)+" of a 10-day module on AI agent evals"}: "${x.t}". Phase: ${PH(d).name}.\nCore note: ${x.n}\nKey terms: ${x.k.join(", ")}.\n\nWrite a 10-minute lesson, about 450 words:\n#### The idea in one line\n#### How it works (with an everyday analogy)\n#### A BPM or consulting example\n#### What interviewers want to hear\n#### Check yourself (3 short questions, answers hidden at the end under 'Answers')`;
     tutorTurns = [{role:"user",content:prompt}];
     const t = await ask(prompt, $("tutorOut"), {cache:true});
-    if (t){ tutorTurns.push({role:"assistant",content:t}); $("askRow").hidden=false; }
+    if (t){ tutorTurns.push({role:"assistant",content:t}); $("askRow").hidden=false; cacheSet(d, {tutor: {text: t, at: todayKey()}}); $("teachBtn").hidden = true; $("tutorCache").innerHTML = `Cached lesson · <button class="linkbtn" id="tutorRegen">Regenerate</button>`; }
   };
   ACT.askBtn = async () => {
     const q = $("askIn").value.trim(); if(!q) return;
@@ -3237,7 +3510,7 @@ function wireClaude(){
   ACT.scriptAI = async () => {
     const c = current(), x = DAYS[c-1];
     const el=$("script");
-    const t = await ask(`${STYLE}\n\nWrite a 'theatre of the mind' visualisation in the spirit of Maxwell Maltz's Psycho-Cybernetics, for Prem's morning. He wants an AI Consultant role within 3 months and is learning "${x.t}" today. He feels anxious sometimes, so keep the tone calm and grounded. Second person, present tense, 90-120 words, plain paragraphs only, vivid sensory detail, end with one slow breath.`, el, {cache:false});
+    const t = await ask(`${STYLE}\n\nWrite a 'theatre of the mind' visualisation in the spirit of Maxwell Maltz's Psycho-Cybernetics, for Prem's morning. He is an AI Consultant preparing for senior conversations, and he is learning "${x.t}" today. He feels anxious sometimes, so keep the tone calm and grounded. Second person, present tense, 90-120 words, plain paragraphs only, vivid sensory detail, end with one slow breath.`, el, {cache:false});
     if (t){ M().script = t; save(); }
   };
   // mock
@@ -3269,16 +3542,16 @@ async function startMock(){
   const mode=$("mockMode").value, c=current();
   const studied = DAYS.slice(0, Math.max(c-1,3)).map((d,i)=>(i+1)+". "+d.t).join("; ");
   $("chat").innerHTML=""; $("mockInRow").hidden=false; $("mockEnd").hidden=false;
-  mock=[{role:"user",content:`${STYLE}\n\nYou are a friendly but rigorous interviewer for an AI Consultant role at a consulting or IT services firm. Round: ${MODES[mode]}.\nPrem is on ${c<=CORE ? "day "+c+" of 100" : "bonus day "+(c-CORE)+" (agent evals)"}. Topics studied: ${studied}.\nRules: ask ONE question at a time. After each answer, give: a score out of 10, one thing that worked, one thing to improve, then the next question. Keep each reply under 120 words. He has anxiety at times: be encouraging and specific, never harsh. Start now with a one-line welcome and the first question.`}];
+  mock=[{role:"user",content:`${STYLE}\n\nYou are a friendly but rigorous interviewer for an AI Consultant role at a consulting or IT services firm. Round: ${MODES[mode]}.\nPrem is on ${c<=CORE ? "day "+c+" of 100" : "bonus day "+(c-CORE)+" (agent evals)"}. Topics studied: ${studied}.\nRules: ask ONE question at a time. After each answer, give: "On target:" one point that worked; "Course correction:" one blind spot, ideally a trade-off, failure mode or second-order effect he missed; then the next question. Never give numeric scores. Keep each reply under 120 words. He has anxiety at times: be encouraging and specific, never harsh. Start now with a one-line welcome and the first question.`}];
   await mockTurn();
 }
 async function sendMock(){
   const t=$("mockIn").value.trim(); if(!t) return; $("mockIn").value="";
   bubble("user","<p>"+esc(t)+"</p>"); mock.push({role:"user",content:t}); await mockTurn();
 }
-function confirmEndMock(){ sheet("End the interview?","You get a final summary with your score and three things to practise.","End and get feedback",endMock); }
+function confirmEndMock(){ sheet("End the interview?","You get a final summary: your strengths and three course corrections to practise.","End and get feedback",endMock); }
 async function endMock(){
-  mock.push({role:"user",content:"End the interview now. Give a final summary: overall score out of 10, top 3 strengths, top 3 things to practise this week, and one encouraging line."});
+  mock.push({role:"user",content:"End the interview now. Give a final summary: top 3 on-target strengths, top 3 course corrections to practise this week, the one mental model to work on, and one calm closing line. No numeric scores."});
   $("mockInRow").hidden=true; $("mockEnd").hidden=true; await mockTurn();
 }
 
